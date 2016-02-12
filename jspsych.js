@@ -24,6 +24,10 @@ var jsPsych = (function() {
   var DOM_target;
   // time that the experiment began
   var exp_start_time;
+  
+  //add feature: abort on too many timeouts
+  var consecutiveTimeouts=0;
+  var totalTimeouts=0;
 
   //
   // public methods
@@ -127,7 +131,15 @@ var jsPsych = (function() {
 
     // handle callback at whole-experiment level
     opts.on_trial_finish(trial_data);
-
+    
+    if(typeof data.timeout !== 'undefined' && data.timeout == true){
+    	consecutiveTimeouts++;
+    	totalTimeouts++;
+    }
+    else{
+    	consecutiveTimeouts = 0;
+    }
+    
     // wait for iti
     if (typeof current_trial.timing_post_trial == 'undefined') {
       if (opts.default_iti > 0) {
@@ -158,6 +170,16 @@ var jsPsych = (function() {
       if (complete) {
         finishExperiment();
         return;
+      }
+      
+      //check if we have too many timeouts
+      if(opts.max_consecutive_timeouts && consecutiveTimeouts > opts.max_consecutive_timeouts){
+    	  finishExperiment(true);
+    	  return;
+      }
+      else if(opts.max_total_timeouts && totalTimeouts > opts.max_total_timeouts){
+    	  finishExperiment(true);
+    	  return
       }
 
       doTrial(timeline.trial());
@@ -541,8 +563,14 @@ var jsPsych = (function() {
     }
   }
 
-  function finishExperiment() {
-    opts.on_finish(jsPsych.data.getData());
+  function finishExperiment(isAborted) {
+    if(isAborted){
+    	opts.on_abort(jsPsych.data.getData());
+    }
+    else{
+    	opts.on_finish(jsPsych.data.getData());
+    }
+	
 
     if(typeof timeline.end_message !== 'undefined'){
       DOM_target.html(timeline.end_message);

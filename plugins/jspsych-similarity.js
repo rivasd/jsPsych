@@ -30,15 +30,26 @@ jsPsych.plugins.similarity = (function() {
 
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
-
+    
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
+    
+    /**
+     * Let's try out my idea of normalizing trial logic as trial methods
+     * the action that happens when a trial is run should all be encapsulated inside methods of the trial object
+     * By doing this, we can implement an API of trial-action that will allow developers to tweak the logic more easily
+     * this way we can easily reuse code for common actions to do inside a trial, easily change order, and decorated functions!
+     * @author Daniel Rivas
+     */
+    
+    //Added feature to prevent returning the stimulus in case it a dynamically-created one and thus potentially huge
+    trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;
+    
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
-    var setTimeoutHandlers = [];
+    trial.setTimeoutHandlers = [];
 
     // show the images
     if (!trial.is_html) {
@@ -57,7 +68,7 @@ jsPsych.plugins.similarity = (function() {
       show_response_slider(display_element, trial);
     }
 
-    setTimeoutHandlers.push(setTimeout(function() {
+    trial.setTimeoutHandlers.push(setTimeout(function() {
       showBlankScreen();
     }, trial.timing_first_stim));
 
@@ -66,7 +77,7 @@ jsPsych.plugins.similarity = (function() {
 
       $('#jspsych-sim-stim').css('visibility', 'hidden');
 
-      setTimeoutHandlers.push(setTimeout(function() {
+      trial.setTimeoutHandlers.push(setTimeout(function() {
         showSecondStim();
       }, trial.timing_image_gap));
     }
@@ -86,7 +97,7 @@ jsPsych.plugins.similarity = (function() {
       }
 
       if (trial.timing_second_stim > 0) {
-        setTimeoutHandlers.push(setTimeout(function() {
+        trial.setTimeoutHandlers.push(setTimeout(function() {
           $("#jspsych-sim-stim").css('visibility', 'hidden');
           if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
@@ -184,16 +195,19 @@ jsPsych.plugins.similarity = (function() {
         var response_time = endTime - startTime;
 
         // kill any remaining setTimeout handlers
-        for (var i = 0; i < setTimeoutHandlers.length; i++) {
-          clearTimeout(setTimeoutHandlers[i]);
+        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
+          clearTimeout(trial.setTimeoutHandlers[i]);
         }
 
         var score = $("#slider").slider("value");
         var trial_data = {
           "sim_score": score,
           "rt": response_time,
-          "stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
+          //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
         };
+        if(trial.return_stim){
+        	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
+        }
         // goto next trial in block
         display_element.html('');
         jsPsych.finishTrial(trial_data);

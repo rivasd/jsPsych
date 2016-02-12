@@ -33,7 +33,9 @@ jsPsych.plugins.categorize = (function() {
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
+    
+    //Added ability to not return stimulus, in case it is a Data URI and hence super duper long
+    trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     var setTimeoutHandlers = [];
@@ -87,9 +89,19 @@ jsPsych.plugins.categorize = (function() {
       trial_data = {
         "rt": info.rt,
         "correct": correct,
-        "stimulus": trial.stimulus,
+        //"stimulus": trial.stimulus,
         "key_press": info.key
       };
+      if(trial.return_stim){
+    	  trial_data.stimulus = trial.stimulus;
+      }
+      //Add feature for timeouts
+      if(info.rt < 0){
+    	  trial_data.timeout = true;
+      }
+      else{
+    	  trial_data.timeout timeout= false;
+      }
 
       display_element.html('');
 
