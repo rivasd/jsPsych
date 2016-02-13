@@ -100,7 +100,7 @@ jsPsych.plugins.categorize = (function() {
     	  trial_data.timeout = true;
       }
       else{
-    	  trial_data.timeout timeout= false;
+    	  trial_data.timeout = false;
       }
 
       display_element.html('');

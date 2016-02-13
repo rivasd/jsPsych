@@ -205,6 +205,7 @@ jsPsych.plugins.similarity = (function() {
           "rt": response_time,
           //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
         };
+        trial_data.timeout = false; //quick hack for something I need right now
         if(trial.return_stim){
         	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
         }
