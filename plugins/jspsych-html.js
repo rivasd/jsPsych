@@ -26,11 +26,20 @@ jsPsych.plugins.html = (function() {
     	var dict={};
     	var inputElts = elt.find(":input"); //get all input elements within the target element
     	inputElts.each(function(idx, input){
-    		var value = $.trim(input.val()); // do not add to value dict if value is empty string
-    		if(value != ''){
-    			dict[input.attr("name")] = input.val();
+    		input = $(input);
+    		var name = input.attr("name");
+    		var checked = input.prop('checked');
+    		if( checked === undefined ){
+    			//this is not a checkbox/radio
+    			if($.trim(input.val()) != ''){
+    				dict[name] = input.val();
+    			}
+    		}
+    		else if(checked){
+    			dict[name]=input.val()
     		}
     	});
+    	//we have to reiterate because the previous selector gets ALL radio/checkbox with the same name
     	return dict;
     }
     
