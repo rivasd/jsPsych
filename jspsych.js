@@ -132,6 +132,7 @@ var jsPsych = (function() {
     // handle callback at whole-experiment level
     opts.on_trial_finish(trial_data);
     
+    //To use the timeout feature, the trial-data must contain a timeout attribute
     if(typeof data.timeout !== 'undefined' && data.timeout == true){
     	consecutiveTimeouts++;
     	totalTimeouts++;
