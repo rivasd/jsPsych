@@ -19,13 +19,15 @@ jsPsych.plugins['visualnback'] = (function(){
 	  
 	  for(var i = 0; i < targetcount; i++){
 		  	var $target = allTargets[i] = $("<div></div>");
+		  	$target.css("position","relative");
 		  	  	
-		  	var X = getRandomArbitrary(size,width-size);
-		  	var Y = getRandomArbitrary(size, height-size);
+		  	var X = $target.css("left",getRandomArbitrary(size,width-size));
+		  	var Y = $target.css("top",getRandomArbitrary(size,height-size));
 		  	
 		  	if(i > 0){	
 		  		for(var j = 0; j < i ; j){
-		  			if (abs(allTargets[j].X - allTargets[i].X) > size/2 && abs(allTargets[j].Y - allTargets[i].Y) > size/2){
+		  			if ((Math.abs(allTargets[j].css("left") - allTargets[i].css("left")) > size/2) && 
+		  					(Math.abs(allTargets[j].css("top") - allTargets[i].css("top")) > size/2)){
 		  					if(X < (width - 2*size)){
 		  						X = X + size/2;
 		  					}	
@@ -33,7 +35,7 @@ jsPsych.plugins['visualnback'] = (function(){
 		  					j=0;
 		  				}
 		  			j++
-		  			}
+		  			
 		  		}
 		  	} 
 	    	
@@ -53,10 +55,7 @@ jsPsych.plugins['visualnback'] = (function(){
    * 			3.5.1.2 Afficher un échec
    * 	3.6 Enregistrer les données 
    * */
-  
 
-	  
-	  
 	  
   }
 
