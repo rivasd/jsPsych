@@ -1,4 +1,9 @@
-
+/**
+ * A plugin to present a classic visual n-back task, an index of visual working memory
+ * 
+ * @author Daniel Rivas
+ * @author Catherine Prévost
+ */
 
 jsPsych.plugins['visualnback'] = (function(){
 
@@ -59,10 +64,15 @@ jsPsych.plugins['visualnback'] = (function(){
 	  
 	  allTargets.forEach(function(point){
 		  jsPsych.getDisplayElement().append(point.node);
-		  point.node.css("position","relative");
-		  point.node.css("left",point.X);
-		  point.node.css("top", point.Y);
-		  point.node.css("background-color","indigo");
+		  point.node.css({
+			  'position': 'relative',
+			  'left': point.X,
+			  'top': point.Y,
+			  'background-color': 'indigo',
+			  'height': size,
+			  'width': size,
+			  'border-radius': '100px' //classic hack to created a round div: give it infinitely round borders 
+		  });
 	  });
 	  
 	  plugin.targets = allTargets;
@@ -100,7 +110,7 @@ jsPsych.plugins['visualnback'] = (function(){
 		  return isCorrect;
 	  }
 	  
-	data = {}; //just a placeholder data ibject for now
+	var data = {}; //just a placeholder data ibject for now
     jsPsych.finishTrial(data);
   }
 
