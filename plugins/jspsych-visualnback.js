@@ -4,6 +4,7 @@ jsPsych.plugins['visualnback'] = (function(){
 
   var plugin = {};
   plugin.targets = [];
+  plugin.answers = [];
   
   /** @type {boolean} flag to indicate that the experiment has been initialized and we can use the list of past answers*/
   plugin.started=false; 
@@ -60,7 +61,8 @@ jsPsych.plugins['visualnback'] = (function(){
 		  jsPsych.getDisplayElement().append(point.node);
 		  point.node.css("position","relative");
 		  point.node.css("left",point.X);
-		  point.node.css("top", point.Y);	  
+		  point.node.css("top", point.Y);
+		  point.node.css("background-color","indigo");
 	  });
 	  
 	  plugin.targets = allTargets;
@@ -73,6 +75,30 @@ jsPsych.plugins['visualnback'] = (function(){
 		  plugin.init(trial.stimuli);
 	  }
 	  
+	  function selectingTarget(){
+		  
+		  trial.n = trial.n || 2;
+		  
+		  var idx = Math.floor(Math.random()*plugin.targets.length);
+		  var currentAnswer = allTargets[idx].node;  
+		  answers.push(currentAnswer);
+		  
+		  currentAnswer.css("background-color","red");
+	  } 
+	  
+	  function clear(){
+		  plungin.targets.forEach(function(point){
+			 point.node.css("background-color","indigo");  
+		  });
+	  }
+	  
+	  function verify(chosen){
+		  var isCorrect = false; 
+		  if(plugin.answers[plugin.answers.length-trial.n] == chosen){
+			  isCorrect = true;
+		  }
+		  return isCorrect;
+	  }
 	  
 	data = {}; //just a placeholder data ibject for now
     jsPsych.finishTrial(data);
