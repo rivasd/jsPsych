@@ -5,20 +5,30 @@ jsPsych.plugins['visualnback'] = (function(){
   var plugin = {};
   plugin.targets = [];
   
+  /** @type {boolean} flag to indicate that the experiment has been initialized and we can use the list of past answers*/
+  plugin.started=false; 
+  
   function getRandomArbitrary(min, max){
 	  
 	  return Math.floor(Math.random()*(max-min)+min);
   }
   
   plugin.init = function(targetcount){
-	  var height = jsPsych.getDisplayElement().heigth();
-	  var width = jsPsych.getDisplayElement().width();
+	  var dElement = jsPsych.getDisplayElement();
+	  var height = dElement.height(); 
+	  if(height==0){
+		  //It is possible for the display element to have zero height, if, as often happens, it is empty and has no fixed height set by css
+		  //we need to give a non-zero, default height for the plugin to work 
+		  height=400;
+		  dElement.height(height);
+	  }
+	  var width = dElement.width();
 	  var smallest = Math.min(height,width);
-	  var size = smallest/(targetcount+2);
+	  var size = Math.floor(smallest/(targetcount+2));
 	  var allTargets = [];	
-	  
+
 	  for(var i = 0; i < targetcount; i++){
-		  	var $target = $("<div></div>");
+		  	var $target = $("<div></div>", {"class": "nbackstim"});
 		  	$target.css("position","relative");
 		  	
 		  	var point = {
@@ -32,16 +42,16 @@ jsPsych.plugins['visualnback'] = (function(){
 		  	point.Y = getRandomArbitrary(size,height-size);
 		  	
 		  	if(i > 0){	
-		  		for(var j = 0; j < i ; j){
-		  			if ((Math.abs(allTargets[j].X - allTargets[i].Y) > size/2) && 
-		  					(Math.abs(allTargets[j].Y - allTargets[i].Y) > size/2)){
-		  					if(point.X < (width - 2*size)){
-		  						point.X += size/2;
-		  					}	
-		  					else point.X = size;
-		  					j=0;
-		  				}
-		  			j++	  			
+		  		for(var j = 0; j < i ; j++){
+		  			if ((Math.abs(allTargets[j].X - allTargets[i].Y) > size/2) && (Math.abs(allTargets[j].Y - allTargets[i].Y)) > size/2){
+	  					if(point.X < (width - 2*size)){
+	  						point.X += Math.floor(size/2);
+	  					}	
+	  					else{ 
+	  						point.X = size;
+	  						j=0;
+	  					}
+		  			}
 		  		}
 		  	}     	
 	  }
@@ -58,8 +68,13 @@ jsPsych.plugins['visualnback'] = (function(){
   }
 
   plugin.trial = function(display_element, trial){
+	  if(!plugin.started){
+		  //this is the first time we run a visualnback trial, we must place the stimuli and generate an empty queue of past answers
+		  plugin.init(trial.stimuli);
+	  }
 	  
 	  
+	data = {}; //just a placeholder data ibject for now
     jsPsych.finishTrial(data);
   }
 
