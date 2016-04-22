@@ -20,7 +20,11 @@ jsPsych.plugins['visualnback'] = (function(){
   }
   
   plugin.init = function(targetcount){
-	  var dElement = jsPsych.getDisplayElement();
+	  var dElement = $("<div></div>").css({
+		  'display':'block',
+		  'width': '100%'
+	  });
+	  jsPsych.getDisplayElement();
 	  var height = dElement.height(); 
 	  if(height==0){
 		  //It is possible for the display element to have zero height, if, as often happens, it is empty and has no fixed height set by css
@@ -32,11 +36,28 @@ jsPsych.plugins['visualnback'] = (function(){
 	  var smallest = Math.min(height,width);
 	  var size = Math.floor(smallest/(targetcount+2));
 	  var allTargets = [];	
-
+	  
+	  /**
+	   * Detects whether a given point will intersect any of the points previously placed on the display, given its position and size.
+	   * Since it assumes that we use circular stimuli, this is basically an implementation of [the circle collision algorithm]{@link https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection}
+	   * @param	{point}	point	The point to test
+	   * @returns {boolean}
+	   */
+	  function collides(point){
+		  allTargets.forEach(function(prev){
+			  var diffX = Math.abs(point.X - prev.X);
+			  var diffY = Math.abs(point.Y - prev.Y);
+			  
+			  if(diffX <= size*2 || diffY <= size*2){
+				  //TODO: should we return return more than a boolean?
+				  return true;
+			  }
+		  });
+		  return false;
+	  }
+	  
 	  for(var i = 0; i < targetcount; i++){
 		  	var $target = $("<div></div>", {"class": "nbackstim"});
-		  	$target.css("position","relative");
-		  	
 		  	var point = {
 		  		node: $target,
 		  		X: 0,
@@ -49,7 +70,7 @@ jsPsych.plugins['visualnback'] = (function(){
 		  	
 		  	if(i > 0){	
 		  		for(var j = 0; j < i ; j++){
-		  			if ((Math.abs(allTargets[j].X - allTargets[i].Y) > size/2) && (Math.abs(allTargets[j].Y - allTargets[i].Y)) > size/2){
+		  			if (collides(point)){
 	  					if(point.X < (width - 2*size)){
 	  						point.X += Math.floor(size/2);
 	  					}	
@@ -65,7 +86,7 @@ jsPsych.plugins['visualnback'] = (function(){
 	  allTargets.forEach(function(point){
 		  jsPsych.getDisplayElement().append(point.node);
 		  point.node.css({
-			  'position': 'relative',
+			  'position': 'absolute',
 			  'left': point.X,
 			  'top': point.Y,
 			  'background-color': 'indigo',
