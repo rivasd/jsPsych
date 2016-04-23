@@ -63,6 +63,11 @@ jsPsych.plugins['visualnback'] = (function(){
 		  return collDetected;
 	  }
 	  
+	  function place(point){
+		  point.X = getRandomArbitrary(size,width-size);
+		  point.Y = getRandomArbitrary(size,height-size);
+	  }
+	  
 	  for(var i = 0; i < targetcount; i++){
 		  	var $target = $("<div></div>", {"class": "jspsych-nbackstim"});
 		  	var point = {
@@ -72,25 +77,19 @@ jsPsych.plugins['visualnback'] = (function(){
 		  	}
 		  	
 		  	allTargets[i]=point;	
-		  	point.X = getRandomArbitrary(size,width-size);
-		  	point.Y = getRandomArbitrary(size,height-size);
+		  	place(point);
 		  	
 		  	if(i > 0){	
 		  		for(var j = 0; j < i ; j++){
 		  			if (collides(point)){
-	  					if(point.X < (width - 2*size)){
-	  						point.X += Math.floor(size/2);
-	  					}	
-	  					else{ 
-	  						point.X = size;
-	  					}
+	  					place(point);
 	  					j=0;
 		  			}
 		  		}
 		  	}     	
 	  }
 	  plugin.viewport = dElement;
-	  plugin.feedback = $("<p></p>", {class: feedback});
+	  plugin.feedback = $("<p></p>", {class: 'feedback'});
 	  jsPsych.getDisplayElement().append(dElement).append(plugin.feedback);
 	  
 	  allTargets.forEach(function(point){
@@ -112,9 +111,10 @@ jsPsych.plugins['visualnback'] = (function(){
 
   plugin.trial = function(display_element, trial){
 	  
-	  jsPsych.getDisplayElement().append(dElement);
+	  jsPsych.getDisplayElement().append(plugin.viewport);
 	  trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 	  trial.n = trial.n || 2;
+	  trial.response_key = trial.response_key || [13];
 	  
 	  if(!plugin.started){
 		  //this is the first time we run a visualnback trial, we must place the stimuli and generate an empty queue of past answers
@@ -147,7 +147,7 @@ jsPsych.plugins['visualnback'] = (function(){
 	  display_element.append(plugin.viewport);
 	  
 	  var selected = selectTarget();
-	  plugin.targets.push(selected);
+	  plugin.answers.push(selected);
 	  
 	  function end(data){
 		  var correct = verify(selected); 
@@ -159,7 +159,7 @@ jsPsych.plugins['visualnback'] = (function(){
 			  plugin.feedback.text(correct ? trial.correct : trial.incorrect);
 		  }
 		  
-		  display_element.append(feedback);
+		  display_element.append(plugin.feedback);
 		  
 		  setTimeoutHandlers.push(setTimeout(function(){
 			  clear();
@@ -186,10 +186,8 @@ jsPsych.plugins['visualnback'] = (function(){
 				  timeout: true,
 				  rt: -1
 			  });
-		  }), trial.timeout);
-	  }
-
-	  
+		  }, trial.timeout));
+	  }  
   }
 
   return plugin;
