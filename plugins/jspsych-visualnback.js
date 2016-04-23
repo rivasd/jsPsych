@@ -12,19 +12,22 @@ jsPsych.plugins['visualnback'] = (function(){
   plugin.answers = [];
   
   /** @type {boolean} flag to indicate that the experiment has been initialized and we can use the list of past answers*/
-  plugin.started=false; 
+  plugin.started=false;
+
   
   function getRandomArbitrary(min, max){
 	  
 	  return Math.floor(Math.random()*(max-min)+min);
   }
   
-  plugin.init = function(targetcount){
-	  var dElement = $("<div></div>").css({
+  plugin.init = function(trial){
+	  var targetcount = trial.stimuli;
+	  
+	  var dElement = $("<div></div>", {id: 'jspsych-nbackviewport'}).css({
 		  'display':'block',
 		  'width': '100%'
 	  });
-	  jsPsych.getDisplayElement();
+	  
 	  var height = dElement.height(); 
 	  if(height==0){
 		  //It is possible for the display element to have zero height, if, as often happens, it is empty and has no fixed height set by css
@@ -32,7 +35,7 @@ jsPsych.plugins['visualnback'] = (function(){
 		  height=400;
 		  dElement.height(height);
 	  }
-	  var width = dElement.width();
+	  var width = jsPsych.getDisplayElement().width();
 	  var smallest = Math.min(height,width);
 	  var size = Math.floor(smallest/(targetcount+2));
 	  var allTargets = [];	
@@ -44,20 +47,24 @@ jsPsych.plugins['visualnback'] = (function(){
 	   * @returns {boolean}
 	   */
 	  function collides(point){
+		  var collDetected = false;
 		  allTargets.forEach(function(prev){
-			  var diffX = Math.abs(point.X - prev.X);
-			  var diffY = Math.abs(point.Y - prev.Y);
+			  if(prev === point){
+				  return;
+			  }
+			  var diffX = point.X - prev.X;
+			  var diffY = point.Y - prev.Y;
 			  
-			  if(diffX <= size*2 || diffY <= size*2){
+			  if(Math.sqrt( diffX*diffX + diffY*diffY) <= size*2){
 				  //TODO: should we return return more than a boolean?
-				  return true;
+				  collDetected =  true;
 			  }
 		  });
-		  return false;
+		  return collDetected;
 	  }
 	  
 	  for(var i = 0; i < targetcount; i++){
-		  	var $target = $("<div></div>", {"class": "nbackstim"});
+		  	var $target = $("<div></div>", {"class": "jspsych-nbackstim"});
 		  	var point = {
 		  		node: $target,
 		  		X: 0,
@@ -76,15 +83,18 @@ jsPsych.plugins['visualnback'] = (function(){
 	  					}	
 	  					else{ 
 	  						point.X = size;
-	  						j=0;
 	  					}
+	  					j=0;
 		  			}
 		  		}
 		  	}     	
 	  }
+	  plugin.viewport = dElement;
+	  plugin.feedback = $("<p></p>", {class: feedback});
+	  jsPsych.getDisplayElement().append(dElement).append(plugin.feedback);
 	  
 	  allTargets.forEach(function(point){
-		  jsPsych.getDisplayElement().append(point.node);
+		  dElement.append(point.node);
 		  point.node.css({
 			  'position': 'absolute',
 			  'left': point.X,
@@ -97,42 +107,89 @@ jsPsych.plugins['visualnback'] = (function(){
 	  });
 	  
 	  plugin.targets = allTargets;
-	  
+	  plugin.started = true;
   }
 
   plugin.trial = function(display_element, trial){
+	  
+	  jsPsych.getDisplayElement().append(dElement);
+	  trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+	  trial.n = trial.n || 2;
+	  
 	  if(!plugin.started){
 		  //this is the first time we run a visualnback trial, we must place the stimuli and generate an empty queue of past answers
-		  plugin.init(trial.stimuli);
+		  plugin.init(trial);
 	  }
+	  //start listening
 	  
-	  function selectingTarget(){
-		  
-		  trial.n = trial.n || 2;
-		  
+	  function selectTarget(){
 		  var idx = Math.floor(Math.random()*plugin.targets.length);
-		  var currentAnswer = allTargets[idx].node;  
-		  answers.push(currentAnswer);
+		  var currentAnswer = plugin.targets[idx].node;  
+		  plugin.answers.push(currentAnswer);
 		  
 		  currentAnswer.css("background-color","red");
+		  return currentAnswer;
 	  } 
 	  
 	  function clear(){
-		  plungin.targets.forEach(function(point){
+		  plugin.targets.forEach(function(point){
 			 point.node.css("background-color","indigo");  
 		  });
 	  }
 	  
 	  function verify(chosen){
-		  var isCorrect = false; 
-		  if(plugin.answers[plugin.answers.length-trial.n] == chosen){
-			  isCorrect = true;
-		  }
-		  return isCorrect;
+		  return (chosen === plugin.targets[plugin.targets.length-trial.n]);
 	  }
 	  
-	var data = {}; //just a placeholder data ibject for now
-    jsPsych.finishTrial(data);
+	  
+	  
+	  var setTimeoutHandlers= [];
+	  display_element.append(plugin.viewport);
+	  
+	  var selected = selectTarget();
+	  plugin.targets.push(selected);
+	  
+	  function end(data){
+		  var correct = verify(selected); 
+		  
+		  if(data.timeout === true){
+			  plugin.feedback.text(trial.timeout_message);
+		  }
+		  else{
+			  plugin.feedback.text(correct ? trial.correct : trial.incorrect);
+		  }
+		  
+		  display_element.append(feedback);
+		  
+		  setTimeoutHandlers.push(setTimeout(function(){
+			  clear();
+			  plugin.viewport.detach();
+			  plugin.feedback.detach();
+			  
+			  setTimeoutHandlers.forEach(function(h){
+				  clearTimeout(h);
+			  });
+			  jsPsych.finishTrial(data);
+		  }), trial.timeout_timing);
+	  }
+	  
+	  var keyListener = jsPsych.pluginAPI.getKeyboardResponse({
+		  callback_function: end,
+		  valid_responses: trial.response_key,
+		  rt_method: 'date',
+		  persist: false
+	  });
+	  
+	  if(trial.timeout > 0){
+		  setTimeoutHandlers.push(setTimeout(function(){
+			  end({
+				  timeout: true,
+				  rt: -1
+			  });
+		  }), trial.timeout);
+	  }
+
+	  
   }
 
   return plugin;
