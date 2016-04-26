@@ -188,6 +188,7 @@ jsPsych.plugins['visualnback'] = (function(){
 			  });
 		  }, trial.timeout));
 	  }  
+	  end
   }
 
   return plugin;
