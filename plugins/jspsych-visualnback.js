@@ -1,8 +1,9 @@
 /**
  * A plugin to present a classic visual n-back task, an index of visual working memory
  * 
- * @author Daniel Rivas
- * @author Catherine Prévost
+ * @author 	Daniel Rivas
+ * @author 	Catherine Prévost
+ * @date 	May 2016
  */
 
 jsPsych.plugins['visualnback'] = (function(){
@@ -120,8 +121,10 @@ jsPsych.plugins['visualnback'] = (function(){
 		  //this is the first time we run a visualnback trial, we must place the stimuli and generate an empty queue of past answers
 		  plugin.init(trial);
 	  }
-	  //start listening
 	  
+	  /**
+	   * randomly chooses a target and paints it a different color, and remembers the choice
+	   */
 	  function selectTarget(){
 		  var idx = Math.floor(Math.random()*plugin.targets.length);
 		  var currentAnswer = plugin.targets[idx].node;  
@@ -131,64 +134,88 @@ jsPsych.plugins['visualnback'] = (function(){
 		  return currentAnswer;
 	  } 
 	  
+	  /**
+	   * Makes all target the same colour
+	   */
 	  function clear(){
 		  plugin.targets.forEach(function(point){
 			 point.node.css("background-color","indigo");  
 		  });
 	  }
 	  
+	  /**
+	   * Determines whether the chosen target is the same as n trials in the past
+	   */
 	  function verify(chosen){
-		  return (chosen === plugin.targets[plugin.targets.length-trial.n]);
+		  return (chosen === plugin.answers[plugin.answers.length-trial.n]);
 	  }
 	  
-	  
-	  
+	  //holds the IDs for the setTimeout calls
 	  var setTimeoutHandlers= [];
+	  //Show the targets
+	  //TODO: check effect of this repeated DOM insertion on accuracy of reaction times?
 	  display_element.append(plugin.viewport);
-	  
+	  //Choose a target at random, paint it red
 	  var selected = selectTarget();
-	  plugin.answers.push(selected);
+	  //will be true if the subject presses the response key
+	  var hasHit = false;
+	  //reaction time, will be >0 if subject presses the response key
+	  var rt = -1;
 	  
-	  function end(data){
-		  var correct = verify(selected); 
-		  
-		  if(data.timeout === true){
-			  plugin.feedback.text(trial.timeout_message);
-		  }
-		  else{
-			  plugin.feedback.text(correct ? trial.correct : trial.incorrect);
-		  }
-		  
-		  display_element.append(plugin.feedback);
-		  
-		  setTimeoutHandlers.push(setTimeout(function(){
-			  clear();
-			  plugin.viewport.detach();
-			  plugin.feedback.detach();
-			  
-			  setTimeoutHandlers.forEach(function(h){
-				  clearTimeout(h);
-			  });
-			  jsPsych.finishTrial(data);
-		  }), trial.timeout_timing);
-	  }
+	  //Start counting down until timeout
+	  setTimeoutHandlers.push(setTimeout(function(){
+		  end();
+	  }, trial.timeout));
 	  
+	  //At the same time, start listening for a key press
 	  var keyListener = jsPsych.pluginAPI.getKeyboardResponse({
-		  callback_function: end,
+		  callback_function: function(data){
+			  hasHit = true;
+			  rt = data.rt;
+			  jsPsych.pluginAPI.cancelKeyboardResponse(keyListener);
+		  },
 		  valid_responses: trial.response_key,
 		  rt_method: 'date',
 		  persist: false
 	  });
 	  
-	  if(trial.timeout > 0){
-		  setTimeoutHandlers.push(setTimeout(function(){
-			  end({
-				  timeout: true,
-				  rt: -1
+	  //This is executed after the period of time the subject had to press the key
+	  function end(){
+		  var data={
+			response: hasHit,
+			rt: rt,
+			hit: verify(selected),
+			back: trial.n
+		  }
+		  
+		  function next(){
+			  
+			 clear();
+			 plugin.viewport.detach();
+			 plugin.feedback.detach();
+			 setTimeoutHandlers.forEach(function(h){
+				 clearTimeout(h);
 			  });
-		  }, trial.timeout));
-	  }  
-	  end
+			  jsPsych.finishTrial(data);
+			  
+		  }
+		  
+		  
+		  if(trial.show_feedback){
+			  if(plugin.answers.length < trial.n){
+				  plugin.feedback.text(trial.invalid_message);
+			  }
+			  else{
+				  plugin.feedback.text(data.response == data.hit ? trial.correct : trial.incorrect); //matches hits and correct rejections
+			  }
+			  display_element.append(plugin.feedback);
+			  setTimeoutHandlers.push(setTimeout(function(){
+				  next();
+			  }, trial.timing_feedback));
+		  }else{
+			  next();
+		  }  
+	  }
   }
 
   return plugin;
