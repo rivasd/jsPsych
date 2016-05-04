@@ -61,8 +61,7 @@ jsPsych.plugins['wcst'] = (function(){
 	  
   }
   
-  
-
+ 
   
   plugin.trial = function(display_element, trial){
 	  
@@ -117,7 +116,6 @@ jsPsych.plugins['wcst'] = (function(){
 		  plugin.choices[this.id];
 		  //bla blabla
 	  }
-	  
 	  
     jsPsych.finishTrial();
   }
