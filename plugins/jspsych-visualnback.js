@@ -176,11 +176,12 @@ jsPsych.plugins['visualnback'] = (function(){
 		  },
 		  valid_responses: trial.response_key,
 		  rt_method: 'date',
-		  persist: false
+		  persist: true
 	  });
 	  
 	  //This is executed after the period of time the subject had to press the key
 	  function end(){
+		  jsPsych.pluginAPI.cancelKeyboardResponse(keyListener);
 		  var data={
 			response: hasHit,
 			rt: rt,
