@@ -180,6 +180,8 @@ jsPsych.plugins['wcst'] = (function(){
 		  return card;
 	  }
 	  
+	  /***************************************** PUBLIC API **********************************/
+	  
 	  /**
 	   * Sets up the vault with empty images, creates and appends the canvas element that will be used to draw the cards.
 	   */
@@ -214,7 +216,7 @@ jsPsych.plugins['wcst'] = (function(){
 	   * Retrieve an card img element specified by the number, shape, and color
 	   */
 	  module.get = function(number, shape, color){
-		  return vault[number][shape][color];
+		  return $(vault[number][shape][color]);
 	  }
 	  
 	  module.init();
@@ -250,7 +252,7 @@ jsPsych.plugins['wcst'] = (function(){
 		  plugin.choices[i] = {}
 	  }
 	  
-	  plugin.viewport.append(plugin.generator.get('1', 'triangle', 'red'));
+	  plugin.viewport.append(plugin.generator.get('2', 'cross', 'green'));
 	  initialized = true;
   }
     
@@ -263,7 +265,8 @@ jsPsych.plugins['wcst'] = (function(){
 	  /**
 	   * Generates an abstract card where the value of all 3 dimensions are set randomly
 	   */
-	  function generateCard(){
+	  function generateCard(boards){
+		  //TODO: ensure this card does not match any of the board cards
 		  return {
 			  shape: shapes[Math.floor(Math.random()* shapes.length)],
 			  number: numbers[Math.floor(Math.random()* numbers.length)],
@@ -273,10 +276,12 @@ jsPsych.plugins['wcst'] = (function(){
 	  
 	  /**
 	   * Takes an abstract representation of a card and gives a string pointing to the name of the image file on the server.
+	   * 
 	   */
 	  function render(spec){
 		  return plugin.generator.get(spec.number, spec.shape, spec.color);
 	  }
+	  
 	  
 	  /**
 	   * Gives an array of 4 abstract cards among which all values of all dimensions are used exactly once
@@ -286,15 +291,15 @@ jsPsych.plugins['wcst'] = (function(){
 		jsPsych.randomization.shuffle(numbers);
 		jsPsych.randomization.shuffle(shapes);
 		jsPsych.randomization.shuffle(colors);
-			
+		
 		var cards=[];
 		for(var i=0;i<4;i++){
-		  plugin.choices = {
+		  cards.push({
 			  number:numbers[i],
 			  color: colors[i],
 			  shape: shapes[i],
-			  img: plugin.generator.get(numbers[1], shapes[i], colors[i])
-		  };
+			  img: plugin.generator.get(numbers[i], shapes[i], colors[i])
+		  });
 		}
 		return cards
 	  }
@@ -332,6 +337,30 @@ jsPsych.plugins['wcst'] = (function(){
 	  if(!initialized){
 		  plugin.init();
 	  }
+	  
+	  
+	  var board=getBoard();
+	  
+	  var target = generateCard(board);
+	  plugin.target.append(target);
+	  
+	  getBoard.forEach(function(card, idx, arr){
+		  var cell = $("<td></td>");
+		  cell.append(card.img);
+		  plugin.cards.append(cell);
+
+		  card.img.click(function(evt){
+			 var correct = verify(card, target, plugin.rule);
+			 if(correct){
+				 //montrer: CORRECT!
+			 }
+			 else{
+				 //montrer INCORRECT!
+			 }
+		  });
+		  
+	  });
+	  
 	  
 	  
     jsPsych.finishTrial();
