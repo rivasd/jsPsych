@@ -34,9 +34,10 @@ jsPsych.plugins['wcst'] = (function(){
 	  
 	  var height = opts.height;
 	  var width = opts.width;
-	  var size = Math.floor(width/5);
+	  var size = Math.floor(width/4);
 	  var backgroundColor = opts.backgroundColor;
 	  
+	  var canvas;
 	  var context;
 	  var vault={};
 	  var numberOfCards=0;
@@ -72,7 +73,7 @@ jsPsych.plugins['wcst'] = (function(){
 		  //we defined that exactly 5 shape-widths should fit along the width of a card, allowing for 1 width's worth of clearance on both sides + 3 possible horizontal positions
 		  var shapeWidth = Math.floor(width/5);
 		  //the min distance a shape's center should be from the card edge
-		  var clearance = Math.ceil(shapeWidth*1.5);
+		  var clearance = Math.ceil(shapeWidth*1.3);
 		  var acrossX = 2*shapeWidth;
 		  
 		  keyPoints.center = [Math.floor(width/2), Math.floor(height/2)];
@@ -187,9 +188,9 @@ jsPsych.plugins['wcst'] = (function(){
 		  findKeyPoints();
 		  canvas = $('<canvas height="'+height+'" width="'+width+'"></canvas>', {
 			 class: 'jspsych-wcst-canvas',
-			 id:'wcst-canvas',
-			 display:'none'
+			 id:'wcst-canvas'
 		  });
+		  canvas.css("display", "none");
 		  opts.target.append(canvas);
 		  context = canvas[0].getContext("2d");
 	  }
@@ -209,6 +210,9 @@ jsPsych.plugins['wcst'] = (function(){
 		  ready=true;
 	  }
 	  
+	  /**
+	   * Retrieve an card img element specified by the number, shape, and color
+	   */
 	  module.get = function(number, shape, color){
 		  return vault[number][shape][color];
 	  }
@@ -230,8 +234,6 @@ jsPsych.plugins['wcst'] = (function(){
 	  thirdrow.append(plugin.feedback);
 	  plugin.viewport.append(thirdrow);
 	  
-	  var canvas = $("<canvas></canvas>");
-	  
 	  jsPsych.getDisplayElement().append(plugin.viewport);
 	  
 	  plugin.generator = CardGenerator({
@@ -246,15 +248,16 @@ jsPsych.plugins['wcst'] = (function(){
 	  plugin.choices = []
 	  for(var i=0;i<4;i++){
 		  plugin.choices[i] = {}
-		  plugin.choices[i].img = new Image()
-		  plugin.choices[i].img= 'card-'+i.toString();
 	  }
 	  
-	  plugin.viewport.append(plugin.generator.get('3', 'cross', 'red'));
-	  
+	  plugin.viewport.append(plugin.generator.get('1', 'triangle', 'red'));
+	  initialized = true;
   }
   
- 
+  //A few constants that I don't want to re declare on each trial
+  var numbers=['1', '2', '3', '4'];
+  var shapes=['triangle', 'square', 'circle', 'cross'];
+  var colors=['red', 'yellow', 'blue', 'green'];
   
   plugin.trial = function(display_element, trial){
 	  
