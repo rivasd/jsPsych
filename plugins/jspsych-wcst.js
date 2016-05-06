@@ -253,8 +253,7 @@ jsPsych.plugins['wcst'] = (function(){
 	  plugin.viewport.append(plugin.generator.get('1', 'triangle', 'red'));
 	  initialized = true;
   }
-  
-  //A few constants that I don't want to re declare on each trial
+    
   var numbers=['1', '2', '3', '4'];
   var shapes=['triangle', 'square', 'circle', 'cross'];
   var colors=['red', 'yellow', 'blue', 'green'];
@@ -265,14 +264,18 @@ jsPsych.plugins['wcst'] = (function(){
 	   * Generates an abstract card where the value of all 3 dimensions are set randomly
 	   */
 	  function generateCard(){
-		  
+		  return {
+			  shape: shapes[Math.floor(Math.random()* shapes.length)],
+			  number: numbers[Math.floor(Math.random()* numbers.length)],
+			  color: colors[Math.floor(Math.random()* colors.length)]
+		  }
 	  }
 	  
 	  /**
 	   * Takes an abstract representation of a card and gives a string pointing to the name of the image file on the server.
 	   */
 	  function render(spec){
-		  
+		  return plugin.generator.get(spec.number, spec.shape, spec.color);
 	  }
 	  
 	  /**
@@ -280,7 +283,20 @@ jsPsych.plugins['wcst'] = (function(){
 	   * Make sure to keep plugin.choices up to date!
 	   */
 	  function getBoard(){
-		  
+		jsPsych.randomization.shuffle(numbers);
+		jsPsych.randomization.shuffle(shapes);
+		jsPsych.randomization.shuffle(colors);
+			
+		var cards=[];
+		for(var i=0;i<4;i++){
+		  plugin.choices = {
+			  number:numbers[i],
+			  color: colors[i],
+			  shape: shapes[i],
+			  img: plugin.generator.get(numbers[1], shapes[i], colors[i])
+		  };
+		}
+		return cards
 	  }
 	  
 	  /**
