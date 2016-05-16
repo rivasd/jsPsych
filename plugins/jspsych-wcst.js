@@ -274,12 +274,12 @@ jsPsych.plugins['wcst'] = (function(){
 		  var chosenNumber = numbers[Math.floor(Math.random()* numbers.length)];
 		  var chosenColor = colors[Math.floor(Math.random()* colors.length)];
 		  
-		  var targetCard = {
-				  shape: chosenShape,
-				  number: chosenNumber,
-				  color: chosenColor,
-				  img: plugin.generator.get(chosenShape, chosenNumber, chosenColor)		  
-		 }
+		   targetCard = {
+					  shape: chosenShape,
+					  number: chosenNumber,
+					  color: chosenColor,
+					  img: plugin.generator.get(chosenNumber, chosenShape, chosenColor)		  
+		   }
 		  
 		  function isSame(board, targetCard){
 			  var same;
@@ -302,7 +302,7 @@ jsPsych.plugins['wcst'] = (function(){
 					  shape: chosenShape,
 					  number: chosenNumber,
 					  color: chosenColor,
-					  img: plugin.generator.get(chosenShape, chosenNumber, chosenColor)		  
+					  img: plugin.generator.get(chosenNumber, chosenShape, chosenColor)		  
 			 }
 			  
 		  }
