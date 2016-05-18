@@ -12,10 +12,10 @@ jsPsych.plugins['wcst'] = (function(){
   var initialized = false;
   /**@type {string} represents which dimension serves currently as the rule*/
   plugin.rule= undefined;
-  
+  plugin.wins;
+  plugin.consecutive;
   /**@type {number} holds the number of consecutive correct answers, useful to know when to change the rule*/
-  plugin.consecutive = 0;
-  
+  plugin.totalErrors;
   /**@type {string} holds the value of the last rule, useful to identify perseveration errors*/
   plugin.lastRule = undefined;
   
@@ -253,7 +253,11 @@ jsPsych.plugins['wcst'] = (function(){
 	  for(var i=0;i<4;i++){
 		  plugin.choices[i] = {}
 	  }
-	  
+	  plugin.wins = 0;
+	  plugin.consecutive = 0;
+	  plugin.totalErrors = 0;
+	  var ruleSamples = ['number','color', 'shape'];
+	  plugin.rule = ruleSamples[Math.floor(Math.random()*3)];
 	  //plugin.viewport.append(plugin.generator.get('2', 'cross', 'green'));
 	  initialized = true;
   }
@@ -264,12 +268,11 @@ jsPsych.plugins['wcst'] = (function(){
   var rules = ['number', 'color', 'shape'];
   
   plugin.trial = function(display_element, trial){
-	  
+	  trial.streak = trial.streak || 4;
 	  /**
 	   * Generates an abstract card where the value of all 3 dimensions are set randomly
 	   */
 	  function generateCard(board){
-		  //TODO: ensure this card does not match any of the board cards
 		  var chosenShape = shapes[Math.floor(Math.random()* shapes.length)];
 		  var chosenNumber = numbers[Math.floor(Math.random()* numbers.length)];
 		  var chosenColor = colors[Math.floor(Math.random()* colors.length)];
@@ -282,7 +285,7 @@ jsPsych.plugins['wcst'] = (function(){
 		   }
 		  
 		  function isSame(board, targetCard){
-			  var same;
+			  var same = false;
 			  board.forEach(function(boardCard){
 				  if (targetCard.shape === boardCard.shape && targetCard.color === boardCard.color
 				  &&targetCard.number === boardCard.number){
@@ -290,7 +293,7 @@ jsPsych.plugins['wcst'] = (function(){
 				  }
 			 
 			  });
-			  return same = false;
+			  return same;
 		  }
 		  
 		  while(isSame(board, targetCard)){
@@ -303,7 +306,7 @@ jsPsych.plugins['wcst'] = (function(){
 					  number: chosenNumber,
 					  color: chosenColor,
 					  img: plugin.generator.get(chosenNumber, chosenShape, chosenColor)		  
-			 }
+			  }
 			  
 		  }
 		  return targetCard;
@@ -324,9 +327,9 @@ jsPsych.plugins['wcst'] = (function(){
 	   * Make sure to keep plugin.choices up to date!
 	   */
 	  function getBoard(){
-		jsPsych.randomization.shuffle(numbers);
-		jsPsych.randomization.shuffle(shapes);
-		jsPsych.randomization.shuffle(colors);
+		numbers = jsPsych.randomization.shuffle(numbers);
+		shapes = jsPsych.randomization.shuffle(shapes);
+		colors = jsPsych.randomization.shuffle(colors);
 		
 		var cards=[];
 		for(var i=0;i<4;i++){
@@ -348,18 +351,23 @@ jsPsych.plugins['wcst'] = (function(){
 		  jsPsych.randomization.shuffle(rules);
 		  plugin.lastRule = plugin.rule;
 		  
-		  if(rules[0] !== plugin.rule){
+		  if( rules[0] !== plugin.rule){
 			  plugin.rule = rules[0];
 		  }
 		  else plugin.rule = rules[1];
 		  plugin.justChanged = true;
+		  plugin.wins++;
+		  plugin.consecutive = 0;
 	  }
 	  
 	  /**
 	   * Given to abstract cards, returns whether the candidate matches the target given the current dimension rule
 	   */
 	  function verify(candidate, target, rule){
-		  return target[rule] === candidate[rule];	  
+	  	  if(target[rule] === candidate[rule]){
+	  	  	return true;
+	  	  	}
+		  else return false;  
 	  }
 	  
 	  /**
@@ -367,7 +375,7 @@ jsPsych.plugins['wcst'] = (function(){
 	   */
 	  function checkPerseveration(card, target){
 		  var persever = false;
-		  if (plugin.lastRule !== undefined && justChanged === false){ 
+		  if (plugin.lastRule !== undefined && plugin.justChanged === false){ 
 			  //when the rule hadn't change yet, it 
 			  //can't be perseveration and the first error after a rule change cannot really be counted as 
 			  //a perseveration since there is no prior warning that the rule is now invalid
@@ -402,10 +410,12 @@ jsPsych.plugins['wcst'] = (function(){
 	  var board=getBoard();
 	  //Create and draw a card on the middle of the page
 	  var target = generateCard(board);
-	  plugin.target.append(target);
+	  plugin.target.append(target.img);
 	  
 	  var beginning = new Date();
 	  beginning = Date.now();
+	  
+	  
 
 	  //Ties the card on the board with the DOM and wait for someone to click on a board card
 	  board.forEach(function(card, idx, arr){
@@ -414,7 +424,8 @@ jsPsych.plugins['wcst'] = (function(){
 		  plugin.cards.append(cell);
 		  //When user clicks on a board card, the answer is verified and a feedback is given
 		  card.img.click(function(evt){
-			 var correct = verify(card, target, plugin.rule);
+			 var correct = verify(target, card, plugin.rule);
+			 keepScore(correct);
 			 var reactionTime = new Date();
 			 reactionTime = Date.now();
 			 if(correct){
@@ -432,7 +443,13 @@ jsPsych.plugins['wcst'] = (function(){
 				 "rule": plugin.rule
 			 }
 			 setTimeout(function(){
+				 plugin.target.empty();
+				 plugin.cards.empty();
+				 plugin.feedback.empty();
 				 jsPsych.finishTrial(data);
+				 if(plugin.consecutive >= trial.streak){
+				 	changeRule();
+				 }
 			 },1500); //TODO customising time in trials
 		  });
 	  });  
