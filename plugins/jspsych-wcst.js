@@ -1,10 +1,11 @@
 /**
- * A plugin to implement the Wisconsin Card Sorting Task
- * 
+ * A plugin to implement the Wisconsin Card Sorting Task 
+ * The task features had been built by matching information in Neuropsychological Assessment fifth edition 
+ * by Lezak, Howieson, Bigler and Tranel 
  * @author Daniel Rivas
  * @author Cahterine Prevost
  */
-
+ 
 
 jsPsych.plugins['wcst'] = (function(){
 
@@ -452,6 +453,7 @@ jsPsych.plugins['wcst'] = (function(){
 				 if(plugin.consecutive >= trial.streak){
 				 	changeRule();
 				 }
+				 else{plugin.justChanged = false;}
 			 },1500); //TODO customising time in trials
 		  });
 	  });  
