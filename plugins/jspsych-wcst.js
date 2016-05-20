@@ -256,6 +256,7 @@ jsPsych.plugins['wcst'] = (function(){
 	  plugin.wins = 0;
 	  plugin.consecutive = 0;
 	  plugin.totalErrors = 0;
+	  //TODO checking if the first rule is always color or if it is just me getting paranoid
 	  var ruleSamples = ['number','color', 'shape'];
 	  plugin.rule = ruleSamples[Math.floor(Math.random()*3)];
 	  //plugin.viewport.append(plugin.generator.get('2', 'cross', 'green'));
@@ -374,6 +375,7 @@ jsPsych.plugins['wcst'] = (function(){
 	   * Verifies if the card chosen match the last rule
 	   */
 	  function checkPerseveration(card, target){
+		  //TODO test if perseveration counting is working
 		  var persever = false;
 		  if (plugin.lastRule !== undefined && plugin.justChanged === false){ 
 			  //when the rule hadn't change yet, it 
