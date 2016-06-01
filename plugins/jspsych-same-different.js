@@ -71,6 +71,7 @@ jsPsych.plugins['same-different'] = (function() {
     }
 
     function showSecondStim() {
+    	jsPsych.pluginAPI.hardware({recipient:"native", payload:20});
       if (!trial.is_html) {
         display_element.append($('<img>', {
           src: trial.stimuli[1],
