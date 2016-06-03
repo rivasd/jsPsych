@@ -1623,9 +1623,9 @@ jsPsych.pluginAPI = (function() {
   
   //it might be useful to open up a line of communication from the extension back to this page script,
   //again, this will have to pass through DOM events. For now speed is of no concern so I will use jQuery
-  $("body").on("jspsych:activate", function(evt){
+  $document.addEventListener("jspsych-activate", function(evt){
 	  module.hardwareConnected = true;
-  });
+  })
   
   return module;
 })();
