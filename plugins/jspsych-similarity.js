@@ -36,6 +36,10 @@ jsPsych.plugins.similarity = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
+    //Adding new parameters 
+    
+    
+    
     /**
      * Let's try out my idea of normalizing trial logic as trial methods
      * the action that happens when a trial is run should all be encapsulated inside methods of the trial object
@@ -62,6 +66,11 @@ jsPsych.plugins.similarity = (function() {
         "html": trial.stimuli[0],
         "id": 'jspsych-sim-stim'
       }));
+    }
+    
+    //first stimuli has been shown, send first trigger
+    if(trial.hardware_first_stim && jsPsych.pluginAPI.hardwareConnected){
+    	jsPsych.pluginAPI.hardware(trial.hardware_first_stim);
     }
 
     if (trial.show_response == "FIRST_STIMULUS") {
@@ -91,7 +100,13 @@ jsPsych.plugins.similarity = (function() {
       }
 
       $('#jspsych-sim-stim').css('visibility', 'visible');
-
+      
+      //second stimuli has been shown, send trigger
+      
+      if(trial.hardware_second_stim && jsPsych.pluginAPI.hardwareConnected){
+      	jsPsych.pluginAPI.hardware(trial.hardware_second_stim);
+      }
+      
       if (trial.show_response == "SECOND_STIMULUS") {
         show_response_slider(display_element, trial);
       }
