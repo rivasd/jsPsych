@@ -54,33 +54,48 @@ jsPsych.plugins.similarity = (function() {
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
-
-    // show the images
-    if (!trial.is_html) {
-      display_element.append($('<img>', {
-        "src": trial.stimuli[0],
-        "id": 'jspsych-sim-stim'
-      }));
-    } else {
-      display_element.append($('<div>', {
-        "html": trial.stimuli[0],
-        "id": 'jspsych-sim-stim'
-      }));
-    }
     
-    //first stimuli has been shown, send first trigger
-    if(trial.hardware_first_stim && jsPsych.pluginAPI.hardwareConnected){
-    	jsPsych.pluginAPI.hardware(trial.hardware_first_stim);
+    var $paragraph = $("<p>+</p>");
+    display_element.append($paragraph);
+    $paragraph.css({
+    	"display": "block",
+    	"text-align": "center",
+    	"vertical-align": "middle"   	
+    });
+    
+    setTimeout(function(){
+    	$paragraph.empty();
+    	showFirstImage();  	
+    }, 6000);
+   
+    
+    function showFirstImage(){
+    // show the images
+	    if (!trial.is_html) {
+	      display_element.append($('<img>', {
+	        "src": trial.stimuli[0],
+	        "id": 'jspsych-sim-stim'
+	      }));
+	    } else {
+	      display_element.append($('<div>', {
+	        "html": trial.stimuli[0],
+	        "id": 'jspsych-sim-stim'
+	      }));
+	    }
+	    
+	    //first stimuli has been shown, send first trigger
+	    if(trial.hardware_first_stim && jsPsych.pluginAPI.hardwareConnected){
+	    	jsPsych.pluginAPI.hardware(trial.hardware_first_stim);
+	    }
+	
+	    if (trial.show_response == "FIRST_STIMULUS") {
+	      show_response_slider(display_element, trial);
+	    }
+	
+	    trial.setTimeoutHandlers.push(setTimeout(function() {
+	      showBlankScreen();
+	    }, trial.timing_first_stim));
     }
-
-    if (trial.show_response == "FIRST_STIMULUS") {
-      show_response_slider(display_element, trial);
-    }
-
-    trial.setTimeoutHandlers.push(setTimeout(function() {
-      showBlankScreen();
-    }, trial.timing_first_stim));
-
 
     function showBlankScreen() {
 
