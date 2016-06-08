@@ -58,10 +58,16 @@ jsPsych.plugins.similarity = (function() {
     var $paragraph = $("<p>+</p>");
     display_element.append($paragraph);
     $paragraph.css({
-    	"display": "block",
-    	"text-align": "center",
-    	"vertical-align": "middle"   	
+    	"display":"block",
+	    "position":"absolute",
+	    "left": "50%",
+	    "top": "50%",
+	    "width": "200px",
+	    "height": "200px",
+	    "margin-left": "-100px",
+	    "margin-top": "-100px"
     });
+ 
     
     setTimeout(function(){
     	$paragraph.empty();
