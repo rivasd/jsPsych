@@ -58,6 +58,7 @@ jsPsych.plugins.similarity = (function() {
     var $paragraph = $("<p>+</p>");
     display_element.append($paragraph);
     $paragraph.css({
+    	"font-size":"350%",
     	"display":"block",
 	    "position":"absolute",
 	    "left": "50%",
@@ -70,7 +71,7 @@ jsPsych.plugins.similarity = (function() {
  
     
     setTimeout(function(){
-    	$paragraph.empty();
+    	display_element.empty();
     	showFirstImage();  	
     }, 6000);
    
