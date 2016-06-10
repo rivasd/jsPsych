@@ -25,8 +25,9 @@ jsPsych.plugins.similarity = (function() {
     trial.show_response = trial.show_response || "SECOND_STIMULUS";
 
     trial.timing_first_stim = trial.timing_first_stim || 1000; // default 1000ms
-    trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
+    trial.timing_second_stim = trial.timing_second_stim || 1000; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
+    trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
 
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
@@ -54,26 +55,28 @@ jsPsych.plugins.similarity = (function() {
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
+    function showFixationCross(){
+        var $paragraph = $("<p>+</p>");
+        display_element.append($paragraph);
+        $paragraph.css({
+        	"font-size":"350%",
+        	"display":"block",
+    	    "position":"absolute",
+    	    "left": "50%",
+    	    "top": "50%",
+    	    "width": "200px",
+    	    "height": "200px",
+    	    "margin-left": "-100px",
+    	    "margin-top": "-100px"
+        });  	
+    }
     
-    var $paragraph = $("<p>+</p>");
-    display_element.append($paragraph);
-    $paragraph.css({
-    	"font-size":"350%",
-    	"display":"block",
-	    "position":"absolute",
-	    "left": "50%",
-	    "top": "50%",
-	    "width": "200px",
-	    "height": "200px",
-	    "margin-left": "-100px",
-	    "margin-top": "-100px"
-    });
- 
+    showFixationCross();
     
     setTimeout(function(){
     	display_element.empty();
     	showFirstImage();  	
-    }, 6000);
+    }, trial.timing_fixation_cross);
    
     
     function showFirstImage(){
@@ -129,17 +132,18 @@ jsPsych.plugins.similarity = (function() {
       	jsPsych.pluginAPI.hardware(trial.hardware_second_stim);
       }
       
-      if (trial.show_response == "SECOND_STIMULUS") {
-        show_response_slider(display_element, trial);
-      }
+      
 
       if (trial.timing_second_stim > 0) {
         trial.setTimeoutHandlers.push(setTimeout(function() {
           $("#jspsych-sim-stim").css('visibility', 'hidden');
-          if (trial.show_response == "POST_STIMULUS") {
+          if (trial.show_response == "SECOND_STIMULUS") {
             show_response_slider(display_element, trial);
           }
         }, trial.timing_second_stim));
+      }
+      else if (trial.show_response == "SECOND_STIMULUS") {
+        show_response_slider(display_element, trial);
       }
     }
 
