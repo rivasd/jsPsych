@@ -28,6 +28,7 @@ jsPsych.plugins.similarity = (function() {
     trial.timing_second_stim = trial.timing_second_stim || 1000; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
     trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
+    trial.timing_sample_page = trial.timing_sample_page || 5000  // -1 = none; positive numbers = msec to display second image.
 
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
@@ -38,6 +39,7 @@ jsPsych.plugins.similarity = (function() {
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     //Adding new parameters 
+    plugin.sample_page = plugin.sample_page || true;
     
     
     
@@ -55,7 +57,19 @@ jsPsych.plugins.similarity = (function() {
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
+    
+    function showSamplePage(){
+    	display_element.append ($("<table><tr><p>Voici des exemples de stimulis de pratique</p></tr>" +
+    	"<tr><td><img></td><td><img></td></tr>" +
+    	"<tr><p>Voici des exemples de stimulis </p></tr>" +
+    	"<tr><td><img></td><td><img></td></tr></table>"));
+    	
+    	
+    	plugin.sample_page = false;
+    }
+    
     function showFixationCross(){
+    	display_element.empty();
         var $paragraph = $("<p>+</p>");
         display_element.append($paragraph);
         $paragraph.css({
@@ -69,6 +83,10 @@ jsPsych.plugins.similarity = (function() {
     	    "margin-left": "-100px",
     	    "margin-top": "-100px"
         });  	
+    }
+    
+    if(plugin.sample_page){
+    	setTimeout(showSamplePage(),trial.timing_sample_page);
     }
     
     showFixationCross();
@@ -230,7 +248,7 @@ jsPsych.plugins.similarity = (function() {
       if (trial.prompt !== "") {
         display_element.append(trial.prompt);
       }
-
+      
       $("#next").click(function() {
         var endTime = (new Date()).getTime();
         var response_time = endTime - startTime;
