@@ -25,7 +25,7 @@ jsPsych.plugins.similarity = (function() {
     trial.show_response = trial.show_response || "SECOND_STIMULUS";
 
     trial.timing_first_stim = trial.timing_first_stim || 1000; // default 1000ms
-    trial.timing_second_stim = trial.timing_second_stim || 1000; // -1 = inf time; positive numbers = msec to display second image.
+    trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
     trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
     trial.timing_sample_page = trial.timing_sample_page || 5000  // -1 = none; positive numbers = msec to display second image.
@@ -59,11 +59,33 @@ jsPsych.plugins.similarity = (function() {
     trial.setTimeoutHandlers = [];
     
     function showSamplePage(){
-    	display_element.append ($("<table><tr><p>Voici des exemples de stimulis de pratique</p></tr>" +
-    	"<tr><td><img></td><td><img></td></tr>" +
-    	"<tr><p>Voici des exemples de stimulis </p></tr>" +
-    	"<tr><td><img></td><td><img></td></tr></table>"));
+    	$sampleSheet = $("<table></table>");
     	
+    	$firstRow = $("<tr></tr>");
+    	$secondRow = $("<tr></tr>");
+    	$thirdRow = $("<tr></tr>");
+    	$fourthRow = $("<tr></tr>");
+    	
+    	$information1 = $("<p>Voici des exemples de stimuli de pratique</p>")
+    	$information2 = $("<p>Voici des exemples de stimuli </p>")
+    	
+    	$image1 = $("<td><img></img></td>");
+    	$image1 = $("<td><img></img></td>");
+    	$image1 = $("<td><img></img></td>");
+    	$image1 = $("<td><img></img></td>");
+    	
+    	display_element.append($sampleSheet);
+    	$sampleSheet.append($firstRow);
+    	$sampleSheet.append($secondRow);
+    	$sampleSheet.append($thirdRow);
+    	$sampleSheet.append($fourthRow);
+    	
+    	$firstRow.append($information1);
+    	$thirdRow.append($information2);
+    	$secondRow.append($image1);
+    	$secondRow.append($image2);
+    	$fourthRow.append($image3);
+    	$fourthRow.append($image4);
     	
     	plugin.sample_page = false;
     }
