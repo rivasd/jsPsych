@@ -28,7 +28,7 @@ jsPsych.plugins.similarity = (function() {
     trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
     trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
-    trial.timing_sample_page = trial.timing_sample_page || 5000  // -1 = none; positive numbers = msec to display second image.
+
 
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
@@ -58,58 +58,24 @@ jsPsych.plugins.similarity = (function() {
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
     
-    function showSamplePage(){
-    	$sampleSheet = $("<table></table>");
-    	
-    	$firstRow = $("<tr></tr>");
-    	$secondRow = $("<tr></tr>");
-    	$thirdRow = $("<tr></tr>");
-    	$fourthRow = $("<tr></tr>");
-    	
-    	$information1 = $("<p>Voici des exemples de stimuli de pratique</p>")
-    	$information2 = $("<p>Voici des exemples de stimuli </p>")
-    	
-    	$image1 = $("<td><img></img></td>");
-    	$image1 = $("<td><img></img></td>");
-    	$image1 = $("<td><img></img></td>");
-    	$image1 = $("<td><img></img></td>");
-    	
-    	display_element.append($sampleSheet);
-    	$sampleSheet.append($firstRow);
-    	$sampleSheet.append($secondRow);
-    	$sampleSheet.append($thirdRow);
-    	$sampleSheet.append($fourthRow);
-    	
-    	$firstRow.append($information1);
-    	$thirdRow.append($information2);
-    	$secondRow.append($image1);
-    	$secondRow.append($image2);
-    	$fourthRow.append($image3);
-    	$fourthRow.append($image4);
-    	
-    	plugin.sample_page = false;
-    }
-    
     function showFixationCross(){
     	display_element.empty();
+    
+    	if(display_element.css("position")==="static"){
+    		display_element.css("position", "relative");
+    	}
+    	
         var $paragraph = $("<p>+</p>");
         display_element.append($paragraph);
         $paragraph.css({
         	"font-size":"350%",
-        	"display":"block",
     	    "position":"absolute",
     	    "left": "50%",
     	    "top": "50%",
-    	    "width": "200px",
-    	    "height": "200px",
-    	    "margin-left": "-100px",
-    	    "margin-top": "-100px"
+    	    "transform": "translate(-50%, -50%)"   
         });  	
     }
     
-    if(plugin.sample_page){
-    	setTimeout(showSamplePage(),trial.timing_sample_page);
-    }
     
     showFixationCross();
     
@@ -173,18 +139,19 @@ jsPsych.plugins.similarity = (function() {
       }
       
       
-
+      if(trial.show_response == "SECOND_STIMULUS") {
+          show_response_slider(display_element, trial);
+      }
+      
       if (trial.timing_second_stim > 0) {
         trial.setTimeoutHandlers.push(setTimeout(function() {
           $("#jspsych-sim-stim").css('visibility', 'hidden');
-          if (trial.show_response == "SECOND_STIMULUS") {
+          if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
           }
         }, trial.timing_second_stim));
       }
-      else if (trial.show_response == "SECOND_STIMULUS") {
-        show_response_slider(display_element, trial);
-      }
+       
     }
 
 
