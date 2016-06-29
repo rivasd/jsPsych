@@ -28,6 +28,7 @@ jsPsych.plugins.similarity = (function() {
     trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
     trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
+    trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
 
 
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
@@ -151,8 +152,37 @@ jsPsych.plugins.similarity = (function() {
           }
         }, trial.timing_second_stim));
       }
-       
     }
+    
+    
+    function endTrial(data){
+        
+
+        // kill any remaining setTimeout handler
+	        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
+	          clearTimeout(trial.setTimeoutHandlers[i]);
+	        }
+
+	    var score = undefined;
+        
+	    if(data.rt === -1){
+	    	score = 0;
+	    }
+	    else score = $("#slider").slider("value");
+	    
+        var trial_data = {
+          "sim_score": score,
+          "rt": data.rt
+          //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
+        };
+        trial_data.timeout = false; //quick hack for something I need right now
+        if(trial.return_stim){
+        	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
+        }
+        // goto next trial in block
+        display_element.html('');
+        jsPsych.finishTrial(trial_data);
+     }
 
 
     function show_response_slider(display_element, trial) {
@@ -232,36 +262,20 @@ jsPsych.plugins.similarity = (function() {
         'class': 'sim',
         'html': 'Submit Answer'
       }));
-
+       
       // if prompt is set, show prompt
       if (trial.prompt !== "") {
         display_element.append(trial.prompt);
-      }
-      
-      $("#next").click(function() {
-        var endTime = (new Date()).getTime();
-        var response_time = endTime - startTime;
-
-        // kill any remaining setTimeout handlers
-        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
-          clearTimeout(trial.setTimeoutHandlers[i]);
-        }
-
-        var score = $("#slider").slider("value");
-        var trial_data = {
-          "sim_score": score,
-          "rt": response_time,
-          //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
-        };
-        trial_data.timeout = false; //quick hack for something I need right now
-        if(trial.return_stim){
-        	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
-        }
-        // goto next trial in block
-        display_element.html('');
-        jsPsych.finishTrial(trial_data);
+      }   
+      trial.setTimeoutHandlers.push(setTimeout(function(){
+    	  endTrial({rt:-1})
+    	  }, trial.timeout));
+      var endTime = (new Date()).getTime();
+      var response_time = endTime - startTime;
+      $("#next").click(function(){
+    	  endTrial({rt: response_time});
       });
     }
   };
   return plugin;
-})();
+  })();
