@@ -29,8 +29,9 @@ jsPsych.plugins.similarity = (function() {
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
     trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
     trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
-
-
+    trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
+    trial.timeout_message_timing = trial.timeout_message_timing || 1000;
+    
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
     
@@ -162,26 +163,33 @@ jsPsych.plugins.similarity = (function() {
 	        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
 	          clearTimeout(trial.setTimeoutHandlers[i]);
 	        }
-
-	    var score = undefined;
         
-	    if(data.rt === -1){
-	    	score = 0;
+	    trial_data.timeout = false; //quick hack for something I need right now
+	    if(data.sim_score === undefined){
+	    	data.sim_score = 0;
+	    	data.timeout = true;
 	    }
-	    else score = $("#slider").slider("value");
 	    
-        var trial_data = {
-          "sim_score": score,
-          "rt": data.rt
-          //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
-        };
-        trial_data.timeout = false; //quick hack for something I need right now
+        
         if(trial.return_stim){
-        	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
+        	data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
         }
         // goto next trial in block
         display_element.html('');
-        jsPsych.finishTrial(trial_data);
+        
+        if(data.rt === -1){
+        	//this was a timeout
+        	display_element.append(trial.timeout_message);
+        	trial.setTimeoutHandlers.push(setTimeout(function(){
+        		display_element.empty();
+        		jsPsych.finishTrial(data);
+        	},trial.timeout_message_timing))
+        }
+        else{
+        	jsPsych.finishTrial(data);
+        }
+        
+        
      }
 
 
@@ -266,14 +274,21 @@ jsPsych.plugins.similarity = (function() {
       // if prompt is set, show prompt
       if (trial.prompt !== "") {
         display_element.append(trial.prompt);
-      }   
+      }  
+      
       trial.setTimeoutHandlers.push(setTimeout(function(){
-    	  endTrial({rt:-1})
-    	  }, trial.timeout));
-      var endTime = (new Date()).getTime();
-      var response_time = endTime - startTime;
+    	  endTrial({rt:-1});
+      }, trial.timeout));
+      
+      
+      
       $("#next").click(function(){
-    	  endTrial({rt: response_time});
+    	  var endTime = (new Date()).getTime();
+          var response_time = endTime - startTime;
+    	  endTrial({
+    		  rt: response_time,
+    		  sim_score: $("#slider").slider("value")
+    	  });
       });
     }
   };
