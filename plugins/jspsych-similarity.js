@@ -276,9 +276,12 @@ jsPsych.plugins.similarity = (function() {
         display_element.append(trial.prompt);
       }  
       
-      trial.setTimeoutHandlers.push(setTimeout(function(){
-    	  endTrial({rt:-1});
-      }, trial.timeout));
+      if(trial.timeout > 0){
+    	  trial.setTimeoutHandlers.push(setTimeout(function(){
+        	  endTrial({rt:-1});
+          }, trial.timeout));
+      }
+      
       
       
       
