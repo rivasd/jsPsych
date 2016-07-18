@@ -164,7 +164,7 @@ jsPsych.plugins.similarity = (function() {
 	          clearTimeout(trial.setTimeoutHandlers[i]);
 	        }
         
-	    trial_data.timeout = false; //quick hack for something I need right now
+	    data.timeout = false; //quick hack for something I need right now
 	    if(data.sim_score === undefined){
 	    	data.sim_score = 0;
 	    	data.timeout = true;
