@@ -282,9 +282,6 @@ jsPsych.plugins.similarity = (function() {
           }, trial.timeout));
       }
       
-      
-      
-      
       $("#next").click(function(){
     	  var endTime = (new Date()).getTime();
           var response_time = endTime - startTime;
