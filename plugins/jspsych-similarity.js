@@ -14,7 +14,31 @@ jsPsych.plugins.similarity = (function() {
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image');
-
+  
+  //trigger mappings
+  var cat = {
+	  'lakamite': '1',
+	  'kalamite': '2'
+  }
+  var pairtype = {
+	'same': '1',
+	'different': '2'
+  }
+  
+  
+   /**
+    * Returns a pair of numbers that are the trigger values to send. They should depend on the order, the category, and the pair-type that the image is in
+    */
+  plugin.getTriggers = function(trial){
+	  
+	  if(!trial.data || !trial.data.firstStim || !trial.data.kind){
+		  return null;
+	  }
+	  var first = "1"+cat[trial.data.firstStim]+pairtype[trial.data.kind];
+	  var secnd = "2"+cat[trial.data.secondStim]+pairtype[trial.data.kind];
+	  return [parseInt(first), parseInt(secnd)];
+  };
+  
   plugin.trial = function(display_element, trial) {
 
     // default parameters
@@ -43,7 +67,8 @@ jsPsych.plugins.similarity = (function() {
     //Adding new parameters 
     plugin.sample_page = plugin.sample_page || true;
     
-    
+    //find out the right triggers to send
+    var trigs = plugin.getTriggers(trial);
     
     /**
      * Let's try out my idea of normalizing trial logic as trial methods
@@ -102,8 +127,12 @@ jsPsych.plugins.similarity = (function() {
 	    }
 	    
 	    //first stimuli has been shown, send first trigger
-	    if(trial.hardware_first_stim && jsPsych.pluginAPI.hardwareConnected){
-	    	jsPsych.pluginAPI.hardware(trial.hardware_first_stim);
+	    if(trigs && jsPsych.pluginAPI.hardwareConnected){
+	    	jsPsych.pluginAPI.hardware({
+	    		target: 'parallel',
+	    		action: 'trigger',
+	    		payload: trigs[0]
+	    	});
 	    }
 	
 	    if (trial.show_response == "FIRST_STIMULUS") {
@@ -136,8 +165,12 @@ jsPsych.plugins.similarity = (function() {
       
       //second stimuli has been shown, send trigger
       
-      if(trial.hardware_second_stim && jsPsych.pluginAPI.hardwareConnected){
-      	jsPsych.pluginAPI.hardware(trial.hardware_second_stim);
+      if(trigs && jsPsych.pluginAPI.hardwareConnected){
+      	jsPsych.pluginAPI.hardware({
+      		target:'parallel',
+      		action:'trigger',
+      		payload: trigs[1]
+      	});
       }
       
       
