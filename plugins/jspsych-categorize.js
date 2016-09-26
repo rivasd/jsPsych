@@ -167,6 +167,13 @@ jsPsych.plugins.categorize = (function() {
 
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
+        //send trigger for feedback/error ERPs
+        jsPsych.pluginAPI.hardware({
+        	target: 'parallel',
+        	action: 'trigger',
+        	payload: correct ? 10 : 20
+        });
+        
       } else {
         // show image during feedback if flag is set
         if (trial.show_stim_with_feedback) {
