@@ -13,6 +13,9 @@ jsPsych.plugins.categorize = (function() {
   jsPsych.pluginAPI.registerPreload('animation', 'stimulus', 'image');
   
   plugin.getTrigger = function(trial){
+	  if(trial.is_practice){
+		  return null;
+	  }
 	  if(trial.data && trial.data.category){
 		  if(trial.data.category === 'lakamite'){
 			  return 76;
