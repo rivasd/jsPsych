@@ -3,9 +3,11 @@
 
 <head>
   <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-ui.min.js"></script>
   <script src="../jspsych.js"></script>
   <script src="../plugins/jspsych-rating.js"></script>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <style>
     img {
       width: 300px;
@@ -64,7 +66,9 @@
     timing_stim: 0.500,
     timeline: [trial_1, trial_2, trial_3],
     choices: [89, 78], // Y or N
-    prompt: '<p class="center-content">Have you seen this face before? Y or N.</p>',
+    show_ticks : true,
+    labels : ["-3","-2","-1","0","1","2","3"],
+    prompt: '<p class="center-content">Do you like the piece of art?</p>',
     data: {
       node_data: true
     }
