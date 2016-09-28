@@ -92,15 +92,15 @@ jsPsych.plugins.similarity = (function() {
     		display_element.css("position", "relative");
     	}
     	
-        var $paragraph = $("<p>+</p>");
+        var $paragraph = $("<p>+</p>", {class : "jspsych-sim-centered"});
         display_element.append($paragraph);
         $paragraph.css({
         	"font-size":"350%",
-    	    "position":"absolute",
+    	    /*"position":"absolute",
     	    "left": "50%",
     	    "top": "50%",
-    	    "transform": "translate(-50%, -50%)"   
-        });  	
+    	    "transform": "translate(-50%, -50%)"  */ 
+        });
     }
     
     
@@ -117,12 +117,14 @@ jsPsych.plugins.similarity = (function() {
 	    if (!trial.is_html) {
 	      display_element.append($('<img>', {
 	        "src": trial.stimuli[0],
-	        "id": 'jspsych-sim-stim'
+	        "id": 'jspsych-sim-stim',
+	        "class": 'jspsych-sim-centered'
 	      }));
 	    } else {
 	      display_element.append($('<div>', {
 	        "html": trial.stimuli[0],
-	        "id": 'jspsych-sim-stim'
+	        "id": 'jspsych-sim-stim',
+	        "class": 'jspsych-sim-centered'
 	      }));
 	    }
 	    
@@ -161,7 +163,10 @@ jsPsych.plugins.similarity = (function() {
         $('#jspsych-sim-stim').html(trial.stimuli[1]);
       }
 
-      $('#jspsych-sim-stim').css('visibility', 'visible');
+      $('#jspsych-sim-stim').css({
+    	"align-self":'center',  
+    	visibility:'visible'  
+      	});
       
       //second stimuli has been shown, send trigger
       
@@ -233,7 +238,8 @@ jsPsych.plugins.similarity = (function() {
       // create slider
       display_element.append($('<div>', {
         "id": 'slider',
-        "class": 'sim'
+        "class": 'sim',
+        "align-self":'flex-end'
       }));
 
       $("#slider").slider({
