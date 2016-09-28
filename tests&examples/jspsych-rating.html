@@ -6,6 +6,7 @@
   <script src="js/jquery-ui.min.js"></script>
   <script src="../jspsych.js"></script>
   <script src="../plugins/jspsych-rating.js"></script>
+  <script src="../plugins/jspsych-forcedchoice.js"></script>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <style>
@@ -34,14 +35,153 @@
 			'-3': {},
 			'-2': {},
 			'-1': {},
-			'0' : {}.
+			'0' : {},
 			'1' : {},
 			'2' : {},
 			'3'	: {}
 		};
 		
+		
+		function getLeastUsed(rating, max){
+			var candidate;
+			var usage = Infinity;
+			var group = vault[rating.toString()];
+			for (url in group){
+				if(group.hasOwnProperty(url)){
+					if(group[url] < usage){
+						usage = group[url];
+						candidate = url;
+					}
+				}	
+			}
+			if(usage > max){
+				//failed to find an entry used less than the max param
+				return false;
+			}
+			else{
+				group[candidate] = group[candidate] + 1;
+				return candidate;
+			}
+		};
+		
+		function shuffle(a) {
+		    var j, x, i;
+		    for (i = a.length; i; i--) {
+		        j = Math.floor(Math.random() * i);
+		        x = a[i - 1];
+		        a[i - 1] = a[j];
+		        a[j] = x;
+		    }
+		}
+		
+		
+		/**
+		* Stores a single image URL under an optional name in the store
+		*/
 		module.loadSingle = function(url, name){
 			var pathComponents = url.split("/");
+			name = name || pathComponents[pathComponents.length-1].split(".")[0]; //keep the filename at the end of the URL but without the extension
+			unsortedVault[name] = url;
+		}
+		
+		module.loadList = function(urls){
+			urls.forEach(function(elt){
+				module.loadSingle(elt);
+			})
+		}
+		
+		
+		/**
+		* Associates a signed integer rating to the url of an image for future reference
+		*/
+		module.rate = function(url, rating){
+			vault[rating.toString()][url] = 0;
+		}
+		
+		/**
+		* Returns the number of images that have been given the specified rating so far
+		*/
+		module.getSize = function(rating){
+			return Object.keys(vault[rating.toString()]).length;
+		}
+		
+		/**
+		* 
+		*/
+		module.getPairs = function(repeat_limit, distances, num_pairs){
+			repeat_limit = repeat_limit || 8;
+			var pairs = {};
+			
+			var success = distances.every(function(elt, i, array) {
+				if(elt < 0 ){
+					throw "cannot create pairs of negative distances";
+				}
+				pairs[elt.toString()] = []
+				//enumerate all possible rating combinations that respect the given distance
+				var possibilities = [];
+				for(var i=0; i< 4; i++){ //TODO: allow arbitrary number of rating values
+					if(i+elt < 4){
+						possibilities.push([i.toString(), (i+elt).toString()]);
+					}
+				}
+				
+				//now continuously loop through those rating pairs (0-2, 1-3, etc) and try to create a pair with one images of the corresponding rating
+				var pairCount = 0;
+				var pairCursor = 0;
+				var failure = false;
+				
+				while(pairCount < num_pairs){
+					if(pairCursor >= possibilities.length){
+						pairCursor = 0;
+					}
+					//choose which of the possible pair types to try
+					var pairType = possibilities[pairCursor];
+					// try to find a usable image for each rating in the pair
+					var first = getLeastUsed(pairType[0], repeat_limit);
+					var secnd = getLeastUsed(pairType[1], repeat_limit);
+					
+					//if we could not find a suitable image for either rating, abort
+					if(!(first && secnd)){
+						failure = true;
+						break;
+					}
+					
+					//we found suitable image names, increment their usage count and return the pair
+					pairs[elt.toString()].push([first, secnd]);
+					pairCursor++;
+					pairCount++;
+				}
+				return !failure;
+			});
+			
+			if(success){
+				return pairs;
+			}
+			else{
+				return false;
+			}
+		}
+		
+		module.getTimeline = function(repeat_limit, distances, num_pairs){
+			//default values based on previous paper "Testing necessary regional frontal contributions to value assessment and fixation-based updating"
+			repeat_limit = repeat_limit || 8;
+			distances = distances || [0, 1 ,2];
+			num_pairs = num_pairs || 34;
+			
+			var pairs = module.getPairs(repeat_limit, distances, num_pairs);
+			if(pairs){
+				var timeline = [];
+				for (dist in pairs){
+					if(pairs.hasOwnProperty(dist)){
+						timeline = timeline.concat(pairs[dist]);
+					}
+				}
+				shuffle(timeline);
+				return timeline;
+			}
+			else{
+				return false
+			}
 		}
 		
 		return module;
