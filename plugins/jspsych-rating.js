@@ -97,9 +97,9 @@ jsPsych.plugins["rating"] = (function() {
 	   }
 	   
 	   
-	   if(trial.return_stim){
-		   data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
-	   }
+	   
+	   data.stimulus = trial.stim_name || trial.stimulus;
+	   
 	   // goto next trial in block
 	   display_element.html('');
 	   
@@ -135,6 +135,7 @@ jsPsych.plugins["rating"] = (function() {
     trial.labels = (typeof trial.labels === 'undefined') ? ["Hate", "Love"] : trial.labels;
     trial.intervals = trial.intervals || 7;
     trial.show_ticks = (typeof trial.show_ticks === 'undefined') ? false : trial.show_ticks;
+    trial.return_stim = trial.return_stim || true;
 
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early

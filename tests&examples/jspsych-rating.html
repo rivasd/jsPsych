@@ -7,6 +7,7 @@
   <script src="../jspsych.js"></script>
   <script src="../plugins/jspsych-rating.js"></script>
   <script src="../plugins/jspsych-forcedchoice.js"></script>
+  <script src="../plugins/jspsych-call-function.js"></script>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <style>
@@ -112,6 +113,7 @@
 			repeat_limit = repeat_limit || 8;
 			var pairs = {};
 			
+			//we need to form an array of pairs for each demanded distance
 			var success = distances.every(function(elt, i, array) {
 				if(elt < 0 ){
 					throw "cannot create pairs of negative distances";
@@ -131,6 +133,10 @@
 				var failure = false;
 				
 				while(pairCount < num_pairs){
+					if(possibilities.length === 0){
+						failure = true;
+						break;
+					}
 					if(pairCursor >= possibilities.length){
 						pairCursor = 0;
 					}
@@ -140,16 +146,16 @@
 					var first = getLeastUsed(pairType[0], repeat_limit);
 					var secnd = getLeastUsed(pairType[1], repeat_limit);
 					
-					//if we could not find a suitable image for either rating, abort
+					//if we could not find a suitable image for either rating, BUT don't abort, we might be able to reach enough pairs using other pairTypes
 					if(!(first && secnd)){
-						failure = true;
-						break;
+						possibilities.splice(pairCursor, 1); //remove that possibility since we were not able to find a pair for it. Do not incremenent cursors since rest of array was shifted already
 					}
-					
-					//we found suitable image names, increment their usage count and return the pair
-					pairs[elt.toString()].push([first, secnd]);
-					pairCursor++;
-					pairCount++;
+					else{
+						//we found suitable image names, increment their usage count and return the pair
+						pairs[elt.toString()].push([first, secnd]);
+						pairCursor++;
+						pairCount++;
+					}
 				}
 				return !failure;
 			});
@@ -200,7 +206,10 @@
     stimulus: '<p>:)</p>',
     is_html: true
   }
-
+  //Global object that will hold the pairs of artwork. forced-choice trials will fetch their stimuli from here dynamically using simple array index with jsPsych's functions-as-plugin-params
+  var choiceTimeline;
+  var forcedChoiceTrialCounter = 0; 
+  
   var node = {
     type: 'rating',
     timing_stim: 0.500,
@@ -210,14 +219,44 @@
     labels : ["-3","-2","-1","0","1","2","3"],
     prompt: '<p class="center-content">Do you like the piece of art?</p>',
     data: {
-      node_data: true
+      node_data: true //??? why is that here?
+    },
+    // after every rating trial, assign the rating to the url of the image in the ImageRater
+    on_finish: function(data){
+    	if(data.rating !== null ){
+    		ImageRater.rate(data.stimulus, data.rating);
+    	}
     }
   }
 
-
+  //A trial that does not do anything for the subject but builds the array of artwork pairs according to spec, to be used to get stimuli for the next phase
+  var build_node = {
+	type: "call-function",
+	func: function(){
+		choiceTimeline = ImageRater.getTimeline(20, [0], 1);
+		if(choiceTimeline === false){
+			jsPsych.endExperiment("Could not proceed with choice task");
+		}
+	}
+  }
+	
+  //Represents the binary forced choice task block
+  var forcedChoiceNode = {
+	type: "forcedchoice",
+	on_finish: function(data){
+		forcedChoiceTrialCounter++;
+	},
+	timeline:[
+		{stimuli: function(){return choiceTimeline[forcedChoiceTrialCounter]}}
+	]
+  }
+  
+  //load the artworks into the ImageRater
+  ImageRater.loadList(["img/sad_face_1.jpg", "img/happy_face_1.jpg"]);
+  
   jsPsych.init({
     display_element: $('#jspsych-target'),
-    timeline: [node],
+    timeline: [node, build_node, forcedChoiceNode],
     on_finish: function() {
       jsPsych.data.displayData();
     },
