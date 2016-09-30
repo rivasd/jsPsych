@@ -9,8 +9,12 @@
   <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <style>
-    img {
+    .jspsych-genstim {
       width: 300px;
+      height: 300px;
+      display: block;
+      margin: 0 auto;
+      text-align: center;
     }
   </style>
 </head>
@@ -22,7 +26,9 @@
   var block_1 = {
     type: 'similarity',
     stimuli: ['img/happy_face_1.jpg', 'img/sad_face_1.jpg'],
-    prompt: '<p class="center-content">How similar are these pictures?</p>'
+    prompt: '<p class="center-content">How similar are these pictures?</p>',
+    timeout: -1,
+    timing_fixation_cross: 30000
   }
 
   jsPsych.init({
