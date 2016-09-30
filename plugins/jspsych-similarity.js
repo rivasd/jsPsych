@@ -30,6 +30,9 @@ jsPsych.plugins.similarity = (function() {
     * Returns a pair of numbers that are the trigger values to send. They should depend on the order, the category, and the pair-type that the image is in
     */
   plugin.getTriggers = function(trial){
+	  if(trial.is_practice){
+		  return;
+	  }
 	  
 	  if(!trial.data || !trial.data.firstStim || !trial.data.kind){
 		  return null;
