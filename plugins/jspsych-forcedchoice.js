@@ -52,7 +52,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
   plugin.trial = function(display_element, trial) {
 
     // set default values for parameters
-    trials.is_html = trial.is_html || false;
+    trial.is_html = trial.is_html || false;
     trial.timing_stim = trial.timing_stim || 1000;
     trial.timing_fixation = trial.timing_fixation || 500;
     trial.prompt = trial.prompt || "Click on one of the images";
