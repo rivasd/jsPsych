@@ -9,8 +9,12 @@
   <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <style>
-    img {
+    .jspsych-genstim {
       width: 300px;
+      height: 300px;
+      display: block;
+      margin: 0 auto;
+      text-align: center;
     }
     #jspsych-target{	
 	/* text-align: left; */
@@ -43,6 +47,8 @@
     prompt: '<p class="center-content">How similar are these pictures?</p>',
     timing_first_stim : '1000',
     timing_second_stim : '1000'
+    timeout: -1,
+    timing_fixation_cross: 30000
   }
 
   jsPsych.init({

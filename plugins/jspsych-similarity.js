@@ -94,16 +94,21 @@ jsPsych.plugins.similarity = (function() {
     	if(display_element.css("position")==="static"){
     		display_element.css("position", "relative");
     	}
-    	
-        var $paragraph = $("<p>+</p>", {class : "jspsych-sim-centered"});
+	
+        var $paragraph = $('<p> + </p>');
+        
         display_element.append($paragraph);
         $paragraph.css({
         	"font-size":"350%",
-    	    /*"position":"absolute",
-    	    "left": "50%",
-    	    "top": "50%",
-    	    "transform": "translate(-50%, -50%)"  */ 
+        	"display": 'flex',
+        	"justify-content": "center", /* align horizontal */
+        	"align-items": "center" /* align vertical */
+    	    //"position":"absolute",
+    	    //"left": "50%"
+    	    //"top": "50%",
+    	    //"transform": "translate(-50%, -50%)"   
         });
+        $paragraph.addClass('jspsych-genstim');
     }
     
     
@@ -121,13 +126,13 @@ jsPsych.plugins.similarity = (function() {
 	      display_element.append($('<img>', {
 	        "src": trial.stimuli[0],
 	        "id": 'jspsych-sim-stim',
-	        "class": 'jspsych-sim-centered'
+	        'class': 'jspsych-genstim'
 	      }));
 	    } else {
 	      display_element.append($('<div>', {
 	        "html": trial.stimuli[0],
 	        "id": 'jspsych-sim-stim',
-	        "class": 'jspsych-sim-centered'
+	        'class': 'jspsych-genstim'
 	      }));
 	    }
 	    
