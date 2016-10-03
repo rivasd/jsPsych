@@ -4,15 +4,52 @@ jsPsych.plugins["rating"] = (function() {
 
   jsPsych.pluginAPI.registerPreload('single-stim', 'stimulus', 'image');
   
-
-  plugin.show_response_slider = function (display_element, trial) {
-
-
+  //div that will contain all UI elements involved in getting a response from a subject. Useful to cache and quickly hide those elements
+  plugin.response_element = $("<div>", {'class': 'jspsych-response', 'id': 'jspsych-rating-response'});
+  plugin.active = false;
+  
+  plugin.show_response = function(display_element, trial){
+	if(!plugin.active){
+		display_element.append(plugin.response_element);
+		if(trial.response === 'slider'){
+			plugin.response_slider(display_element, trial);
+		}
+		else if(trial.response === 'boxes'){
+			plugin.response_boxes(display_element, trial);
+		}
+		plugin.active = true;
+	}
+	plugin.response_element.show();
+  };
+  
+  plugin.response_boxes = function(display_element, trial){
+	  plugin.response_element.empty();
+	  plugin.choices = $("<ul>", {'class': 'jspsych-choice-list'});
+	  plugin.choices.css({
+		 'list-style': 'none',
+		 'margin': 'none'
+	  });
+	  
+	  trial.ratings.forEach(function(elt){
+		  var option = $("<li>", {'class': 'jspsych-choice-item'});
+		  option.text(elt);
+		  plugin.choices.append(option);
+	  });
+	  
+	  
+  };
+  
+  plugin.response_slider = function (display_element, trial) {
+	  
+	  plugin.response_element.empty();
+	  
       // create slider
-      display_element.append($('<div>', {
+      plugin.slider = $('<div>', {
         "id": 'slider',
         "class": 'sim'
-      }));
+      });
+      
+      plugin.response_element.append(plugin.slider);
 
       $("#slider").slider({
         value: Math.ceil(trial.intervals / 2),
@@ -40,7 +77,7 @@ jsPsych.plugins["rating"] = (function() {
       }
 
       // create labels for slider
-      display_element.append($('<ul>', {
+      plugin.response_element.append($('<ul>', {
         "id": "sliderlabels",
         "class": 'sliderlabels',
         "css": {
@@ -76,7 +113,7 @@ jsPsych.plugins["rating"] = (function() {
       });
 
       //  create button
-      display_element.append($('<button>', {
+      plugin.response_element.append($('<button>', {
         'id': 'next',
         'class': 'sim',
         'html': 'Submit Answer'
@@ -136,7 +173,9 @@ jsPsych.plugins["rating"] = (function() {
     trial.intervals = trial.intervals || 7;
     trial.show_ticks = (typeof trial.show_ticks === 'undefined') ? false : trial.show_ticks;
     trial.return_stim = trial.return_stim || true;
-
+    trial.response = trial.response || 'slider';
+    
+    
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
@@ -156,7 +195,7 @@ jsPsych.plugins["rating"] = (function() {
 	}
     
     // show the slider
-    plugin.show_response_slider(display_element, trial);
+    plugin.show_response(display_element, trial);
     
     var startTime = (new Date()).getTime();
     
@@ -171,14 +210,26 @@ jsPsych.plugins["rating"] = (function() {
         }, trial.timeout));
     }
     // wait for a response    
-    $("#next").click(function(){
-  	  var endTime = (new Date()).getTime();
-        var response_time = endTime - startTime;
-  	  plugin.endTrial({
-  		  rt: response_time,
-  		  rating: $("#slider").slider("value")
-  	 }, trial, display_element)
-    });
+    
+    if(trial.response === 'slider'){
+    	$("#next").click(function(){
+	  	  var endTime = (new Date()).getTime();
+	        var response_time = endTime - startTime;
+	  	  plugin.endTrial({
+	  		  rt: response_time,
+	  		  rating: $("#slider").slider("value")
+	  	 }, trial, display_element)
+    	 });
+    }else if(trial.response === 'boxes'){
+    	$("li.jspsych-choice-item").click(function(evt){
+    		var endTime = (new Date()).getTime();
+	        var response_time = endTime - startTime;
+	  	  	plugin.endTrial({
+	  		  rt: response_time,
+	  		  rating: $(this).text()
+	  	  	}, trial, display_element)
+    	 });
+    };
   };
   
   return plugin;
