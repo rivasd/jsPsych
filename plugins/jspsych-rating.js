@@ -32,9 +32,15 @@ jsPsych.plugins["rating"] = (function() {
 	  
 	  trial.ratings.forEach(function(elt){
 		  var option = $("<li>", {'class': 'jspsych-choice-item'});
+		  option.css({
+			  'display': 'inline-block',
+			  'cursor': 'pointer',			
+		  });
 		  option.text(elt);
 		  plugin.choices.append(option);
 	  });
+	  
+	  plugin.response_element.append(plugin.choices);
 	  
 	  
   };
@@ -52,9 +58,9 @@ jsPsych.plugins["rating"] = (function() {
       plugin.response_element.append(plugin.slider);
 
       $("#slider").slider({
-        value: Math.ceil(trial.intervals / 2),
-        min: 1,
-        max: trial.intervals,
+        value: Math.ceil(trial.intervals[1] / 2),
+        min: trial.intervals[0],
+        max: trial.intervals[1],
         step: 1,
       });
 
@@ -182,10 +188,10 @@ jsPsych.plugins["rating"] = (function() {
     trial.prompt = trial.prompt || "";
     
     trial.labels = (typeof trial.labels === 'undefined') ? ["Hate", "Love"] : trial.labels;
-    trial.intervals = trial.intervals || 7;
+    trial.intervals = trial.intervals || [-3,3];
     trial.show_ticks = (typeof trial.show_ticks === 'undefined') ? false : trial.show_ticks;
     trial.return_stim = trial.return_stim || true;
-    trial.response = trial.response || 'slider';
+    trial.response = trial.response || 'slider'; //type of response you give (slider or boxes)
     
     
     // this array holds handlers from setTimeout calls

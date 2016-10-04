@@ -14,6 +14,11 @@
     img {
       width: 300px;
     }
+    .jspsych-choice-item {
+	  border: solid;
+	  margin: 5px;
+	  padding: 5px;
+    }
   </style>
 </head>
 
@@ -21,177 +26,7 @@
   <div id="jspsych-target"></div>
 </body>
 <script>
-	/**
-	* Module for organising visual stimuli and their rating as decided by the subject during the experiment.
-	* Also allows to create randomized and balanced stimuli pairs.
-	*
-	* @author Daniel Rivas
-	*/
-	var ImageRater = (function(){
-		var module = {};
-		
-		var unsortedVault = {};
-		
-		var vault = {
-			'-3': {},
-			'-2': {},
-			'-1': {},
-			'0' : {},
-			'1' : {},
-			'2' : {},
-			'3'	: {}
-		};
-		
-		
-		function getLeastUsed(rating, max){
-			var candidate;
-			var usage = Infinity;
-			var group = vault[rating.toString()];
-			for (url in group){
-				if(group.hasOwnProperty(url)){
-					if(group[url] < usage){
-						usage = group[url];
-						candidate = url;
-					}
-				}	
-			}
-			if(usage > max){
-				//failed to find an entry used less than the max param
-				return false;
-			}
-			else{
-				group[candidate] = group[candidate] + 1;
-				return candidate;
-			}
-		};
-		
-		function shuffle(a) {
-		    var j, x, i;
-		    for (i = a.length; i; i--) {
-		        j = Math.floor(Math.random() * i);
-		        x = a[i - 1];
-		        a[i - 1] = a[j];
-		        a[j] = x;
-		    }
-		}
-		
-		
-		/**
-		* Stores a single image URL under an optional name in the store
-		*/
-		module.loadSingle = function(url, name){
-			var pathComponents = url.split("/");
-			name = name || pathComponents[pathComponents.length-1].split(".")[0]; //keep the filename at the end of the URL but without the extension
-			unsortedVault[name] = url;
-		}
-		
-		module.loadList = function(urls){
-			urls.forEach(function(elt){
-				module.loadSingle(elt);
-			})
-		}
-		
-		
-		/**
-		* Associates a signed integer rating to the url of an image for future reference
-		*/
-		module.rate = function(url, rating){
-			vault[rating.toString()][url] = 0;
-		}
-		
-		/**
-		* Returns the number of images that have been given the specified rating so far
-		*/
-		module.getSize = function(rating){
-			return Object.keys(vault[rating.toString()]).length;
-		}
-		
-		/**
-		* 
-		*/
-		module.getPairs = function(repeat_limit, distances, num_pairs){
-			repeat_limit = repeat_limit || 8;
-			var pairs = {};
-			
-			//we need to form an array of pairs for each demanded distance
-			var success = distances.every(function(elt, i, array) {
-				if(elt < 0 ){
-					throw "cannot create pairs of negative distances";
-				}
-				pairs[elt.toString()] = []
-				//enumerate all possible rating combinations that respect the given distance
-				var possibilities = [];
-				for(var i=0; i< 4; i++){ //TODO: allow arbitrary number of rating values
-					if(i+elt < 4){
-						possibilities.push([i.toString(), (i+elt).toString()]);
-					}
-				}
-				
-				//now continuously loop through those rating pairs (0-2, 1-3, etc) and try to create a pair with one images of the corresponding rating
-				var pairCount = 0;
-				var pairCursor = 0;
-				var failure = false;
-				
-				while(pairCount < num_pairs){
-					if(possibilities.length === 0){
-						failure = true;
-						break;
-					}
-					if(pairCursor >= possibilities.length){
-						pairCursor = 0;
-					}
-					//choose which of the possible pair types to try
-					var pairType = possibilities[pairCursor];
-					// try to find a usable image for each rating in the pair
-					var first = getLeastUsed(pairType[0], repeat_limit);
-					var secnd = getLeastUsed(pairType[1], repeat_limit);
-					
-					//if we could not find a suitable image for either rating, BUT don't abort, we might be able to reach enough pairs using other pairTypes
-					if(!(first && secnd)){
-						possibilities.splice(pairCursor, 1); //remove that possibility since we were not able to find a pair for it. Do not incremenent cursors since rest of array was shifted already
-					}
-					else{
-						//we found suitable image names, increment their usage count and return the pair
-						pairs[elt.toString()].push([first, secnd]);
-						pairCursor++;
-						pairCount++;
-					}
-				}
-				return !failure;
-			});
-			
-			if(success){
-				return pairs;
-			}
-			else{
-				return false;
-			}
-		}
-		
-		module.getTimeline = function(repeat_limit, distances, num_pairs){
-			//default values based on previous paper "Testing necessary regional frontal contributions to value assessment and fixation-based updating"
-			repeat_limit = repeat_limit || 8;
-			distances = distances || [0, 1 ,2];
-			num_pairs = num_pairs || 34;
-			
-			var pairs = module.getPairs(repeat_limit, distances, num_pairs);
-			if(pairs){
-				var timeline = [];
-				for (dist in pairs){
-					if(pairs.hasOwnProperty(dist)){
-						timeline = timeline.concat(pairs[dist]);
-					}
-				}
-				shuffle(timeline);
-				return timeline;
-			}
-			else{
-				return false
-			}
-		}
-		
-		return module;
-	})();
+
 
 
   var trial_1 = {
@@ -214,49 +49,18 @@
     type: 'rating',
     timing_stim: 0.500,
     timeline: [trial_1, trial_2, trial_3],
+    response: 'slider',
+    ratings:["-3","-2","-1","0","1","2","3"],
     choices: [89, 78], // Y or N
     show_ticks : true,
     labels : ["-3","-2","-1","0","1","2","3"],
-    prompt: '<p class="center-content">Do you like the piece of art?</p>',
-    data: {
-      node_data: true //??? why is that here?
-    },
-    // after every rating trial, assign the rating to the url of the image in the ImageRater
-    on_finish: function(data){
-    	if(data.rating !== null ){
-    		ImageRater.rate(data.stimulus, data.rating);
-    	}
-    }
+    prompt: '<p class="center-content">Do you like the piece of art?</p>'
+    
   }
-
-  //A trial that does not do anything for the subject but builds the array of artwork pairs according to spec, to be used to get stimuli for the next phase
-  var build_node = {
-	type: "call-function",
-	func: function(){
-		choiceTimeline = ImageRater.getTimeline(20, [0], 1);
-		if(choiceTimeline === false){
-			jsPsych.endExperiment("Could not proceed with choice task");
-		}
-	}
-  }
-	
-  //Represents the binary forced choice task block
-  var forcedChoiceNode = {
-	type: "forcedchoice",
-	on_finish: function(data){
-		forcedChoiceTrialCounter++;
-	},
-	timeline:[
-		{stimuli: function(){return choiceTimeline[forcedChoiceTrialCounter]}}
-	]
-  }
-  
-  //load the artworks into the ImageRater
-  ImageRater.loadList(["img/sad_face_1.jpg", "img/happy_face_1.jpg"]);
-  
+	  
   jsPsych.init({
     display_element: $('#jspsych-target'),
-    timeline: [node, build_node, forcedChoiceNode],
+    timeline: [node],
     on_finish: function() {
       jsPsych.data.displayData();
     },
