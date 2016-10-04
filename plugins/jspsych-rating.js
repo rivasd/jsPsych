@@ -138,13 +138,25 @@ jsPsych.plugins["rating"] = (function() {
 	   data.stimulus = trial.stim_name || trial.stimulus;
 	   
 	   // goto next trial in block
-	   display_element.html('');
+	   plugin.response_element.hide();
+	   $("#jspsych-single-stim-stimulus").remove();
+	   if(plugin.prompt) plugin.prompt.remove();
+	   plugin.stim.remove();
+	   
+	   //remove previous event handlers
+	   if(trial.response === 'slider'){
+		   $("#next").off('click');
+	   }
+	   else if(trial.response === 'boxes'){
+		   $("li.jspsych-choice-item").off('click');
+	   }
+	   
 	   
 	   if(data.rt === -1){
 	   	//this was a timeout
 		   	display_element.append(trial.timeout_message);
 		   	trial.setTimeoutHandlers.push(setTimeout(function(){
-		   		display_element.empty();
+		   		//display_element.empty();
 		   		jsPsych.finishTrial(data);
 		   	},trial.timeout_message_timing))
 	   }
@@ -182,16 +194,15 @@ jsPsych.plugins["rating"] = (function() {
     
     //Show the stimulus
     if (!trial.is_html) {
-    	display_element.append($('<img>', {
-    		src: trial.stimulus,
-	        id: 'jspsych-single-stim-stimulus'
-	    	}));
-	    } 
+    	plugin.stim = $('<img>', {src: trial.stimulus,id: 'jspsych-single-stim-stimulus'});
+    	display_element.prepend(plugin.stim);
+	} 
     else {
-	      display_element.append($('<div>', {
+    	plugin.stim = $('<div>', {
 	        html: trial.stimulus,
 	        id: 'jspsych-single-stim-stimulus'
-	      }));
+	      });
+    	display_element.prepend(plugin.stim);
 	}
     
     // show the slider
@@ -201,8 +212,11 @@ jsPsych.plugins["rating"] = (function() {
     
     //show the prompt
     if (trial.prompt !== "") {
-          display_element.append(trial.prompt);
-        }  
+    	plugin.prompt = $("<p>", {'class': 'jspsych-prompt'});
+    	plugin.prompt.text(trial.prompt)
+        display_element.append(plugin.prompt);
+    }
+    
     //if there is a timeout, schedule the trial end    
     if(trial.timeout > 0){
     	trial.setTimeoutHandlers.push(setTimeout(function(){
@@ -211,25 +225,28 @@ jsPsych.plugins["rating"] = (function() {
     }
     // wait for a response    
     
-    if(trial.response === 'slider'){
-    	$("#next").click(function(){
-	  	  var endTime = (new Date()).getTime();
-	        var response_time = endTime - startTime;
-	  	  plugin.endTrial({
-	  		  rt: response_time,
-	  		  rating: $("#slider").slider("value")
-	  	 }, trial, display_element)
-    	 });
-    }else if(trial.response === 'boxes'){
-    	$("li.jspsych-choice-item").click(function(evt){
-    		var endTime = (new Date()).getTime();
-	        var response_time = endTime - startTime;
-	  	  	plugin.endTrial({
-	  		  rt: response_time,
-	  		  rating: $(this).text()
-	  	  	}, trial, display_element)
-    	 });
-    };
+    	if(trial.response === 'slider'){
+        	//TODO: attach listener only once!
+        	$("#next").click(function(){
+    	  	  var endTime = (new Date()).getTime();
+    	        var response_time = endTime - startTime;
+    	  	  plugin.endTrial({
+    	  		  rt: response_time,
+    	  		  rating: $("#slider").slider("value")
+    	  	 }, trial, display_element)
+        	 });
+        }else if(trial.response === 'boxes'){
+        	$("li.jspsych-choice-item").click(function(evt){
+        		var endTime = (new Date()).getTime();
+    	        var response_time = endTime - startTime;
+    	  	  	plugin.endTrial({
+    	  		  rt: response_time,
+    	  		  rating: $(this).text()
+    	  	  	}, trial, display_element)
+        	 });
+        };
+    
+    
   };
   
   return plugin;
