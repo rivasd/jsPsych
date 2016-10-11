@@ -182,7 +182,6 @@ jsPsych.plugins["rating"] = (function() {
     // set default values for the parameters
     trial.choices = trial.choices || [];
     trial.response_ends_trial = (typeof trial.response_ends_trial == 'undefined') ? true : trial.response_ends_trial;
-    trial.timing_stim = trial.timing_stim || -1;
     trial.timing_response = trial.timing_response || -1;
     trial.is_html = (typeof trial.is_html == 'undefined') ? false : trial.is_html;
     trial.prompt = trial.prompt || "";
