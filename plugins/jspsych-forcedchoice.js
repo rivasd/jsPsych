@@ -9,12 +9,13 @@ jsPsych.plugins["forcedchoice"] = (function() {
   
   
   plugin.showRow = function(display_element, items){
-	  var flexCont = $("<div>", {id: 'jspsych-forcedchoiceStim','class': 'jspsych-row', display:'flex'});
+	  var flexCont = $("<div>", {id: 'jspsych-forcedchoice-row','class': 'jspsych-row'});
 	  flexCont.css({
 		  'margin': '0 auto',
 		  'justify-content': 'center',
 		  'align-items': 'center',
-		  'width': '100%'
+		  'width': '100%',
+		  'display': 'flex'
 	  });
 	  
 	  items.forEach(function(elem, id, arr){
@@ -79,10 +80,10 @@ jsPsych.plugins["forcedchoice"] = (function() {
 		trial.stimuli.forEach(function(elt, i, array) {
     		var stimImage;
     		if(!trial.is_html){
-    			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoiceStim'});
+    			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
     		}
     		else{
-    			stimImage = $(elt);
+    			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
     		}
     		
     		stimImage.on('click', function(evt) {
@@ -96,6 +97,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     			display_element.empty();
     			plugin.end(trial, display_element, data);
     		});
+    		stimImage.css("cursor", "pointer");
     		choices.push(stimImage);
     	});
 

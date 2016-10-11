@@ -200,13 +200,13 @@ jsPsych.plugins["rating"] = (function() {
     
     //Show the stimulus
     if (!trial.is_html) {
-    	plugin.stim = $('<img>', {src: trial.stimulus,id: 'jspsych-single-stim-stimulus'});
+    	plugin.stim = $('<img>', {src: trial.stimulus, 'class': 'jspsych-single-stim-stimulus'});
     	display_element.prepend(plugin.stim);
 	} 
     else {
     	plugin.stim = $('<div>', {
 	        html: trial.stimulus,
-	        id: 'jspsych-single-stim-stimulus'
+	        'class': 'jspsych-single-stim-stimulus'
 	      });
     	display_element.prepend(plugin.stim);
 	}
