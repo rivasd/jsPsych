@@ -57,7 +57,8 @@ jsPsych.plugins["forcedchoice"] = (function() {
     trial.timing_stim = trial.timing_stim || 1000;
     trial.timing_fixation = trial.timing_fixation || 500;
     trial.prompt = trial.prompt || "Click on one of the images";
-    
+    trial.keyboard = trial.keyboard || false; //tells if the participant has to click on the chosen stimulus or press a key associated to it
+    trial.key_choices = trial.key_choices || ['a','l'];
 
     // allow variables as functions
     // this allows any trial variable to be specified as a function
@@ -76,30 +77,82 @@ jsPsych.plugins["forcedchoice"] = (function() {
     	
     	var choices = [];
     	var data= {};
-
-		trial.stimuli.forEach(function(elt, i, array) {
-    		var stimImage;
-    		if(!trial.is_html){
-    			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
-    		}
-    		else{
-    			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
-    		}
+    	
+    	//if the participant has to answer by pressing a key associated with the chosen stimulus
+    	if(trial.keyboard){
     		
-    		stimImage.on('click', function(evt) {
-    			//end of the trial, clear all pending setTimeouts
-    			setTimeoutHandlers.forEach(function(elt, i, array) {
-    				clearTimeout(elt);
-    			});
-    			setTimeoutHandlers = [];
-    			
-    			data.chosen_idx = i;
-    			display_element.empty();
-    			plugin.end(trial, display_element, data);
+    		var coded_keychoices = [];
+    		
+    		trial.key_choices.forEach(function(key_label){
+    			var key_code = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(key_label);
+    			coded_keychoices.push(key_code);
     		});
-    		stimImage.css("cursor", "pointer");
-    		choices.push(stimImage);
-    	});
+    		
+    		trial.stimuli.forEach(function(elt, i, array) {
+        		var stimImage;
+        		var stimSpace = $("<div>", {'class' : 'jspsych-forcedchoice-stimHandler'});
+        		
+        		if(!trial.is_html){
+        			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
+        		}
+        		else{
+        			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
+        		}
+        		var stimKeyLabel = $("<span>");
+        		
+        		if(trial.key_choices[i]){
+        			stimKeyLabel.text(trial.key_choices[i]);	
+        		}
+        		
+        		stimSpace.append(stimImage);
+        		stimSpace.append(stimKeyLabel);
+        		
+        		jsPsych.pluginAPI.getKeyboardResponse({
+        			'callback_function': function(data) {
+        			//end of the trial, clear all pending setTimeouts
+        			setTimeoutHandlers.forEach(function(elt, i, array) {
+        				clearTimeout(elt);
+        			});
+        			
+        			setTimeoutHandlers = [];
+        			display_element.empty();
+        			
+        			plugin.end(trial, display_element, data);
+        		}, 'valid_responses': coded_keychoices});
+        		
+        		choices.push(stimSpace);
+        	});
+    		
+    	}
+    	
+    	//if the participant has to answer by clicking on the stimuli
+    	else{
+    		
+    		trial.stimuli.forEach(function(elt, i, array) {
+        		var stimImage;
+        		if(!trial.is_html){
+        			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
+        		}
+        		else{
+        			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
+        		}
+        		stimImage.on('click', function(evt) {
+        			//end of the trial, clear all pending setTimeouts
+        			setTimeoutHandlers.forEach(function(elt, i, array) {
+        				clearTimeout(elt);
+        			});
+        			setTimeoutHandlers = [];
+        			
+        			data.chosen_idx = i;
+        			display_element.empty();
+        			plugin.end(trial, display_element, data);
+        		});
+        		stimImage.css("cursor", "pointer");
+        		choices.push(stimImage);
+        	});
+    		
+    	}
+
 
     	plugin.showRow(display_element, choices);
     	data.startTime = Date.now();
