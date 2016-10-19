@@ -1,3 +1,4 @@
+
 jsPsych.plugins["rating"] = (function() {
 
   var plugin = {};
@@ -255,4 +256,4 @@ jsPsych.plugins["rating"] = (function() {
   };
   
   return plugin;
-})();
+})()
