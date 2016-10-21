@@ -43,7 +43,9 @@ jsPsych.plugins["forcedchoice"] = (function() {
   
   plugin.end = function(trial, display_el, data){
 	  
-	  data.rt = Date.now() - data.startTime;
+	  if(!trial.keyboard){
+		  data.rt = Date.now() - data.startTime; 
+	  }
 	  delete data.startTime;
 	  data.chosen = trial.stimuli[data.chosen_idx];
 	  
@@ -56,7 +58,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     trial.is_html = trial.is_html || false;
     trial.timing_stim = trial.timing_stim || 1000;
     trial.timing_fixation = trial.timing_fixation || 500;
-    trial.prompt = trial.prompt || "Click on one of the images";
+    trial.prompt = trial.prompt || "Choose one of the images";
     trial.keyboard = trial.keyboard || false; //tells if the participant has to click on the chosen stimulus or press a key associated to it
     trial.key_choices = trial.key_choices || ['a','l'];
 
@@ -76,7 +78,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     	display_element.append($("<span>" + trial.prompt + "</span>", {'class': "jspsych-prompt"}));
     	
     	var choices = [];
-    	var data= {};
+    	var data = {};
     	
     	//if the participant has to answer by pressing a key associated with the chosen stimulus
     	if(trial.keyboard){
@@ -107,18 +109,21 @@ jsPsych.plugins["forcedchoice"] = (function() {
         		stimSpace.append(stimImage);
         		stimSpace.append(stimKeyLabel);
         		
-        		jsPsych.pluginAPI.getKeyboardResponse({
+        		jsPsych.pluginAPI.getKeyboardResponse({	
         			'callback_function': function(data) {
-        			//end of the trial, clear all pending setTimeouts
-        			setTimeoutHandlers.forEach(function(elt, i, array) {
-        				clearTimeout(elt);
-        			});
-        			
-        			setTimeoutHandlers = [];
-        			display_element.empty();
-        			
-        			plugin.end(trial, display_element, data);
-        		}, 'valid_responses': coded_keychoices});
+		        			//end of the trial, clear all pending setTimeouts
+		        			setTimeoutHandlers.forEach(function(elt, i, array) {
+		        				clearTimeout(elt);
+		        			});
+		        			
+		        			setTimeoutHandlers = [];
+		        			data.chosen_idx = i;
+		        			display_element.empty();
+		        			
+		        			plugin.end(trial, display_element, data);
+        				}, 
+        			'valid_responses': coded_keychoices
+        		});
         		
         		choices.push(stimSpace);
         	});
