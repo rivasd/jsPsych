@@ -23,6 +23,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
 	  });
 	  
 	  display_element.append(flexCont);
+	  
   }
   
   plugin.showFixation = function(display_element){
@@ -43,9 +44,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
   
   plugin.end = function(trial, display_el, data){
 	  
-	  if(!trial.keyboard){
-		  data.rt = Date.now() - data.startTime; 
-	  }
+	  data.rt = Date.now() - data.startTime; 
 	  delete data.startTime;
 	  data.chosen = trial.stimuli[data.chosen_idx];
 	  
@@ -78,7 +77,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     	display_element.append($("<span>" + trial.prompt + "</span>", {'class': "jspsych-prompt"}));
     	
     	var choices = [];
-    	var data = {};
+    	var sending_data = {};
     	
     	//if the participant has to answer by pressing a key associated with the chosen stimulus
     	if(trial.keyboard){
@@ -90,7 +89,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     			coded_keychoices.push(key_code);
     		});
     		
-    		trial.stimuli.forEach(function(elt, i, array) {
+    		trial.stimuli.forEach(function(elt, idx, array) {
         		var stimImage;
         		var stimSpace = $("<div>", {'class' : 'jspsych-forcedchoice-stimHandler'});
         		
@@ -102,38 +101,47 @@ jsPsych.plugins["forcedchoice"] = (function() {
         		}
         		var stimKeyLabel = $("<span>");
         		
-        		if(trial.key_choices[i]){
-        			stimKeyLabel.text(trial.key_choices[i]);	
+        		if(trial.key_choices[idx]){
+        			stimKeyLabel.text(trial.key_choices[idx]);	
         		}
         		
         		stimSpace.append(stimImage);
         		stimSpace.append(stimKeyLabel);
         		
-        		jsPsych.pluginAPI.getKeyboardResponse({	
-        			'callback_function': function(data) {
-		        			//end of the trial, clear all pending setTimeouts
-		        			setTimeoutHandlers.forEach(function(elt, i, array) {
-		        				clearTimeout(elt);
-		        			});
-		        			
-		        			setTimeoutHandlers = [];
-		        			data.chosen_idx = i;
-		        			display_element.empty();
-		        			
-		        			plugin.end(trial, display_element, data);
-        				}, 
-        			'valid_responses': coded_keychoices
-        		});
         		
         		choices.push(stimSpace);
         	});
+    		
+    		jsPsych.pluginAPI.getKeyboardResponse({	
+    			'callback_function': function(data) {
+	        			//end of the trial, clear all pending setTimeouts
+	        			setTimeoutHandlers.forEach(function(elt, i, array) {
+	        				clearTimeout(elt);
+	        			});
+	        			
+	        			setTimeoutHandlers = [];
+	        			
+	        			sending_data.chosen_idx = (function(){
+	        				for(var j=0; j < coded_keychoices.length; j++){
+	        					if(data.key == coded_keychoices[j]){
+	        						return j;
+	        					}
+	        				};
+	        			})();
+	        			display_element.empty();
+	        			
+	        			plugin.end(trial, display_element, sending_data);
+    				}, 
+    			'valid_responses': coded_keychoices,
+    			'persist': false
+    		});	
     		
     	}
     	
     	//if the participant has to answer by clicking on the stimuli
     	else{
     		
-    		trial.stimuli.forEach(function(elt, i, array) {
+    		trial.stimuli.forEach(function(elt, idx, array) {
         		var stimImage;
         		if(!trial.is_html){
         			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
@@ -141,6 +149,8 @@ jsPsych.plugins["forcedchoice"] = (function() {
         		else{
         			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
         		}
+        		
+        		
         		stimImage.on('click', function(evt) {
         			//end of the trial, clear all pending setTimeouts
         			setTimeoutHandlers.forEach(function(elt, i, array) {
@@ -148,19 +158,19 @@ jsPsych.plugins["forcedchoice"] = (function() {
         			});
         			setTimeoutHandlers = [];
         			
-        			data.chosen_idx = i;
+        			sending_data.chosen_idx = idx;
         			display_element.empty();
-        			plugin.end(trial, display_element, data);
+        			plugin.end(trial, display_element, sending_data);
         		});
         		stimImage.css("cursor", "pointer");
         		choices.push(stimImage);
         	});
     		
+    		
     	}
-
-
-    	plugin.showRow(display_element, choices);
-    	data.startTime = Date.now();
+    	
+    	plugin.showRow(display_element, choices, sending_data);
+    	sending_data.startTime = Date.now();  	
     	
     }, trial.timing_fixation));
   };
