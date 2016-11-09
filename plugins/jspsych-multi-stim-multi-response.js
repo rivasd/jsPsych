@@ -14,7 +14,59 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('multi-stim-multi-response', 'stimuli', 'image');
+  jsPsych.pluginAPI.registerPreload('multi-stim-multi-response', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
+
+  plugin.info = {
+    name: 'multi-stim-multi-response',
+    description: '',
+    parameters: {
+      stimuli: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      is_html: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      choices: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        default: undefined,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      },
+      timing_stim: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 1000,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      timing_response: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      response_ends_trial: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: true,
+        no_function: false,
+        description: ''
+      }
+    }
+  }
 
   plugin.trial = function(display_element, trial) {
 
@@ -36,9 +88,6 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
-    // this array holds handlers from setTimeout calls
-    // that need to be cleared if the trial ends early
-    var setTimeoutHandlers = [];
 
     // array to store if we have gotten a valid response for
     // all the different response types
@@ -73,9 +122,7 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
     var end_trial = function() {
 
       // kill any remaining setTimeout handlers
-      for (var i = 0; i < setTimeoutHandlers.length; i++) {
-        clearTimeout(setTimeoutHandlers[i]);
-      }
+      jsPsych.pluginAPI.clearAllTimeouts();
 
       // kill keyboard listeners
       jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
@@ -163,7 +210,7 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
       }
 
       if (typeof trial.timing_stim[whichStimulus] !== 'undefined' && trial.timing_stim[whichStimulus] > 0) {
-        var t1 = setTimeout(function() {
+        jsPsych.pluginAPI.setTimeout(function() {
           // clear the display, or hide the display
           if (typeof trial.stimuli[whichStimulus + 1] !== 'undefined') {
             display_element.html('');
@@ -175,8 +222,6 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
           }
 
         }, trial.timing_stim[whichStimulus]);
-
-        setTimeoutHandlers.push(t1);
       }
 
     }
@@ -195,10 +240,9 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
 
     // end trial if time limit is set
     if (trial.timing_response > 0) {
-      var t2 = setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         end_trial();
       }, trial.timing_response);
-      setTimeoutHandlers.push(t2);
     }
 
   };

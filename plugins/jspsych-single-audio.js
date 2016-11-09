@@ -12,16 +12,58 @@ jsPsych.plugins["single-audio"] = (function() {
 
   var plugin = {};
 
-  var context = new AudioContext();
-
   jsPsych.pluginAPI.registerPreload('single-audio', 'stimulus', 'audio');
+
+  plugin.info = {
+    name: 'single-audio',
+    description: '',
+    parameters: {
+      stimulus: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      choices: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        array: true,
+        default: jsPsych.ALL_KEYS,
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      },
+      timing_response: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      response_ends_trial: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: true,
+        no_function: false,
+        description: ''
+      },
+      trial_ends_after_audio: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+    }
+  }
 
   plugin.trial = function(display_element, trial) {
 
     // default parameters
-    trial.choices = trial.choices || [];
+    trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.response_ends_trial = (typeof trial.response_ends_trial === 'undefined') ? true : trial.response_ends_trial;
-    // timing parameters
+    trial.trial_ends_after_audio = (typeof trial.trial_ends_after_audio === 'undefined') ? false : trial.trial_ends_after_audio;
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
 
@@ -30,16 +72,20 @@ jsPsych.plugins["single-audio"] = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
-    // this array holds handlers from setTimeout calls
-    // that need to be cleared if the trial ends early
-    var setTimeoutHandlers = [];
-
     // play stimulus
+    var context = jsPsych.pluginAPI.audioContext();
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
     source.connect(context.destination);
     startTime = context.currentTime + 0.1;
     source.start(startTime);
+
+    // set up end event if trial needs it
+    if(trial.trial_ends_after_audio){
+      source.onended = function() {
+        end_trial();
+      }
+    }
 
     // show prompt if there is one
     if (trial.prompt !== "") {
@@ -56,9 +102,7 @@ jsPsych.plugins["single-audio"] = (function() {
     var end_trial = function() {
 
       // kill any remaining setTimeout handlers
-      for (var i = 0; i < setTimeoutHandlers.length; i++) {
-        clearTimeout(setTimeoutHandlers[i]);
-      }
+      jsPsych.pluginAPI.clearAllTimeouts();
 
       // stop the audio file if it is playing
       source.stop();
@@ -69,7 +113,7 @@ jsPsych.plugins["single-audio"] = (function() {
       // gather the data to store for the trial
       var trial_data = {
         "rt": response.rt * 1000,
-        "stimulus": trial.audio_path,
+        "stimulus": trial.stimulus,
         "key_press": response.key
       };
 
@@ -105,10 +149,9 @@ jsPsych.plugins["single-audio"] = (function() {
     });
     // end trial if time limit is set
     if (trial.timing_response > 0) {
-      var t2 = setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         end_trial();
       }, trial.timing_response);
-      setTimeoutHandlers.push(t2);
     }
 
   };

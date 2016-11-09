@@ -13,7 +13,77 @@ jsPsych.plugins.similarity = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image');
+  jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
+
+  plugin.info = {
+    name: 'similarity',
+    description: '',
+    parameters: {
+      stimuli: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      is_html: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      labels: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        array: true,
+        default: ['Not at all similar', 'Identical'],
+        no_function: false,
+        description: ''
+      },
+      intervals: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 100,
+        no_function: false,
+        description: ''
+      },
+      show_ticks: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      show_response: {
+        type: [jsPsych.plugins.parameterType.SELECT],
+        options: ['FIRST_STIMULUS', 'SECOND_STIMULUS','POST_STIMULUS'],
+        default: 'SECOND_STIMULUS',
+        no_function: false,
+        description: ''
+      },
+      timing_first_stim: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 1000,
+        no_function: false,
+        description: ''
+      },
+      timing_image_gap: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 1000,
+        no_function: false,
+        description: ''
+      },
+      timing_second_stim: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      }
+    }
+  }
 
   plugin.trial = function(display_element, trial) {
 
@@ -68,18 +138,18 @@ jsPsych.plugins.similarity = (function() {
       show_response_slider(display_element, trial);
     }
 
-    trial.setTimeoutHandlers.push(setTimeout(function() {
+    jsPsych.pluginAPI.setTimeout(function() {
       showBlankScreen();
-    }, trial.timing_first_stim));
+    }, trial.timing_first_stim);
 
 
     function showBlankScreen() {
 
       $('#jspsych-sim-stim').css('visibility', 'hidden');
 
-      trial.setTimeoutHandlers.push(setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         showSecondStim();
-      }, trial.timing_image_gap));
+      }, trial.timing_image_gap);
     }
 
     function showSecondStim() {
@@ -97,12 +167,12 @@ jsPsych.plugins.similarity = (function() {
       }
 
       if (trial.timing_second_stim > 0) {
-        trial.setTimeoutHandlers.push(setTimeout(function() {
+        jsPsych.pluginAPI.setTimeout(function() {
           $("#jspsych-sim-stim").css('visibility', 'hidden');
           if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
           }
-        }, trial.timing_second_stim));
+        }, trial.timing_second_stim);
       }
     }
 
@@ -195,9 +265,7 @@ jsPsych.plugins.similarity = (function() {
         var response_time = endTime - startTime;
 
         // kill any remaining setTimeout handlers
-        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
-          clearTimeout(trial.setTimeoutHandlers[i]);
-        }
+        jsPsych.pluginAPI.clearAllTimeouts();
 
         var score = $("#slider").slider("value");
         var trial_data = {
