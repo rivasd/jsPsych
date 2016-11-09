@@ -13,7 +13,58 @@ jsPsych.plugins["single-stim"] = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('single-stim', 'stimulus', 'image');
+  jsPsych.pluginAPI.registerPreload('single-stim', 'stimulus', 'image', function(t){ return !t.is_html || t.is_html == 'undefined'});
+
+  plugin.info = {
+    name: 'single-stim',
+    description: '',
+    parameters: {
+      stimulus: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      is_html: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      choices: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        array: true,
+        default: jsPsych.ALL_KEYS,
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      },
+      timing_stim: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      timing_response: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      response_ends_trial: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: true,
+        no_function: false,
+        description: ''
+      },
+
+    }
+  }
 
   plugin.trial = function(display_element, trial) {
 
@@ -23,16 +74,12 @@ jsPsych.plugins["single-stim"] = (function() {
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // set default values for the parameters
-    trial.choices = trial.choices || [];
+    trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.response_ends_trial = (typeof trial.response_ends_trial == 'undefined') ? true : trial.response_ends_trial;
     trial.timing_stim = trial.timing_stim || -1;
     trial.timing_response = trial.timing_response || -1;
     trial.is_html = (typeof trial.is_html == 'undefined') ? false : trial.is_html;
     trial.prompt = trial.prompt || "";
-
-    // this array holds handlers from setTimeout calls
-    // that need to be cleared if the trial ends early
-    var setTimeoutHandlers = [];
 
     // display stimulus
     if (!trial.is_html) {
@@ -62,9 +109,7 @@ jsPsych.plugins["single-stim"] = (function() {
     var end_trial = function() {
 
       // kill any remaining setTimeout handlers
-      for (var i = 0; i < setTimeoutHandlers.length; i++) {
-        clearTimeout(setTimeoutHandlers[i]);
-      }
+      jsPsych.pluginAPI.clearAllTimeouts();
 
       // kill keyboard listeners
       if (typeof keyboardListener !== 'undefined') {
@@ -77,8 +122,6 @@ jsPsych.plugins["single-stim"] = (function() {
         "stimulus": trial.stimulus,
         "key_press": response.key
       };
-
-      //jsPsych.data.write(trial_data);
 
       // clear the display
       display_element.html('');
@@ -105,7 +148,7 @@ jsPsych.plugins["single-stim"] = (function() {
     };
 
     // start the response listener
-    if (JSON.stringify(trial.choices) != JSON.stringify(["none"])) {
+    if (trial.choices != jsPsych.NO_KEYS) {
       var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
         callback_function: after_response,
         valid_responses: trial.choices,
@@ -117,18 +160,16 @@ jsPsych.plugins["single-stim"] = (function() {
 
     // hide image if timing is set
     if (trial.timing_stim > 0) {
-      var t1 = setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         $('#jspsych-single-stim-stimulus').css('visibility', 'hidden');
       }, trial.timing_stim);
-      setTimeoutHandlers.push(t1);
     }
 
     // end trial if time limit is set
     if (trial.timing_response > 0) {
-      var t2 = setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         end_trial();
       }, trial.timing_response);
-      setTimeoutHandlers.push(t2);
     }
 
   };

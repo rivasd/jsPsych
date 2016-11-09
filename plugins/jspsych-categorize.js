@@ -10,7 +10,105 @@ jsPsych.plugins.categorize = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('animation', 'stimulus', 'image');
+  jsPsych.pluginAPI.registerPreload('categorize', 'stimulus', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
+
+  plugin.info = {
+    name: 'categorize',
+    description: '',
+    parameters: {
+      stimulus: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      is_html: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      key_answer: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      choices: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        default: jsPsych.ALL_KEYS,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      text_answer: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      },
+      correct_text: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: 'Correct.',
+        no_function: false,
+        description: ''
+      },
+      incorrect_text: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: 'Wrong.',
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      },
+      force_correct_button_press: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      show_stim_with_feedback: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: true,
+        no_function: false,
+        description: ''
+      },
+      show_feedback_on_timeout: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      timeout_message: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: 'Please respond faster.',
+        no_function: false,
+        description: ''
+      },
+      timing_stim: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      timing_response: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      timing_feedback_duration: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 2000,
+        no_function: false,
+        description: ''
+      }
+    }
+  }
   
   plugin.getTrigger = function(trial){
 	  if(trial.is_practice){
@@ -30,6 +128,7 @@ jsPsych.plugins.categorize = (function() {
   plugin.trial = function(display_element, trial) {
 
     // default parameters
+    trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.text_answer = (typeof trial.text_answer === 'undefined') ? "" : trial.text_answer;
     trial.correct_text = (typeof trial.correct_text === 'undefined') ? "<p class='feedback'>Correct</p>" : trial.correct_text;
     trial.incorrect_text = (typeof trial.incorrect_text === 'undefined') ? "<p class='feedback'>Incorrect</p>" : trial.incorrect_text;
@@ -84,9 +183,9 @@ jsPsych.plugins.categorize = (function() {
 
     // hide image after time if the timing parameter is set
     if (trial.timing_stim > 0) {
-      setTimeoutHandlers.push(setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
-      }, trial.timing_stim));
+      }, trial.timing_stim);
     };
 
     // if prompt is set, show prompt
@@ -100,9 +199,7 @@ jsPsych.plugins.categorize = (function() {
     var after_response = function(info) {
 
       // kill any remaining setTimeout handlers
-      for (var i = 0; i < setTimeoutHandlers.length; i++) {
-        clearTimeout(setTimeoutHandlers[i]);
-      };
+      jsPsych.pluginAPI.clearAllTimeouts();
 
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
@@ -155,12 +252,12 @@ jsPsych.plugins.categorize = (function() {
     });
 
     if (trial.timing_response > 0) {
-      setTimeoutHandlers.push(setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         after_response({
           key: -1,
           rt: -1
         });
-      }, trial.timing_response));
+      }, trial.timing_response);
     }
 
     function doFeedback(correct, timeout) {
@@ -176,7 +273,6 @@ jsPsych.plugins.categorize = (function() {
             	payload: correct ? 10 : 20
             });
         }
-        
         
       } else {
         // show image during feedback if flag is set
@@ -224,7 +320,7 @@ jsPsych.plugins.categorize = (function() {
         });
 
       } else {
-        setTimeout(function() {
+        jsPsych.pluginAPI.setTimeout(function() {
           endTrial();
         }, trial.timing_feedback_duration);
       }

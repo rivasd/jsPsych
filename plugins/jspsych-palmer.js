@@ -20,6 +20,55 @@ jsPsych.plugins.palmer = (function() {
 
   var plugin = {};
 
+  plugin.info = {
+    name: 'palmer',
+    description: '',
+    parameters: {
+      configuration: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: undefined,
+        array: true,
+        no_function: false,
+        description: ''
+      },
+      show_feedback: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: false,
+        no_function: false,
+        description: ''
+      },
+      grid_spacing: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 75,
+        no_function: false,
+        description: ''
+      },
+      circle_radius: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 20,
+        no_function: false,
+        description: ''
+      },
+      square_size: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 3,
+        no_function: false,
+        description: ''
+      },
+      timing_feedback: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 1000,
+        no_function: false,
+        description: ''
+      },
+      prompt: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: ''
+      }
+    }
+  }
 
   plugin.trial = function(display_element, trial) {
 
@@ -197,7 +246,7 @@ jsPsych.plugins.palmer = (function() {
     // start recording the time
     var startTime = (new Date()).getTime();
 
-    display_element.append($('<button id="jspsych-palmer-submitButton" class="jspsych-btn" type="button">Submit Answer</button>'));
+    display_element.append($('<p><button id="jspsych-palmer-submitButton" class="jspsych-btn" type="button">Submit Answer</button></p>'));
     $('#jspsych-palmer-submitButton').click(function() {
       save_data();
     });
@@ -257,7 +306,7 @@ jsPsych.plugins.palmer = (function() {
         }
         display_element.append($.parseHTML("<p id='jspsych-palmer-feedback'>" + feedback + "</p>"));
 
-        setTimeout(function() {
+        jsPsych.pluginAPI.setTimeout(function() {
           next_trial();
         }, trial.timing_feedback);
 
@@ -286,7 +335,7 @@ jsPsych.plugins.palmer = (function() {
     var size = grid_spacing * (square_size + 1);
 
     // create a div to hold the generated svg object
-    var stim_div = $('body').append($('<div id="jspsych-palmer-container">'));
+    var stim_div = $('html').append($('<div id="jspsych-palmer-container">'));
 
     $('#jspsych-palmer-container').append('<svg id="jspsych-palmer-temp-stim" width="' + size + '" height="' + size + '"></svg>');
 

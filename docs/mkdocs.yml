@@ -15,13 +15,16 @@ pages:
 - Tutorials:
   - 'The Basics: Hello World': 'tutorials/hello-world.md'
   - 'Demo Experiment: Simple Reaction Time Task': 'tutorials/rt-task.md'
+  - 'Flanker Task': 'tutorials/flanker.md'
 - Features:
   - 'Creating an Experiment: The Timeline': 'features/timeline.md'
   - 'Data Storage': 'features/data.md'
   - 'Dynamic Content:  Using Functions as Plugin Parameters': 'features/functions-as-parameters.md'
   - 'Event-related Callback Functions': 'features/callbacks.md'
+  - 'Record Browser Interactions': 'features/record-browser-interactions.md'
   - 'Media Preloading': 'features/media-preloading.md'
   - 'Fullscreen Experiments': 'features/fullscreen.md'
+  - 'Exclude Participants Based on Browser Features': 'features/exclude-browser.md'
   - 'Automatic Progress Bar': 'features/progress-bar.md'
   - 'Integrating with Mechanical Turk': 'features/mturk.md'
 - Core Library API:

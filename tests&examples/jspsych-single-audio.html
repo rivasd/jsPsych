@@ -6,9 +6,7 @@
     <script src="../plugins/jspsych-single-audio.js"></script>
     <link rel="stylesheet" href="../css/jspsych.css"></link>
   </head>
-  <body>
-    <div id="jspsych-target"></div>
-  </body>
+
   <script>
 
   /*
@@ -22,11 +20,11 @@
     timeline: [
       {stimulus: 'sound/sound.mp3'},
       {stimulus: 'sound/hammer.mp3'}
-    ]
+    ],
+    prompt: 'press any key to advance'
   }
 
   jsPsych.init({
-    display_element: $('#jspsych-target'),
     timeline: [block_1],
     on_finish: function() {jsPsych.data.displayData();}
   });
