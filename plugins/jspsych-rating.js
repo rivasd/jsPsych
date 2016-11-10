@@ -3,7 +3,7 @@ jsPsych.plugins["rating"] = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('single-stim', 'stimulus', 'image');
+  jsPsych.pluginAPI.registerPreload('rating', 'stimuli', 'image');
   
   //div that will contain all UI elements involved in getting a response from a subject. Useful to cache and quickly hide those elements
   plugin.response_element = $("<div>", {'class': 'jspsych-response', 'id': 'jspsych-rating-response'});
