@@ -31,7 +31,7 @@ jsPsych.plugins["rating"] = (function() {
 		 'margin': 'none'
 	  });
 	  
-	  trial.ratings.forEach(function(elt){
+	  trial.choices.forEach(function(elt){
 		  var option = $("<li>", {'class': 'jspsych-choice-item'});
 		  option.css({
 			  'display': 'inline-block',
