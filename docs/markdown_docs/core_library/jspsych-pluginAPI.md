@@ -91,6 +91,28 @@ var listener_id = jsPsych.pluginAPI.getKeyboardResponse(after_response, ['p','q'
 // cancel keyboard listener
 jsPsych.pluginAPI.cancelKeyboardResponse(listener_id);
 ```
+
+---
+## jsPsych.pluginAPI.clearAllTimeouts
+
+```
+jsPsych.pluginAPI.clearAllTimeouts()
+```
+
+### Parameters
+
+None.
+
+### Return value
+
+Returns nothing.
+
+### Description
+
+Clears any pending timeouts that were set using jsPsych.pluginAPI.setTimeout()
+
+
+
 ---
 ## jsPsych.pluginAPI.convertKeyCharacterToKeyCode
 
@@ -292,7 +314,7 @@ The `callback_load` function can be used to indicate progress. See example below
 
 var sounds = ['file1.mp3', 'file2.mp3', 'file3.mp3'];
 
-jsPsych.preloadAudioFiles(sounds, function(){ startExperiment(); });
+jsPsych.pluginAPI.preloadAudioFiles(sounds, function(){ startExperiment(); });
 
 function startExperiment(){
     jsPsych.init({
@@ -307,7 +329,7 @@ function startExperiment(){
 ```javascript
 var sounds = ['file1.mp3', 'file2.mp3', 'file3.mp3'];
 
-jsPsych.preloadAudioFiles(sounds, function(){ startExperiment(); }, function(nLoaded) { updateLoadedCount(nLoaded); });
+jsPsych.pluginAPI.preloadAudioFiles(sounds, function(){ startExperiment(); }, function(nLoaded) { updateLoadedCount(nLoaded); });
 
 function updateLoadedCount(nLoaded){
 	var percentcomplete = nLoaded / sounds.length * 100;
@@ -359,7 +381,7 @@ The `callback_load` function can be used to indicate progress, if the number of 
 
 var images = ['img/file1.png', 'img/file2.png', 'img/file3.png'];
 
-jsPsych.preloadImages(images, function(){ startExperiment(); });
+jsPsych.pluginAPI.preloadImages(images, function(){ startExperiment(); });
 
 function startExperiment(){
     jsPsych.init({
@@ -374,7 +396,7 @@ function startExperiment(){
 ```javascript
 var images = ['img/file1.png', 'img/file2.png', 'img/file3.png'];
 
-jsPsych.preloadImages(images, function(){ startExperiment(); }, function(nLoaded) { updateLoadedCount(nLoaded); });
+jsPsych.pluginAPI.preloadImages(images, function(){ startExperiment(); }, function(nLoaded) { updateLoadedCount(nLoaded); });
 
 function updateLoadedCount(nLoaded){
 	var percentcomplete = nLoaded / images.length * 100;
@@ -395,7 +417,7 @@ function startExperiment(){
 ## jsPsych.pluginAPI.registerPreload
 
 ```
-jsPsych.pluginAPI.registerPreload(plugin_name, parameter, media_type)
+jsPsych.pluginAPI.registerPreload(plugin_name, parameter, media_type, conditional_function)
 ```
 
 ### Parameters
@@ -405,6 +427,7 @@ Parameter | Type | Description
 plugin_name | string | The name of the plugin. e.g., 'single-stim'.
 parameter | string | The name of the parameter that is a media file. e.g., 'stimulus'
 media_type | string | The type of media, either 'image' or 'audio'.
+conditional_function | function | Only run the preload for a trial if this function returns true, or if this function does not exist.
 
 ### Return value
 
@@ -414,6 +437,42 @@ Nothing.
 
 Use this method in a plugin file to mark a parameter as containing an element that should be preloaded. The method should be called in the plugin file such that it gets called when the file is loaded.
 
+The `conditional_function` function is passed a single argument containing the trial object.
+
 ### Example
 
 For an example, see the [single-stim](https://github.com/jodeleeuw/jsPsych/blob/master/plugins/jspsych-single-stim.js) and [single-audio](https://github.com/jodeleeuw/jsPsych/blob/master/plugins/jspsych-single-audio.js) plugins.
+
+---
+## jsPsych.pluginAPI.setTimeout
+
+```
+jsPsych.pluginAPI.setTimeout(callback, delay)
+```
+
+### Parameters
+
+Parameter | Type | Description
+----------|------|------------
+callback | function | A function to execute after waiting for delay.
+delay | integer | Time to wait in milliseconds.
+
+### Return value
+
+Returns the ID of the setTimeout handle.
+
+### Description
+
+This is simply a call to the standard setTimeout function in JavaScript with the added benefit of registering the setTimeout call in a central list. This is useful for scenarios where some other event (the trial ending, aborting the experiment) should stop the execution of queued timeouts.
+
+### Examples
+
+```javascript
+// print the time
+console.log(Date.now())
+
+// print the time 1s later
+jsPsych.pluginAPI.setTimeout(function(){
+	console.log(Date.now())
+}, 1000);
+```

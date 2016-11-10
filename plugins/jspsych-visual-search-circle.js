@@ -22,28 +22,86 @@ jsPsych.plugins["visual-search-circle"] = (function() {
   jsPsych.pluginAPI.registerPreload('visual-search-circle', 'foil', 'image');
   jsPsych.pluginAPI.registerPreload('visual-search-circle', 'fixation_image', 'image');
 
-  plugin.create = function(params) {
-
-    var trials = new Array(params.target_present.length);
-
-    for (var i = 0; i < trials.length; i++) {
-      trials[i] = {};
-      trials[i].target_present = params.target_present[i];
-      trials[i].set_size = params.set_size[i];
-      trials[i].target = params.target;
-      trials[i].foil = params.foil;
-      trials[i].fixation_image = params.fixation_image;
-      trials[i].target_size = params.target_size || [50, 50];
-      trials[i].fixation_size = params.fixation_size || [16, 16];
-      trials[i].circle_diameter = params.circle_diameter || 250;
-      trials[i].target_present_key = params.target_present_key || 74;
-      trials[i].target_absent_key = params.target_absent_key || 70;
-      trials[i].timing_max_search = (typeof params.timing_max_search === 'undefined') ? -1 : params.timing_max_search;
-      trials[i].timing_fixation = (typeof params.timing_fixation === 'undefined') ? 1000 : params.timing_fixation;
+  plugin.info = {
+    name: 'visual-search-circle',
+    description: '',
+    parameters: {
+      target: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      foil: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      fixation_image: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      set_size: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: undefined,
+        no_function: false,
+        description: ''
+      },
+      target_present: {
+        type: [jsPsych.plugins.parameterType.BOOL],
+        default: true,
+        no_function: false,
+        description: ''
+      },
+      target_size: {
+        type: [jsPsych.plugins.parameterType.INT],
+        array: true,
+        default: 50,
+        no_function: false,
+        description: ''
+      },
+      fixation_size: {
+        type: [jsPsych.plugins.parameterType.INT],
+        array: true,
+        default: 16,
+        no_function: false,
+        description: ''
+      },
+      circle_diameter: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 250,
+        no_function: false,
+        description: ''
+      },
+      target_present_key: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        default: 'j',
+        no_function: false,
+        description: ''
+      },
+      target_absent_key: {
+        type: [jsPsych.plugins.parameterType.KEYCODE],
+        default: 'f',
+        no_function: false,
+        description: ''
+      },
+      timing_max_search: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: -1,
+        no_function: false,
+        description: ''
+      },
+      timing_fixation: {
+        type: [jsPsych.plugins.parameterType.INT],
+        default: 1000,
+        no_function: false,
+        description: ''
+      }
     }
-
-    return trials;
-  };
+  }
 
   plugin.trial = function(display_element, trial) {
 
@@ -93,6 +151,15 @@ jsPsych.plugins["visual-search-circle"] = (function() {
     display_element.append($('<svg id="jspsych-visual-search-circle-svg" width=' + paper_size + ' height=' + paper_size + '></svg>'));
     var paper = Snap('#jspsych-visual-search-circle-svg');
 
+    // check distractors - array?
+    if(!Array.isArray(trial.foil)){
+      fa = [];
+      for(var i=0; i<trial.set_size; i++){
+        fa.push(trial.foil);
+      }
+      trial.foil = fa;
+    }
+
     show_fixation();
 
     function show_fixation() {
@@ -100,7 +167,7 @@ jsPsych.plugins["visual-search-circle"] = (function() {
       var fixation = paper.image(trial.fixation_image, fix_loc[0], fix_loc[1], trial.fixation_size[0], trial.fixation_size[1]);
 
       // wait
-      setTimeout(function() {
+      jsPsych.pluginAPI.setTimeout(function() {
         // after wait is over
         show_search_array();
       }, trial.timing_fixation);
@@ -110,11 +177,15 @@ jsPsych.plugins["visual-search-circle"] = (function() {
 
       var search_array_images = [];
 
+      var to_present = [];
+      if(trial.target_present){
+        to_present.push(trial.target);
+      }
+      to_present = to_present.concat(trial.foil);
+
       for (var i = 0; i < display_locs.length; i++) {
 
-        var which_image = (i == 0 && trial.target_present) ? trial.target : trial.foil;
-
-        var img = paper.image(which_image, display_locs[i][0], display_locs[i][1], trial.target_size[0], trial.target_size[1]);
+        var img = paper.image(to_present[i], display_locs[i][0], display_locs[i][1], trial.target_size[0], trial.target_size[1]);
 
         search_array_images.push(img);
 
@@ -168,7 +239,7 @@ jsPsych.plugins["visual-search-circle"] = (function() {
           }
         } else {
 
-          setTimeout(function() {
+          jsPsych.pluginAPI.setTimeout(function() {
 
             if (!trial_over) {
 

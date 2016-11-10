@@ -246,8 +246,7 @@ timeline.push(blue_trial, orange_trial);
           "<p class='small'><strong>Press the F key</strong></p></div>" +
           "<div class='right center-content'><img src='img/orange.png'></img>" +
           "<p class='small'><strong>Do not press a key</strong></p></div>" +
-          "<p>Press any key to begin.</p>",
-      timing_post_trial: 2000
+          "<p>Press any key to begin.</p>"
     };
 
     /* define test trials */
@@ -387,7 +386,7 @@ We need the `displayData` function to execute when the experiment ends. One way 
 
 ```javascript
 jsPsych.init({
-  experiment_structure: experiment,
+  timeline: timeline,
   on_finish: function() {
     jsPsych.data.displayData();
   }
@@ -476,12 +475,12 @@ var test_block = {
 
 We've got a reasonable experiment at this point. One thing that subjects might appreciate is knowing how well they performed at the end of the experiment. We will create a simple debriefing screen at the end of the experiment that shows the subject their accuracy and average response time on correct responses.
 
-First, we need a function to compute the subject's accuracy and mean RT. We will use the `jsPsych.data.getTrialsOfType()` method to get the data from all the trials run by the single-stim plugin. Then we will iterate through that data to compute the desired measures.
+First, we need a function to compute the subject's accuracy and mean RT. We will use the `jsPsych.data.getData()` method to get the data from all the trials run by the single-stim plugin. Then we will iterate through that data to compute the desired measures.
 
 ```javascript
 function getSubjectData() {
 
-  var trials = jsPsych.data.getTrialsOfType('single-stim');
+  var trials = jsPsych.data.getData({trial_type:'single-stim'});
 
   var sum_rt = 0;
   var correct_trial_count = 0;
@@ -520,7 +519,7 @@ var debrief_block = {
 We need to add the debrief block to the experiment definition array.
 
 ```javascript
-experiment.push(debrief_block);
+timeline.push(debrief_block);
 ```
 
 ## The final code
@@ -602,7 +601,7 @@ experiment.push(debrief_block);
 
   function getSubjectData() {
 
-    var trials = jsPsych.data.getTrialsOfType('single-stim');
+    var trials = jsPsych.data.getData({trial_type: 'single-stim'});
 
     var sum_rt = 0;
     var correct_trial_count = 0;
