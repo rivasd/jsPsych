@@ -146,7 +146,7 @@ jsPsych.plugins["rating"] = (function() {
 	   
 	   // goto next trial in block
 	   plugin.response_element.hide();
-	   $("#jspsych-single-stim-stimulus").remove();
+	   $("#jspsych-rating-stimulus").remove();
 	   if(plugin.prompt) plugin.prompt.remove();
 	   plugin.stim.remove();
 	   
@@ -200,7 +200,7 @@ jsPsych.plugins["rating"] = (function() {
     
     //Show the stimulus
     if (!trial.is_html) {
-    	plugin.stim = $('<img>', {src: trial.stimulus, 'class': 'jspsych-single-stim-stimulus'});
+    	plugin.stim = $('<img>', {src: trial.stimulus, 'class': 'jspsych-rating-stimulus', 'id':'jspsych-rating-stimulus'});
     	display_element.prepend(plugin.stim);
 	} 
     else {
