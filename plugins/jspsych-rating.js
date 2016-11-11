@@ -212,7 +212,7 @@ jsPsych.plugins["rating"] = (function() {
     else {
     	plugin.stim = $('<div>', {
 	        html: trial.stimulus,
-	        'class': 'jspsych-single-stim-stimulus'
+	        'class': 'jspsych-rating-stimulus'
 	      });
     	display_element.prepend(plugin.stim);
 	}
