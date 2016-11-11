@@ -97,7 +97,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
         			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
         		}
         		else{
-        			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
+        			stimImage = $(elt).addClass('jspsych-forcedchoice-stim');
         		}
         		var stimKeyLabel = $("<span>");
         		
@@ -147,7 +147,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
         			stimImage = $("<img>", {'src':elt, 'class': 'jspsych-forcedchoice-stim'});
         		}
         		else{
-        			stimImage = $(elt).addClass('jspsych-forced-choice-stim');
+        			stimImage = $(elt).addClass('jspsych-forcedchoice-stim');
         		}
         		
         		
