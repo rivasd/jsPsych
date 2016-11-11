@@ -35,7 +35,10 @@ jsPsych.plugins["rating"] = (function() {
 		  var option = $("<li>", {'class': 'jspsych-choice-item'});
 		  option.css({
 			  'display': 'inline-block',
-			  'cursor': 'pointer',			
+			  'cursor': 'pointer',
+			  'border': 'solid black',
+			  'margin': '10px',
+			  'padding': '5px'
 		  });
 		  option.text(elt);
 		  plugin.choices.append(option);
