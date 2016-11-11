@@ -165,8 +165,6 @@ jsPsych.plugins["forcedchoice"] = (function() {
         		stimImage.css("cursor", "pointer");
         		choices.push(stimImage);
         	});
-    		
-    		
     	}
     	
     	plugin.showRow(display_element, choices, sending_data);
