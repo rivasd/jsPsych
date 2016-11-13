@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="js/jquery.min.js"></script>
+    <script src="../jspsych.js"></script>
+    <script src="../plugins/jspsych-audio-categorization.js"></script>
+    <link rel="stylesheet" href="../css/jspsych.css"></link>
+  </head>
+
+  <script>
+
+  /*
+  this demo will only work if run online or with special permissions enable offline
+  for chrome, launch the browser from the command-line:
+  chrome --allow-file-access-from-files
+  */
+  
+  var stimuliList = [['sound/sound.mp3','h'],['sound/hammer.mp3', 'g']]
+
+  var block_1 = {
+    type: 'audio-categorize',
+    timeline: [
+      {stimulus: stimuliList[0][0], key_answer: stimuliList[0][1]},
+      {stimulus: stimuliList[1][0], key_answer: stimuliList[1][1]}
+    ],
+    prompt: 'press g if the sound is made by a tool, press h for any other type of sound.',
+    choices: ['g','h']
+  }
+
+  jsPsych.init({
+    timeline: [block_1],
+    on_finish: function() {jsPsych.data.displayData();}
+  });
+
+  </script>
+</html>
