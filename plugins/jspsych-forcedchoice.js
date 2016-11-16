@@ -47,6 +47,8 @@ jsPsych.plugins["forcedchoice"] = (function() {
 	  data.rt = Date.now() - data.startTime; 
 	  delete data.startTime;
 	  data.chosen = trial.stimuli[data.chosen_idx];
+	  data.first = trial.stimuli[0];
+	  data.last = trial.stimuli[stimuli.length-1];
 	  
 	  jsPsych.finishTrial(data);
   };
