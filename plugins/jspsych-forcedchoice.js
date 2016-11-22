@@ -76,7 +76,7 @@ jsPsych.plugins["forcedchoice"] = (function() {
     plugin.showFixation(display_element);
     setTimeoutHandlers.push(setTimeout(function(){
     	display_element.empty();
-    	display_element.append($("<span>" + trial.prompt + "</span>", {'class': "jspsych-prompt"}));
+    	display_element.append($('<span class="jspsych-prompt">' + trial.prompt + "</span>"));
     	
     	var choices = [];
     	var sending_data = {};

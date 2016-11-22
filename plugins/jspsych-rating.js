@@ -208,7 +208,11 @@ jsPsych.plugins["rating"] = (function() {
     trial.setTimeoutHandlers = [];
     
     // were gonna user flexbox for this kind of trial
-    display_element.css('display', 'flex');
+    display_element.css({
+    	display: 'flex',
+    	'flex-direction': 'column',
+    	'justify-content': 'center'
+    });
     
     
     //Show the stimulus
