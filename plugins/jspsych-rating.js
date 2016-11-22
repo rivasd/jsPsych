@@ -170,10 +170,13 @@ jsPsych.plugins["rating"] = (function() {
 		   	display_element.append(trial.timeout_message);
 		   	trial.setTimeoutHandlers.push(setTimeout(function(){
 		   		//display_element.empty();
+		   		//remove flexbox
+		   		display_element.css('display', 'auto');
 		   		jsPsych.finishTrial(data);
 		   	},trial.timeout_message_timing))
 	   }
 	   else{
+		   display_element.css('display', 'auto');
 		   jsPsych.finishTrial(data);
 	   }
     };
@@ -203,6 +206,10 @@ jsPsych.plugins["rating"] = (function() {
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
+    
+    // were gonna user flexbox for this kind of trial
+    display_element.css('display', 'flex');
+    
     
     //Show the stimulus
     if (!trial.is_html) {
