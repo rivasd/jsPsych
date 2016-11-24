@@ -6,11 +6,13 @@
  *
  **/
 
-jsPsych.plugins["single-audio"] = (function() {
+jsPsych.plugins["audio-categorization"] = (function() {
 
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('audio-categorization', 'stimulus', 'audio');
+  
+  
 
   plugin.trial = function(display_element, trial) {
 
@@ -20,13 +22,14 @@ jsPsych.plugins["single-audio"] = (function() {
     trial.trial_ends_after_audio = (typeof trial.trial_ends_after_audio === 'undefined') ? false : trial.trial_ends_after_audio;
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
-    trial.key_answer = convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
+    trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
 
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    
 
     // play stimulus
     var context = jsPsych.pluginAPI.audioContext();
