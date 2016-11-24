@@ -10,7 +10,7 @@ jsPsych.plugins["single-audio"] = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('audio-categorize', 'stimulus', 'audio');
+  jsPsych.pluginAPI.registerPreload('audio-categorization', 'stimulus', 'audio');
 
   plugin.trial = function(display_element, trial) {
 
