@@ -36,12 +36,6 @@ jsPsych.plugins["single-audio"] = (function() {
     startTime = context.currentTime + 0.1;
     source.start(startTime);
 
-    // set up end event if trial needs it
-    if(trial.trial_ends_after_audio){
-      source.onended = function() {
-        end_trial();
-      }
-    }
 
     // show prompt if there is one
     if (trial.prompt !== "") {
