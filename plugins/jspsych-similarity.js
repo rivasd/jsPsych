@@ -130,6 +130,7 @@ jsPsych.plugins.similarity = (function() {
     trial.timeout_message_timing = trial.timeout_message_timing || 1000;
     
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
+    trial.is_audio = (typeof trial.is_audio === 'undefined') ? false : trial.is_audio;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
     
     // if any trial variables are functions
@@ -181,15 +182,49 @@ jsPsych.plugins.similarity = (function() {
         $paragraph.addClass('jspsych-genstim');
     }
     
-    
-    showFixationCross();
-    
-    setTimeout(function(){
-    	display_element.empty();
-    	showFirstImage();  	
-    }, trial.timing_fixation_cross);
-   
-    
+    if(!trial.is_audio){
+    	showFixationCross();
+    	setTimeout(function(){
+        	display_element.empty();
+        	showFirstImage();  	
+        }, trial.timing_fixation_cross);
+    }
+    else{
+    	jsPsych.pluginAPI.registerPreload('similarity', 'stimulus', 'audio');
+    	playSound(0);
+    	if(trial.timing_first_stim > 0){
+	    	setTimeout(function(){    		
+	    		source.stop();
+	        	playSound(1);
+	        	if(trial.timing_second_stim > 0){
+		        	setTimeout(function(){
+		        		source.stop();
+		        		show_response_slider(display_element, trial);
+		            }, trial.timing_second_stim);
+	        	}
+	        	else{
+	        		
+	        	}
+	        }, trial.timing_first_stim);
+    	}
+    	else{
+    		source.onended = function(){
+    			playSound(1);
+    			if(trial.timing_second_stim > 0){
+    				setTimeout(function(){
+    					source.stop();
+		        		show_response_slider(display_element, trial);
+		            }, trial.timing_second_stim);
+    			}
+    			else{
+    				source.onended = function(){
+    					show_response_slider(display_element, trial);
+    				} 				
+    			}
+    		}
+    	}
+    }
+       
     function showFirstImage(){
     // show the images
 	    if (!trial.is_html) {
@@ -222,6 +257,15 @@ jsPsych.plugins.similarity = (function() {
 	    trial.setTimeoutHandlers.push(setTimeout(function() {
 	      showBlankScreen();
 	    }, trial.timing_first_stim));
+    }
+    
+    function playSound(soundOrder){
+    	var context = jsPsych.pluginAPI.audioContext();
+	    var source = context.createBufferSource();
+	    source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimuli[soundOrder]);
+	    source.connect(context.destination);
+	    startTime = context.currentTime + 0.1;
+	    source.start(startTime);
     }
 
     function showBlankScreen() {
