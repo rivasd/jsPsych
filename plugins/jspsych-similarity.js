@@ -144,6 +144,9 @@ jsPsych.plugins.similarity = (function() {
     //find out the right triggers to send
     var trigs = plugin.getTriggers(trial);
     
+    var context;
+    var source;
+    
     /**
      * Let's try out my idea of normalizing trial logic as trial methods
      * the action that happens when a trial is run should all be encapsulated inside methods of the trial object
@@ -260,8 +263,8 @@ jsPsych.plugins.similarity = (function() {
     }
     
     function playSound(soundOrder){
-    	var context = jsPsych.pluginAPI.audioContext();
-	    var source = context.createBufferSource();
+    	context = jsPsych.pluginAPI.audioContext();
+	    source = context.createBufferSource();
 	    source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimuli[soundOrder]);
 	    source.connect(context.destination);
 	    startTime = context.currentTime + 0.1;
