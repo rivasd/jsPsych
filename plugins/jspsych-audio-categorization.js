@@ -10,7 +10,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
   var plugin = {};
 
-  jsPsych.pluginAPI.registerPreload('audio-categorization', 'stimulus', 'audio');
+  jsPsych.pluginAPI.registerPreload('audio-categorization', 'stimulus[0]', 'audio');
   
   
 
