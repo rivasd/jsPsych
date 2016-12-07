@@ -22,7 +22,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     trial.trial_ends_after_audio = (typeof trial.trial_ends_after_audio === 'undefined') ? false : trial.trial_ends_after_audio;
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
-    trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
+    trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.stimulus[1]) || convertKeyCharacterToKeyCode('f'); // key associated to the category
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
 
     // if any trial variables are functions
@@ -34,7 +34,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // play stimulus
     var context = jsPsych.pluginAPI.audioContext();
     var source = context.createBufferSource();
-    source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
+    source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus[0]);
     source.connect(context.destination);
     startTime = context.currentTime + 0.1;
     source.start(startTime);
@@ -66,7 +66,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
       // gather the data to store for the trial
       var trial_data = {
         "rt": response.rt * 1000,
-        "stimulus": trial.stimulus,
+        "stimulus": trial.stimulus[0],
         "key_press": response.key
       };
 
