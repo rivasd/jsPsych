@@ -118,7 +118,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  $timeoutFeedback.text(trial.timeout_feedback);
     	  display_element.append($timeoutFeedback);
     	  
-        end_trial();
+    	  jsPsych.pluginAPI.setTimeout(function() {
+        	  end_trial();
+          }, trial.timing_feedback); 
+    	  
       }, trial.timing_response);
     }
 
