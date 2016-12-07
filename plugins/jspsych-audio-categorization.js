@@ -37,7 +37,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
     source.connect(context.destination);
-    var startTime = context.currentTime + 0.1;
+    var startTime = Date.now();
     source.start(startTime);
 
 
