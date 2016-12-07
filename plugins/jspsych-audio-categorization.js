@@ -37,8 +37,9 @@ jsPsych.plugins["audio-categorization"] = (function() {
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
     source.connect(context.destination);
-    var startTime = Date.now();
+    var startTime = context.currentTime + 0.1;
     source.start(startTime);
+    var rt_start_time = Date.now();
 
 
     // show prompt if there is one
@@ -81,7 +82,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
     // function to handle responses by the subject
     var after_response = function(info) {
-      prefetched_data.rt = Date.now() - startTime;
+      prefetched_data.rt = Date.now() - rt_start_time;
 
       // only record the first response
       if (response.key == -1) {
