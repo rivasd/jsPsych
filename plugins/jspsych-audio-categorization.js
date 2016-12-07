@@ -30,13 +30,14 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
+    var prefetched_data = {};
 
     // play stimulus
     var context = jsPsych.pluginAPI.audioContext();
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
     source.connect(context.destination);
-    startTime = context.currentTime + 0.1;
+    var startTime = context.currentTime + 0.1;
     source.start(startTime);
 
 
@@ -52,7 +53,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     };
 
     // function to end trial when it is time
-    var end_trial = function() {
+    var end_trial = function(prefetched_data) {
 
       // kill any remaining setTimeout handlers
       jsPsych.pluginAPI.clearAllTimeouts();
@@ -65,9 +66,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
       // gather the data to store for the trial
       var trial_data = {
-        "rt": response.rt * 1000,
+        "rt": prefetched_data.rt,
         "stimulus": trial.stimulus,
-        "key_press": response.key
+        "key_press": response.key,
+        "result": prefetched_data.result
       };
 
       // clear the display
@@ -79,6 +81,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
     // function to handle responses by the subject
     var after_response = function(info) {
+      prefetched_data.rt = Date.now() - startTime;
 
       // only record the first response
       if (response.key == -1) {
@@ -88,16 +91,18 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  var $correctFeedback = $('<p></p>', {id:'correctFeedback'});
     	  $correctFeedback.text(trial.correct_feedback);
     	  display_element.append($correctFeedback);
+    	  prefetched_data.result = 'correct';
       }
       else {
     	  if (info.key)
     	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
     	  $incorrectFeedback.text(trial.incorrect_feedback);
-    	  display_element.append($incorrectFeedback);  	  
+    	  display_element.append($incorrectFeedback);
+    	  prefetched_data.result = 'incorrect';
       }
       
       jsPsych.pluginAPI.setTimeout(function() {
-    	  end_trial();
+    	  end_trial(prefetched_data);
       }, trial.timing_feedback);   
     };
 
@@ -117,9 +122,11 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
     	  $timeoutFeedback.text(trial.timeout_feedback);
     	  display_element.append($timeoutFeedback);
+    	  prefetched_data.result = 'timeout';
+    	  prefetched_data.rt = -1;
     	  
     	  jsPsych.pluginAPI.setTimeout(function() {
-        	  end_trial();
+        	  end_trial(prefetched_data);
           }, trial.timing_feedback); 
     	  
       }, trial.timing_response);
