@@ -19,11 +19,11 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // default parameters
     trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.response_ends_trial = (typeof trial.response_ends_trial === 'undefined') ? true : trial.response_ends_trial;
-    trial.trial_ends_after_audio = (typeof trial.trial_ends_after_audio === 'undefined') ? false : trial.trial_ends_after_audio;
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
     trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
+    trial.timeout_feedback = trial.timeout_feedback || 'Answer faster!';
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -85,20 +85,20 @@ jsPsych.plugins["audio-categorization"] = (function() {
         response = info;
       }
       if (info.key == trial.key_answer){
-    	  var $correctFeedback = $('<p >Correct</p>', {id:'correctFeedback'});
+    	  var $correctFeedback = $('<p></p>', {id:'correctFeedback'});
+    	  $correctFeedback.text(trial.correct_feedback);
     	  display_element.append($correctFeedback);
       }
       else {
     	  if (info.key)
-    	  var $incorrectFeedback = $('<p>Incorrect</p>', {id:'incorrectFeedback'});   	  
-    	  display_element.append($incorrectFeedback);   	  
+    	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
+    	  $incorrectFeedback.text(trial.incorrect_feedback);
+    	  display_element.append($incorrectFeedback);  	  
       }
       
       jsPsych.pluginAPI.setTimeout(function() {
-    	  if (trial.response_ends_trial) {
-    	        end_trial();
-    	      }
-        }, trial.timing_feedback);   
+    	  end_trial();
+      }, trial.timing_feedback);   
     };
 
     // start the response listener
@@ -114,6 +114,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // end trial if time limit is set
     if (trial.timing_response > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
+    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
+    	  $timeoutFeedback.text(trial.timeout_feedback);
+    	  display_element.append($timeoutFeedback);
+    	  
         end_trial();
       }, trial.timing_response);
     }
