@@ -83,6 +83,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // function to handle responses by the subject
     var after_response = function(info) {
       prefetched_data.rt = Date.now() - rt_start_time;
+      jsPsych.pluginAPI.clearAllTimeouts();
 
       // only record the first response
       if (response.key == -1) {
