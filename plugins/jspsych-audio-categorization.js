@@ -120,6 +120,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // end trial if time limit is set
     if (trial.timing_response > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
+    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
     	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
     	  $timeoutFeedback.text(trial.timeout_feedback);
     	  display_element.append($timeoutFeedback);
