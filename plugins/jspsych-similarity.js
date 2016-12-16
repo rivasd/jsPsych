@@ -14,6 +14,7 @@ jsPsych.plugins.similarity = (function() {
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
+  jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'audio');
 
   plugin.info = {
     name: 'similarity',
@@ -193,7 +194,6 @@ jsPsych.plugins.similarity = (function() {
         }, trial.timing_fixation_cross);
     }
     else{
-    	jsPsych.pluginAPI.registerPreload('similarity', 'stimulus', 'audio');
     	playSound(0);
     	if(trial.timing_first_stim > 0){
 	    	setTimeout(function(){    		
