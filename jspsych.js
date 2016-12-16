@@ -1890,8 +1890,11 @@ jsPsych.pluginAPI = (function() {
           finishfn();
         }
       }
-      audio_buffers[bufferID] = 'tmp';
-      load_audio_file(bufferID);
+      else{
+    	  audio_buffers[bufferID] = 'tmp';
+          load_audio_file(bufferID);
+      }
+      
     }
 
   }
