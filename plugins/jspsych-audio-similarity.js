@@ -6,11 +6,11 @@
  *
  */
 
-jsPsych.plugins.similarity = (function() {
+jsPsych.plugins["audio-similarity"] = (function() {
 
 	  var plugin = {};
 	  
-	  jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'audio');
+	  jsPsych.pluginAPI.registerPreload('audio-similarity', 'stimuli', 'audio');
   
 	  plugin.trial = function(display_element, trial){
 	
