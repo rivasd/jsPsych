@@ -14,7 +14,7 @@ jsPsych.plugins.similarity = (function() {
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
-  jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'audio');
+  //jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'audio');
 
   plugin.info = {
     name: 'similarity',
