@@ -23,12 +23,74 @@ jsPsych.plugins["rating"] = (function() {
 	plugin.response_element.show();
   };
   
+  
+  plugin.createLabels = function(trial, display_element, response_bar){
+	  
+	// create labels for slider
+      plugin.response_element.append($('<ul>', {
+        "id": "sliderlabels",
+        "class": 'sliderlabels',
+        "css": {
+          "width": "100%",
+          "height": "3em",
+          "margin": "10px 0px 0px 0px",
+          "padding": "0px",
+          "display": "block",
+          "position": "relative"
+        }
+      }));
+
+      for (var j = 0; j < trial.labels.length; j++) {
+        $("#sliderlabels").append('<li>' + trial.labels[j] + '</li>');
+      }
+
+      // position labels to match slider intervals
+      var slider_width = response_bar.width();
+      var num_items = trial.labels.length;
+      var item_width = slider_width / num_items;
+      var spacing_interval = slider_width / (num_items - 1);
+
+      $("#sliderlabels li").each(function(index) {
+    	  //making sure the labels do not go outside the width of the response element by tweaking the first and last label
+    	   // - (item_width);
+    	  var padding=0;
+    	  
+    	  
+    	  
+    	  
+    	  
+    	var label = $(this);
+        label.css({
+          'display': 'inline-block',
+          //'width': item_width + 'px',
+          'margin': '0px',
+          'padding': '0px',
+          'text-align': 'center',
+          'position': 'absolute'
+        });
+        
+        var left = (spacing_interval * index) - (label.width()/2)
+        
+        if(index===0){
+          	left = left + (label.width());
+	  	}
+	  	else if(index === (trial.labels.length - 1)){
+	  		left = left - (label.width());
+	  	}
+        
+        label.css('left', left);
+        
+      });
+  }
+  
   plugin.response_boxes = function(display_element, trial){
 	  plugin.response_element.empty();
 	  plugin.choices = $("<ul>", {'class': 'jspsych-choice-list'});
 	  plugin.choices.css({
 		 'list-style': 'none',
-		 'margin': 'none'
+		 'margin': 'none',
+		 'display': 'flex',
+		 'justify-content': 'space-between'
 	  });
 	  
 	  trial.choices.forEach(function(elt){
@@ -40,15 +102,14 @@ jsPsych.plugins["rating"] = (function() {
 			  'margin': '10px',
 			  'padding': '5px',
 			  'width' : '20px',
-			  'height': '20px',
-			  'text-align': 'center'
+			  'height': '20px'
 		  });
 		  option.text(elt);
 		  plugin.choices.append(option);
 	  });
 	  
 	  plugin.response_element.append(plugin.choices);
-	  
+	  plugin.createLabels(trial, display_element, plugin.choices);
 	  
   };
   
@@ -89,41 +150,7 @@ jsPsych.plugins["rating"] = (function() {
         });
       }
 
-      // create labels for slider
-      plugin.response_element.append($('<ul>', {
-        "id": "sliderlabels",
-        "class": 'sliderlabels',
-        "css": {
-          "width": "100%",
-          "height": "3em",
-          "margin": "10px 0px 0px 0px",
-          "padding": "0px",
-          "display": "block",
-          "position": "relative"
-        }
-      }));
-
-      for (var j = 0; j < trial.labels.length; j++) {
-        $("#sliderlabels").append('<li>' + trial.labels[j] + '</li>');
-      }
-
-      // position labels to match slider intervals
-      var slider_width = $("#slider").width();
-      var num_items = trial.labels.length;
-      var item_width = slider_width / num_items;
-      var spacing_interval = slider_width / (num_items - 1);
-
-      $("#sliderlabels li").each(function(index) {
-        $(this).css({
-          'display': 'inline-block',
-          'width': item_width + 'px',
-          'margin': '0px',
-          'padding': '0px',
-          'text-align': 'center',
-          'position': 'absolute',
-          'left': (spacing_interval * index) - (item_width / 2)
-        });
-      });
+      plugin.createLabels(trial, display_element, plugin.slider);
 
       //  create button
       plugin.response_element.append($('<button>', {
