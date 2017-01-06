@@ -264,7 +264,7 @@ jsPsych.plugins["rating"] = (function() {
     if (trial.prompt !== "") {
     	plugin.prompt = $("<p>", {'class': 'jspsych-prompt'});
     	plugin.prompt.text(trial.prompt)
-        display_element.append(plugin.prompt);
+        display_element.prepend(plugin.prompt);
     }
     
     //if there is a timeout, schedule the trial end    
