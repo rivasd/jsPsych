@@ -178,7 +178,9 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	                
 	          	  endTrial({
 	          		  rt: response_time,
-	          		  sim_score: $("#slider").slider("value")
+	          		  sim_score: $("#slider").slider("value"),
+	          		  firstStim: trial.stimuli[0],
+	          		  secondStim: trial.stimuli[1]
 	          	  });
 	            });
 	          }
@@ -196,9 +198,6 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    	data.sim_score = 0;
 	    	    	data.timeout = true;
 	    	    }
-	    	    	            
-	            data.firstStim = trial.stimuli[0];
-	            data.secondStim = trial.stimuli[1];
 	            
 	            // goto next trial in block
 	            display_element.html('');
