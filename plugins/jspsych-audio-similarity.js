@@ -196,11 +196,10 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    	data.sim_score = 0;
 	    	    	data.timeout = true;
 	    	    }
-	    	    
+	    	    	            
+	            data.firstStim = trial.stimuli[0];
+	            data.secondStim = trial.stimuli[1];
 	            
-	            if(trial.return_stim){
-	            	data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
-	            }
 	            // goto next trial in block
 	            display_element.html('');
 	            
