@@ -119,7 +119,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 		          source.stop();
 
 		          // kill keyboard listeners
-		          jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
+		          jsPsych.pluginAPI.cancelAllKeyboardResponse();
 
 		          // gather the data to store for the trial
 		          var trial_data = {
