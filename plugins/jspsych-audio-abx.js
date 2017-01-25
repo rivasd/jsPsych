@@ -40,19 +40,36 @@ jsPsych.plugins["audio-abx"] = (function() {
 	    	    source.start(startTime);
 	        };
 	        
+		    function after_response(info) {
+		        prefetched_data.rt = Date.now() - rt_start_time;
+		        jsPsych.pluginAPI.clearAllTimeouts();
+		        display_element.empty();
+
+		        // only record the first response
+		        if (response.key == -1) {
+		          response = info;
+		        }
+		        if (info.key == trial.key_answer){
+		      	  prefetched_data.result = 'correct';
+		        }
+		        else {
+		      	  if (info.key)
+		      	  prefetched_data.result = 'incorrect';
+		        }	
+		      	end_trial(prefetched_data);
+		      };	
 	              
 			playSound(0);
 			source.onended = function(){
 				setTimeout(
 					function(){
+						if (trial.prompt !== "") {
+							display_element.append(trial.prompt);
+						}
 						playSound(1)
 						source.onended = function(){
 							setTimeout(function(){
 									playSound(2);
-									if (trial.prompt !== "") {
-										display_element.append(trial.prompt);
-									}
-									
 									
 								    // end trial if time limit is set
 								    source.onended = function(){
@@ -91,24 +108,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 			};
 			
 			
-		    var after_response = function(info) {
-		        prefetched_data.rt = Date.now() - rt_start_time;
-		        jsPsych.pluginAPI.clearAllTimeouts();
-		        display_element.empty();
-
-		        // only record the first response
-		        if (response.key == -1) {
-		          response = info;
-		        }
-		        if (info.key == trial.key_answer){
-		      	  prefetched_data.result = 'correct';
-		        }
-		        else {
-		      	  if (info.key)
-		      	  prefetched_data.result = 'incorrect';
-		        }	
-		      	end_trial(prefetched_data);
-		      };			
+		
 						
 		      var end_trial = function(prefetched_data) {
 
