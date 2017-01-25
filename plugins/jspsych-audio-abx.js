@@ -21,6 +21,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000
 			trial.choices = trial.choices || ['a','b'];			
 			trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
+			trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
 			
 			
 			trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
@@ -28,6 +29,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 			var context;
 		    var source;
 		    var rt_start_time;
+		    var prefetched_data = {};
 		    
 		    trial.setTimeoutHandlers = [];
 		    
