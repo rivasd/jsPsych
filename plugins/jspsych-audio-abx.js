@@ -47,10 +47,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 		        jsPsych.pluginAPI.clearAllTimeouts();
 		        display_element.empty();
 
-		        // only record the first response
-		        if (response.key == -1) {
-		          response = info;
-		        }
+		       
 		        if (info.key == trial.key_answer){
 		      	  prefetched_data.result = 'correct';
 		        }
