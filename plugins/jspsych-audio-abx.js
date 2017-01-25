@@ -61,7 +61,6 @@ jsPsych.plugins["audio-abx"] = (function() {
 									    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
 									      callback_function: after_response,
 									      valid_responses: trial.choices,
-									      rt_method: 'audio',
 									      persist: false,
 									      allow_held_key: false,
 									    });
