@@ -6,7 +6,7 @@
  *
  **/
 
-jsPsych.plugins["audio-similarity"] = (function() {
+jsPsych.plugins["audio-abx"] = (function() {
 	
 	var plugin = {};
 	  
@@ -15,7 +15,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	plugin.trial = function(display_element, trial){
 	
 			// default parameters		
-			trial.timing_gap = trial.timing_image_gap || 500; // default 1000ms
+			trial.timing_gap = trial.timing_gap || 500; // default 1000ms
 			trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
 			trial.timeout_feedback = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000
@@ -40,8 +40,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    source.start(startTime);
 	        };
 	        
-	        
-	        
+	              
 			playSound(0);
 			source.onended = function(){
 				setTimeout(
