@@ -31,6 +31,12 @@ jsPsych.plugins["audio-abx"] = (function() {
 		    var rt_start_time;
 		    var prefetched_data = {};
 		    
+		    // store response
+		    var response = {
+		      rt: -1,
+		      key: -1
+		    };
+		    
 		    trial.setTimeoutHandlers = [];
 		    
 		    function playSound(soundOrder){
@@ -47,7 +53,9 @@ jsPsych.plugins["audio-abx"] = (function() {
 		        jsPsych.pluginAPI.clearAllTimeouts();
 		        display_element.empty();
 
-		       
+		        if (response.key == -1) {
+		            response = info;
+		          }
 		        
 		        if (info.key == trial.key_answer){
 		      	  prefetched_data.result = 'correct';
