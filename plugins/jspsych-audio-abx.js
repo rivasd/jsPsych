@@ -48,6 +48,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 		        display_element.empty();
 
 		       
+		        
 		        if (info.key == trial.key_answer){
 		      	  prefetched_data.result = 'correct';
 		        }
