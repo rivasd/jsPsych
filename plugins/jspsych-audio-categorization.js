@@ -31,6 +31,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     var prefetched_data = {};
+    var keyboardListener;
 
     // play stimulus
     var context = jsPsych.pluginAPI.audioContext();
@@ -109,7 +110,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     };
     source.onended = function(){
     	
-    	 var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+    	      keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
     	      callback_function: after_response,
     	      valid_responses: trial.choices,
     	      rt_method: 'audio',
