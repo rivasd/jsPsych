@@ -24,6 +24,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
     trial.timeout_feedback = trial.timeout_feedback || 'Answer faster!';
+    trial.show_icon = trial.show_icon || false;
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -47,9 +48,11 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
     // show prompt if there is one
     if (trial.prompt !== "") {
-      display_element.append(trial.prompt);
+        display_element.append(trial.prompt);
     }
-    display_element.append($speaker_icon);
+    if (show_icon){
+    	display_element.append($speaker_icon);
+    }
 
     // store response
     var response = {
@@ -112,8 +115,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
       }, trial.timing_feedback);   
     };
     source.onended = function(){
-    	
-    		  $speaker_icon.remove();
+    		if (show_icon){
+    			$speaker_icon.remove();
+    		}
+    		  
     	      keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
     	      callback_function: after_response,
     	      valid_responses: trial.choices,
