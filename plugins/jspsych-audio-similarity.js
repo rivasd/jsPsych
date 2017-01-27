@@ -50,8 +50,10 @@ jsPsych.plugins["audio-similarity"] = (function() {
 			        		show_response_slider(display_element, trial);
 			            }, trial.timing_second_stim);
 		        	}
-		        	else{
-		        		
+		        	else {
+		        		source.onended = function(){
+    					show_response_slider(display_element, trial); 			        		
+		        	    }
 		        	}
 		        }, trial.timing_first_stim);
 	    	}
