@@ -32,8 +32,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
     
     var prefetched_data = {};
     var keyboardListener;
+    var $speaker_icon = $("<div>Icons made by <a href='http://www.flaticon.com/authors/eleonor-wang' title='Eleonor Wang'>Eleonor Wang</a> from <a href='http://www.flaticon.com' title='Flaticon'>www.flaticon.com</a> is licensed by <a href='http://creativecommons.org/licenses/by/3.0/' title='Creative Commons BY 3.0' target='_blank'>CC 3.0 BY</a></div>");
 
     // play stimulus
+    display_element.append($speaker_icon);
     var context = jsPsych.pluginAPI.audioContext();
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
@@ -110,6 +112,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     };
     source.onended = function(){
     	
+    		  $speaker_icon.remove();
     	      keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
     	      callback_function: after_response,
     	      valid_responses: trial.choices,
