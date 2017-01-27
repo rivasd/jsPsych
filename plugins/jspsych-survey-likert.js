@@ -86,7 +86,8 @@ jsPsych.plugins['survey-likert'] = (function() {
     // add submit button
     display_element.append($('<button>', {
       'id': 'jspsych-survey-likert-next',
-      'class': 'jspsych-survey-likert jspsych-btn'
+      'class': 'jspsych-survey-likert jspsych-btn',
+      'type': 'submit'
     }));
     $("#jspsych-survey-likert-next").html('Submit Answers');
     $("#jspsych-survey-likert-next").click(function() {
