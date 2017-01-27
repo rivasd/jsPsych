@@ -50,7 +50,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     if (trial.prompt !== "") {
         display_element.append(trial.prompt);
     }
-    if (show_icon){
+    if (trial.show_icon){
     	display_element.append($speaker_icon);
     }
 
@@ -115,7 +115,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
       }, trial.timing_feedback);   
     };
     source.onended = function(){
-    		if (show_icon){
+    		if (trial.show_icon){
     			$speaker_icon.remove();
     		}
     		  
