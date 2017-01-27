@@ -64,7 +64,7 @@ jsPsych.plugins['survey-likert'] = (function() {
 
     $('#jspsych-survey-likert-preamble').html(trial.preamble);
 
-    display_element.append('<form id="jspsych-survey-likert-form">');
+    display_element.append('<form id="jspsych-survey-likert-form" name="jspsych-survey-likert-form">');
     // add likert scale questions
     for (var i = 0; i < trial.questions.length; i++) {
       form_element = $('#jspsych-survey-likert-form');
@@ -87,9 +87,10 @@ jsPsych.plugins['survey-likert'] = (function() {
     form_element.append($('<input>', {
       'id': 'jspsych-survey-likert-next',
       'class': 'jspsych-survey-likert jspsych-btn',
-      'type': 'submit'
+      'type': 'submit',
+      'for': 'jspsych-survey-likert-form'
     }));
-    $("#jspsych-survey-likert-next").html('Submit Answers');
+    $("#jspsych-survey-likert-next").attr("value",'Submit Answers');
     $("#jspsych-survey-likert-next").click(function() {
       // measure response time
       var endTime = (new Date()).getTime();
