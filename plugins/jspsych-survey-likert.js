@@ -91,7 +91,8 @@ jsPsych.plugins['survey-likert'] = (function() {
       'for': 'jspsych-survey-likert-form'
     }));
     $("#jspsych-survey-likert-next").attr("value",'Submit Answers');
-    form_element.submit(function() {
+    form_element.submit(function(e) {
+    	e.preventDefault();
       // measure response time
       var endTime = (new Date()).getTime();
       var response_time = endTime - startTime;
