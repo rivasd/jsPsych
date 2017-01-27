@@ -35,7 +35,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     var $speaker_icon = $('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255.797 255.797" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 255.797 255.797"><g><path d="m211.424,97.447h-8.701v-71.345c0.001-13.921-12.18-26.102-26.101-26.102-5.22,0-10.441,1.74-15.661,5.22l-83.143,67.865h-50.847c-5.22,0-8.701,3.48-8.701,8.701v92.226c0,5.22 3.48,8.701 8.701,8.701h50.846l83.143,67.865c3.48,3.48 10.441,5.22 15.661,5.22 13.921,0 26.102-12.181 26.102-24.362v-76.566h8.701c13.921,0 26.102-12.181 26.102-26.102v-5.22c2.84217e-14-13.92-12.18-26.101-26.102-26.101zm-140.95,67.864h-34.802v-74.825h34.802v74.825zm113.108,64.385c0,8.701-8.701,10.441-13.921,6.96l-81.786-67.865v-83.525l81.786-67.865c5.22-3.48 13.921-1.74 13.921,6.96v205.335zm36.543-100.927c0,5.22-3.48,8.701-8.701,8.701h-8.701v-22.621h8.701c5.22,0 8.701,3.48 8.701,8.701v5.219z"/></g></svg>');
 
     // play stimulus
-    display_element.append($speaker_icon);
+    
     var context = jsPsych.pluginAPI.audioContext();
     var source = context.createBufferSource();
     source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
@@ -49,6 +49,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     if (trial.prompt !== "") {
       display_element.append(trial.prompt);
     }
+    display_element.append($speaker_icon);
 
     // store response
     var response = {
