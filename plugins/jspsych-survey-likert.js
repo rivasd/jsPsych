@@ -84,7 +84,7 @@ jsPsych.plugins['survey-likert'] = (function() {
     }
 
     // add submit button
-    display_element.append($('<button>', {
+    form_element.append($('<input>', {
       'id': 'jspsych-survey-likert-next',
       'class': 'jspsych-survey-likert jspsych-btn',
       'type': 'submit'
