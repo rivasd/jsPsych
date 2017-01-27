@@ -107,33 +107,35 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  end_trial(prefetched_data);
       }, trial.timing_feedback);   
     };
-
-    // start the response listener
-    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-      callback_function: after_response,
-      valid_responses: trial.choices,
-      rt_method: 'audio',
-      persist: false,
-      allow_held_key: false,
-      audio_context: context,
-      audio_context_start_time: startTime
-    });
-    // end trial if time limit is set
-    if (trial.timing_response > 0) {
-      jsPsych.pluginAPI.setTimeout(function() {
-    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
-    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
-    	  $timeoutFeedback.text(trial.timeout_feedback);
-    	  display_element.append($timeoutFeedback);
-    	  prefetched_data.result = 'timeout';
-    	  prefetched_data.rt = -1;
-    	  
-    	  jsPsych.pluginAPI.setTimeout(function() {
-        	  end_trial(prefetched_data);
-          }, trial.timing_feedback); 
-    	  
-      }, trial.timing_response);
+    source.onended = function(){
+    	
+    	 var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+    	      callback_function: after_response,
+    	      valid_responses: trial.choices,
+    	      rt_method: 'audio',
+    	      persist: false,
+    	      allow_held_key: false,
+    	      audio_context: context,
+    	      audio_context_start_time: startTime
+    	    }); 
+    	    // end trial if time limit is set
+    	    if (trial.timing_response > 0) {
+    	        jsPsych.pluginAPI.setTimeout(function() {
+    	      	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
+    	      	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
+    	      	  $timeoutFeedback.text(trial.timeout_feedback);
+    	      	  display_element.append($timeoutFeedback);
+    	      	  prefetched_data.result = 'timeout';
+    	      	  prefetched_data.rt = -1;
+    	      	  
+    	      	  jsPsych.pluginAPI.setTimeout(function() {
+    	          	  end_trial(prefetched_data);
+    	            }, trial.timing_feedback); 
+    	      	  
+    	        }, trial.timing_response);
+    	    }
     }
+
 
   };
 
