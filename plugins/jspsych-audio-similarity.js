@@ -22,7 +22,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 			
 			trial.timing_first_stim = trial.timing_first_stim || 1000; // default 1000ms
 			trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
-			trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
+			trial.timing_gap = trial.timing_gap || 1000; // default 1000ms
 			trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
 			trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000;
@@ -43,34 +43,39 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	if(trial.timing_first_stim > 0){
 		    	setTimeout(function(){    		
 		    		source.stop();
-		        	playSound(1);
-		        	if(trial.timing_second_stim > 0){
-			        	setTimeout(function(){
-			        		source.stop();
-			        		show_response_slider(display_element, trial);
-			            }, trial.timing_second_stim);
-		        	}
-		        	else {
-		        		source.onended = function(){
-    					show_response_slider(display_element, trial); 			        		
-		        	    }
-		        	}
+		    		setTimeout(function(){
+		    			playSound(1);
+			        	if(trial.timing_second_stim > 0){
+				        	setTimeout(function(){
+				        		source.stop();
+				        		show_response_slider(display_element, trial);
+				            }, trial.timing_second_stim);
+			        	}
+			        	else {
+			        		source.onended = function(){
+	    					show_response_slider(display_element, trial); 			        		
+			        	    }
+			        	}		    			
+		    		}, trial.timing_gap);
+		        	
 		        }, trial.timing_first_stim);
 	    	}
 	    	else{
 	    		source.onended = function(){
-	    			playSound(1);
-	    			if(trial.timing_second_stim > 0){
-	    				setTimeout(function(){
-	    					source.stop();
-			        		show_response_slider(display_element, trial);
-			            }, trial.timing_second_stim);
-	    			}
-	    			else{
-	    				source.onended = function(){
-	    					show_response_slider(display_element, trial);
-	    				} 				
-	    			}
+	    			setTimeout(function(){
+	    				playSound(1);
+	    				if(trial.timing_second_stim > 0){
+		    				setTimeout(function(){
+		    					source.stop();
+				        		show_response_slider(display_element, trial);
+				            }, trial.timing_second_stim);
+		    			}
+		    			else{
+		    				source.onended = function(){
+		    					show_response_slider(display_element, trial);
+		    				} 				
+		    			}
+	    			}, trial.timing_gap);    			    			
 	    		}
 	    	}
 	    	
