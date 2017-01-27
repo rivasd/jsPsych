@@ -37,7 +37,9 @@ jsPsych.plugins['survey-likert'] = (function() {
 
     // default parameters for the trial
     trial.preamble = typeof trial.preamble === 'undefined' ? "" : trial.preamble;
-
+    trial.required = typeof trial.required === 'undefined' ? false : trial.required
+    
+    
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -62,7 +64,7 @@ jsPsych.plugins['survey-likert'] = (function() {
 
     $('#jspsych-survey-likert-preamble').html(trial.preamble);
 
-    display_element.append('<form id="jspsych-survey-likert-form">');
+    display_element.append('<form id="jspsych-survey-likert-form" name="jspsych-survey-likert-form">');
     // add likert scale questions
     for (var i = 0; i < trial.questions.length; i++) {
       form_element = $('#jspsych-survey-likert-form');
@@ -72,19 +74,25 @@ jsPsych.plugins['survey-likert'] = (function() {
       var width = 100 / trial.labels[i].length;
       options_string = '<ul class="jspsych-survey-likert-opts" data-radio-group="Q' + i + '">';
       for (var j = 0; j < trial.labels[i].length; j++) {
-        options_string += '<li style="width:' + width + '%"><input type="radio" name="Q' + i + '" value="' + j + '"><label class="jspsych-survey-likert-opt-label">' + trial.labels[i][j] + '</label></li>';
+    	  
+    	var required =   trial.required ? "required" : "";
+    	  
+        options_string += '<li style="width:' + width + '%"><input type="radio" name="Q' + i + '" value="' + j + '"'+ required +'><label class="jspsych-survey-likert-opt-label">' + trial.labels[i][j] + '</label></li>';
       }
       options_string += '</ul>';
       form_element.append(options_string);
     }
 
     // add submit button
-    display_element.append($('<button>', {
+    form_element.append($('<input>', {
       'id': 'jspsych-survey-likert-next',
-      'class': 'jspsych-survey-likert jspsych-btn'
+      'class': 'jspsych-survey-likert jspsych-btn',
+      'type': 'submit',
+      'for': 'jspsych-survey-likert-form'
     }));
-    $("#jspsych-survey-likert-next").html('Submit Answers');
-    $("#jspsych-survey-likert-next").click(function() {
+    $("#jspsych-survey-likert-next").attr("value",'Submit Answers');
+    form_element.submit(function(e) {
+    	e.preventDefault();
       // measure response time
       var endTime = (new Date()).getTime();
       var response_time = endTime - startTime;
