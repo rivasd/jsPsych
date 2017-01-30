@@ -46,9 +46,25 @@ jsPsych.plugins["audio-abx"] = (function() {
 	    	    source.connect(context.destination);
 	    	    startTime = context.currentTime + 0.1;
 	    	    source.start(startTime);
+	    	    
+	    	  //send the correct stimulus presentation trigger
+	    	    if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
+	    	    	jsPsych.pluginAPI.hardware({
+	    	    		target: 'parallel',
+	    	    		action: 'trigger',
+	    	    		payload: trial.key_answer
+	    	    	});
+	    	    }
 	        };
 	        
 		    function after_response(info) {
+		    	if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
+	    	    	jsPsych.pluginAPI.hardware({
+	    	    		target: 'parallel',
+	    	    		action: 'trigger',
+	    	    		payload: 10
+	    	    	});
+	    	    }
 		        prefetched_data.rt = Date.now() - rt_start_time;
 		        jsPsych.pluginAPI.clearAllTimeouts();
 		        display_element.empty();

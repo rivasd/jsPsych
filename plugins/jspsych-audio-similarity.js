@@ -38,7 +38,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 		    var source;
 		    
 		    trial.setTimeoutHandlers = [];
-		    
+		   
 		    playSound(0);
 	    	if(trial.timing_first_stim > 0){
 		    	setTimeout(function(){    		
