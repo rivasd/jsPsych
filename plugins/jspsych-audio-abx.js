@@ -83,19 +83,18 @@ jsPsych.plugins["audio-abx"] = (function() {
 		      	end_trial(prefetched_data);
 		      };	
 	              
-			playSound(0);
+			playSound(0); //playing sound A
 			source.onended = function(){
 				setTimeout(
 					function(){
+						//show the prompt
 						if (trial.prompt !== "") {
 							display_element.append(trial.prompt);
 						}
-						playSound(1)
+						playSound(1) //playing sound B
 						source.onended = function(){
 							setTimeout(function(){
-									playSound(2);
-									
-								    // end trial if time limit is set
+									playSound(2); //playing sound X
 								    source.onended = function(){
 								    	rt_start_time = Date.now();
 								    	// start the response listener

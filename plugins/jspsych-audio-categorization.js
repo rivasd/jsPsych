@@ -50,6 +50,15 @@ jsPsych.plugins["audio-categorization"] = (function() {
     var startTime = context.currentTime + 0.1;
     source.start(startTime);
     var rt_start_time = Date.now();
+    
+    //send the correct stimulus presentation trigger
+    if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
+    	jsPsych.pluginAPI.hardware({
+    		target: 'parallel',
+    		action: 'trigger',
+    		payload: trial.key_answer
+    	});
+    }
 
 
     // show prompt if there is one
@@ -96,6 +105,8 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // function to handle responses by the subject
     var after_response = function(info) {
     	
+      var correct; //tracking if the answer is correct or not to change the payload of the trigger sent in consequence
+    	
       if (trial.show_icon && !trial.forced_listening){
 			$speaker_icon.remove();
 	  }
@@ -115,6 +126,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  $correctFeedback.text(trial.correct_feedback);
     	  display_element.append($correctFeedback);
     	  prefetched_data.result = 'correct';
+    	  correct = true;
       }
       else {
     	  if (info.key)
@@ -122,6 +134,16 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  $incorrectFeedback.text(trial.incorrect_feedback);
     	  display_element.append($incorrectFeedback);
     	  prefetched_data.result = 'incorrect';
+    	  correct = false;
+      }
+      
+	  //send a trigger when the participant answer depending if the response is correct or not
+      if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
+    	  jsPsych.pluginAPI.hardware({
+    		  target: 'parallel',
+    		  action: 'trigger',
+    		  payload: correct ? 1 : 2
+    	  });
       }
       
       jsPsych.pluginAPI.setTimeout(function() {
