@@ -92,7 +92,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
         "rt": prefetched_data.rt,
         "stimulus": trial.stimulus,
         "key_press": response.key,
-        "result": prefetched_data.result
+        "correct": prefetched_data.correct
       };
 
       // clear the display
@@ -104,8 +104,6 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
     // function to handle responses by the subject
     var after_response = function(info) {
-    	
-      var correct; //tracking if the answer is correct or not to change the payload of the trigger sent in consequence
     	
       if (trial.show_icon && !trial.forced_listening){
 			$speaker_icon.remove();
@@ -125,16 +123,14 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  var $correctFeedback = $('<p></p>', {id:'correctFeedback'});
     	  $correctFeedback.text(trial.correct_feedback);
     	  display_element.append($correctFeedback);
-    	  prefetched_data.result = 'correct';
-    	  correct = true;
+    	  prefetched_data.correct = true;
       }
       else {
     	  if (info.key)
     	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
     	  $incorrectFeedback.text(trial.incorrect_feedback);
     	  display_element.append($incorrectFeedback);
-    	  prefetched_data.result = 'incorrect';
-    	  correct = false;
+    	  prefetched_data.correct = false;
       }
       
 	  //send a trigger when the participant answer depending if the response is correct or not
@@ -142,7 +138,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  jsPsych.pluginAPI.hardware({
     		  target: 'parallel',
     		  action: 'trigger',
-    		  payload: correct ? 1 : 2
+    		  payload: prefetched_data.correct ? 1 : 2
     	  });
       }
       
@@ -174,7 +170,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	      	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
     	      	  $timeoutFeedback.text(trial.timeout_feedback);
     	      	  display_element.append($timeoutFeedback);
-    	      	  prefetched_data.result = 'timeout';
+    	      	  prefetched_data.correct = false;
     	      	  prefetched_data.rt = -1;
     	      	  
     	      	  jsPsych.pluginAPI.setTimeout(function() {
