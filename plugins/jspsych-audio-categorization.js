@@ -22,6 +22,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
     trial.key_answer = trial.key_answer || jsPsych.pluginAPI.convertKeyCharacterToKeyCode('f'); // key associated to the category
+    if(typeof trial.key_answer === "string"){
+      trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer);
+    }
+    
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
     trial.timeout_feedback = trial.timeout_feedback || 'Answer faster!';
     trial.show_icon = trial.show_icon || false;
