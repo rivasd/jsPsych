@@ -29,7 +29,9 @@ jsPsych.plugins["audio-categorization"] = (function() {
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
     trial.timeout_feedback = trial.timeout_feedback || 'Answer faster!';
     trial.show_icon = trial.show_icon || false;
-
+    if (typeof trial.forced_listening === 'undefined'){
+    	trial.forced_listening = false;
+    } //a boolean that indicates if the participant have to answer after the sounds ends or not
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -93,6 +95,14 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
     // function to handle responses by the subject
     var after_response = function(info) {
+    	
+      if (trial.show_icon && !trial.forced_listening){
+			$speaker_icon.remove();
+	  }
+      if(!trial.forced_listening){
+    	  source.stop();
+      }
+      
       prefetched_data.rt = Date.now() - rt_start_time;
       jsPsych.pluginAPI.clearAllTimeouts();
 
@@ -118,6 +128,9 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  end_trial(prefetched_data);
       }, trial.timing_feedback);   
     };
+    
+    //if the researcher want to force the participant to listen to the whole sound before answering
+    if(trial.forced_listening)
     source.onended = function(){
     		if (trial.show_icon){
     			$speaker_icon.remove();
@@ -148,6 +161,38 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	      	  
     	        }, trial.timing_response);
     	    }
+    }
+    
+    
+  //If the researcher let the participant answer before the sound is done
+    else{
+		  
+	      keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+	      callback_function: after_response,
+	      valid_responses: trial.choices,
+	      rt_method: 'audio',
+	      persist: false,
+	      allow_held_key: false,
+	      audio_context: context,
+	      audio_context_start_time: startTime
+	    }); 
+	    // end trial if time limit is set
+	    if (trial.timing_response > 0) {
+	        jsPsych.pluginAPI.setTimeout(function() {
+	      	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
+	      	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
+	      	  $timeoutFeedback.text(trial.timeout_feedback);
+	      	  display_element.append($timeoutFeedback);
+	      	  prefetched_data.result = 'timeout';
+	      	  prefetched_data.rt = -1;
+	      	  
+	      	  jsPsych.pluginAPI.setTimeout(function() {
+	          	  end_trial(prefetched_data);
+	            }, trial.timing_feedback); 
+	      	  
+	        }, trial.timing_response);
+	    }
+    	
     }
 
 
