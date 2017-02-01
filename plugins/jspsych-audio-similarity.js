@@ -26,7 +26,11 @@ jsPsych.plugins["audio-similarity"] = (function() {
 			trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
 			trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000;
-			
+			trial.categories.forEach(function(category, idx){
+				if(typeof category === "string"){
+				    category = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(category);
+				    }
+			});			
 			trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 			
 			// if any trial variables are functions
@@ -79,6 +83,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    		}
 	    	}
 	    	
+	    	
 	    	function playSound(soundOrder){
 	        	context = jsPsych.pluginAPI.audioContext();
 	    	    source = context.createBufferSource();
@@ -86,6 +91,15 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    source.connect(context.destination);
 	    	    startTime = context.currentTime + 0.1;
 	    	    source.start(startTime);
+	    	    
+	    	  //send the correct stimulus presentation trigger if the chrome extension is active, you are note in a practice block and you have access to the category of the stimuli
+	    	    if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice && !(typeof categories[soundOrder] === 'undefined')){
+	    	    	jsPsych.pluginAPI.hardware({
+	    	    		target: 'parallel',
+	    	    		action: 'trigger',
+	    	    		payload: categories[soundOrder]
+	    	    	});
+	    	    }
 	        };
 			
 	        function show_response_slider(display_element, trial) {
