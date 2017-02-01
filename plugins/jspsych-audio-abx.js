@@ -10,18 +10,19 @@ jsPsych.plugins["audio-abx"] = (function() {
 	
 	var plugin = {};
 	  
-	jsPsych.pluginAPI.registerPreload('audio-similarity', 'stimuli', 'audio');
+	jsPsych.pluginAPI.registerPreload('audio-abx', 'stimuli', 'audio');
 
 	plugin.trial = function(display_element, trial){
 	
 			// default parameters		
-			trial.timing_gap = trial.timing_gap || 500; // default 1000ms
-			trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
+			trial.timing_gap = trial.timing_gap || 500; 
+			trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
 			trial.timeout_feedback = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000
 			trial.choices = trial.choices || ['a','b'];			
 			trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
-			trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer) || convertKeyCharacterToKeyCode('f'); // key associated to the category
+			trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
+			trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
 			
 			
 			trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
@@ -52,7 +53,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 	    	    	jsPsych.pluginAPI.hardware({
 	    	    		target: 'parallel',
 	    	    		action: 'trigger',
-	    	    		payload: trial.key_answer
+	    	    		payload: soundOrder + 1
 	    	    	});
 	    	    }
 	        };
@@ -68,17 +69,18 @@ jsPsych.plugins["audio-abx"] = (function() {
 		        prefetched_data.rt = Date.now() - rt_start_time;
 		        jsPsych.pluginAPI.clearAllTimeouts();
 		        display_element.empty();
-
+		        
 		        if (response.key == -1) {
 		            response = info;
 		          }
 		        
-		        if (info.key == trial.key_answer){
-		      	  prefetched_data.result = 'correct';
-		        }
-		        else {
-		      	  if (info.key)
-		      	  prefetched_data.result = 'incorrect';
+		        prefetched_data.correct = function evaluate_correctness(){
+		        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.key_first) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.key_second)){
+				      	   return true;
+				    }
+				    else {
+				      	  return false;
+		            }		        
 		        }	
 		      	end_trial(prefetched_data);
 		      };	
@@ -111,7 +113,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 									    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
 									    	  $timeoutFeedback.text(trial.timeout_feedback);
 									    	  display_element.append($timeoutFeedback);
-									    	  prefetched_data.result = 'timeout';
+									    	  prefetched_data.correct = false;
 									    	  prefetched_data.rt = -1;
 									    	  
 									    	  jsPsych.pluginAPI.setTimeout(function() {
@@ -151,7 +153,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 		            "B": trial.stimuli[1],
 		            "X": trial.stimuli[2],
 		            "key_press": response.key,
-		            "result": prefetched_data.result
+		            "correct": prefetched_data.correct
 		          };
 
 		          // clear the display
