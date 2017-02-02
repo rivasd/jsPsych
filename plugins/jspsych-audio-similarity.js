@@ -26,11 +26,14 @@ jsPsych.plugins["audio-similarity"] = (function() {
 			trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
 			trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000;
-			trial.categories.forEach(function(category, idx){
-				if(typeof category === "string"){
-				    category = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(category);
-				    }
-			});			
+			if(trial.categories){
+				trial.categories.forEach(function(category, idx){
+					if(typeof category === "string"){
+					    category = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(category);
+					    }
+				});	
+			}
+					
 			trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 			
 			// if any trial variables are functions
