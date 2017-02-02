@@ -83,16 +83,16 @@ jsPsych.plugins["audio-abx"] = (function() {
 		            }		        
 		        }	
 		      	end_trial(prefetched_data);
-		      };	
-	              
+		      };
+		      
+			//show the prompt
+			if (trial.prompt !== "") {
+				display_element.append(trial.prompt);
+			}     
 			playSound(0); //playing sound A
 			source.onended = function(){
 				setTimeout(
 					function(){
-						//show the prompt
-						if (trial.prompt !== "") {
-							display_element.append(trial.prompt);
-						}
 						playSound(1) //playing sound B
 						source.onended = function(){
 							setTimeout(function(){
