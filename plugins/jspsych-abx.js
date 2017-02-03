@@ -142,11 +142,7 @@ jsPsych.plugins["abx"] = (function() {
 	            }		        
 	        }	
 	      	end_trial(prefetched_data);
-	      };
-	    
-	    
-	    
-	    
+	      };    
 
 		/** The actual trial
 		 * 
@@ -224,15 +220,18 @@ jsPsych.plugins["abx"] = (function() {
 	    		
 	    	}, trial.timing_stims);
 	    	
-	    }, trial.timing_fixation_cross);		
+	    }, trial.timing_fixation_cross);
+		
+		/** end_trial(prefetched_data)
+		 * function to clear the screen and end the trial
+		 * 
+		 */	
 		
 	 var end_trial = function(prefetched_data) {
 
           // kill any remaining setTimeout handlers
           jsPsych.pluginAPI.clearAllTimeouts();
 
-          // stop the audio file if it is playing
-          source.stop();
 
           // kill keyboard listeners
           jsPsych.pluginAPI.cancelAllKeyboardResponses();
