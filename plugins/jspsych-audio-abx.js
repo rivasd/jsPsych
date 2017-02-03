@@ -58,7 +58,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 	    	    }
 	        };
 	        
-		    function after_response() {
+		    function after_response(info) {
 		    	if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
 	    	    	jsPsych.pluginAPI.hardware({
 	    	    		target: 'parallel',

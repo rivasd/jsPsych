@@ -7,7 +7,7 @@
  *
  */
 
-jsPsych.plugins["abx"] = (function() {
+jsPsych.plugins.abx = (function() {
 	
 	var plugin = {};
 	  
@@ -26,6 +26,7 @@ jsPsych.plugins["abx"] = (function() {
 		trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 		trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
 		trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
+		trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
 		
 		
 		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
@@ -33,6 +34,12 @@ jsPsych.plugins["abx"] = (function() {
 
 	    var rt_start_time;
 	    var prefetched_data = {};
+	    
+	    // store response
+	    var response = {
+	      rt: -1,
+	      key: -1
+	    };
 		
 		/** showFixationCross()
 		 *  fucntion that makes a fixation cross appear on the screen
@@ -117,7 +124,7 @@ jsPsych.plugins["abx"] = (function() {
 		 */
 	    
 	    
-	    function after_response() {
+	    function after_response(info) {
 	    	if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice){
     	    	jsPsych.pluginAPI.hardware({
     	    		target: 'parallel',
@@ -256,4 +263,4 @@ jsPsych.plugins["abx"] = (function() {
 		
 	};	
 	return plugin;	
-});
+})();
