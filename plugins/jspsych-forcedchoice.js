@@ -44,7 +44,9 @@ jsPsych.plugins["forcedchoice"] = (function() {
   
   plugin.end = function(trial, display_el, data){
 	  
-	  data.rt = Date.now() - data.startTime; 
+	  if( ! data.rt){
+		  data.rt = Date.now() - data.startTime; 
+	  }
 	  delete data.startTime;
 	  data.chosen = data.chosen_idx;
 	  data.first = trial.stimuli[0];
@@ -62,7 +64,10 @@ jsPsych.plugins["forcedchoice"] = (function() {
     trial.prompt = trial.prompt || "Choose one of the images";
     trial.keyboard = trial.keyboard || false; //tells if the participant has to click on the chosen stimulus or press a key associated to it
     trial.key_choices = trial.key_choices || ['a','l'];
-
+    trial.timeout = trial.timeout || -1;
+    trial.timeout_message = trial.timeout_message || "Please respond faster";
+    trial.timeout_message_timing = trial.timeout_message_timing || 1000;
+    
     // allow variables as functions
     // this allows any trial variable to be specified as a function
     // that will be evaluated when the trial runs. this allows users
@@ -169,11 +174,35 @@ jsPsych.plugins["forcedchoice"] = (function() {
         	});
     	}
     	
+    	//timeout code
+    	if(trial.timeout > 0){
+    		setTimeoutHandlers.push(setTimeout(function(){
+    			setTimeoutHandlers = [];
+    			display_element.html(trial.timeout_message);
+    			
+    			setTimeoutHandlers.push(setTimeout(function(){
+    				var empty_data = {
+        					chosen_idx: 0,
+        					rt: -1
+        			}
+        			
+        			plugin.end(trial, display_element, empty_data);
+    			}, trial.timeout_messsage_timing))
+    			
+    			
+    		}), trial.timeout);
+    	}
+    	
+    	
     	plugin.showRow(display_element, choices, sending_data);
     	sending_data.startTime = Date.now();  	
     	
     }, trial.timing_fixation));
   };
+  
+  
+  
+
 
   return plugin;
 })();
