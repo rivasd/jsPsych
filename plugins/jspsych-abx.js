@@ -27,6 +27,7 @@ jsPsych.plugins.abx = (function() {
 		trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
 		trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
 		trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
+		trial.prompt_position = trial.prompt_position || 1;
 		
 		
 		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
@@ -165,7 +166,7 @@ jsPsych.plugins.abx = (function() {
 			//take the fixation cross of the screen
 	    	display_element.empty();
 	    	//show the prompt
-			if (trial.prompt !== "") {
+			if (trial.prompt !== "" && trial.prompt_position === 1) {
 				display_element.append(trial.prompt);
 			}
 	    	//Show A
@@ -192,6 +193,10 @@ jsPsych.plugins.abx = (function() {
 				    		setTimeout(function(){
 				    			//hide X
 					    		$('#jspsych-sim-stim').css('visibility', 'hidden');
+					    		//show the prompt if the researcher want it to be at this time in the trial
+								if (trial.prompt !== "" && trial.prompt_position === 2) {
+									display_element.append(trial.prompt);
+								}
 					    		//start the response time calculation
 				    			rt_start_time = Date.now();
 						    	// start the response listener
@@ -201,7 +206,7 @@ jsPsych.plugins.abx = (function() {
 							      persist: false,
 							      allow_held_key: false,
 							    });
-							    
+							    //start calculating the timeout
 							    if (trial.timing_response > 0) {
 								      jsPsych.pluginAPI.setTimeout(function() {
 								    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
