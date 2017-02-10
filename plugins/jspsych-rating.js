@@ -167,7 +167,7 @@ jsPsych.plugins["rating"] = (function() {
     	   clearTimeout(trial.setTimeoutHandlers[i]);
        }
    
-	   data.timeout = false; //quick hack for something I need right now
+	  // data.timeout = false; //quick hack for something I need right now
 	   if(data.rating === undefined){
 		   data.rating = null;
 		   data.timeout = true;
@@ -180,7 +180,7 @@ jsPsych.plugins["rating"] = (function() {
 	   // goto next trial in block
 	   plugin.response_element.hide();
 	   $("#jspsych-rating-stimulus").remove();
-	   if(plugin.prompt) plugin.prompt.remove();
+	   if(plugin.prompt) plugin.prompt.empty();
 	   plugin.stim.remove();
 	   
 	   //remove previous event handlers
@@ -194,15 +194,16 @@ jsPsych.plugins["rating"] = (function() {
 	   
 	   if(data.rt === -1){
 	   	//this was a timeout
-		   	display_element.append(trial.timeout_message);
+		   	plugin.prompt.html(trial.timeout_message);
 		   	trial.setTimeoutHandlers.push(setTimeout(function(){
-		   		//display_element.empty();
+		   		plugin.prompt.remove();
 		   		//remove flexbox
 		   		display_element.css('display', 'auto');
 		   		jsPsych.finishTrial(data);
 		   	},trial.timeout_message_timing))
 	   }
 	   else{
+		   plugin.prompt.remove();
 		   display_element.css('display', 'auto');
 		   jsPsych.finishTrial(data);
 	   }
@@ -270,7 +271,8 @@ jsPsych.plugins["rating"] = (function() {
     //if there is a timeout, schedule the trial end    
     if(trial.timeout > 0){
     	trial.setTimeoutHandlers.push(setTimeout(function(){
-    		plugin.endTrial({rt:-1}, trial, display_element);
+    		
+    		plugin.endTrial({rt:-1, timeout:true}, trial, display_element);
         }, trial.timeout));
     }
     // wait for a response    

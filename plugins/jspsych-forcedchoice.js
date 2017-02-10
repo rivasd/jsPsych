@@ -177,7 +177,17 @@ jsPsych.plugins["forcedchoice"] = (function() {
     	//timeout code
     	if(trial.timeout > 0){
     		setTimeoutHandlers.push(setTimeout(function(){
+    			setTimeoutHandlers.forEach(function(code){
+    				clearTimeout(code);
+    			});
     			setTimeoutHandlers = [];
+    			
+    			jsPsych.pluginAPI.cancelAllKeyboardResponses();
+    			choices.forEach(function(elt, i, array) {
+    				elt.off("click");
+    			})
+    			
+    			
     			display_element.html(trial.timeout_message);
     			
     			setTimeoutHandlers.push(setTimeout(function(){
@@ -185,12 +195,12 @@ jsPsych.plugins["forcedchoice"] = (function() {
         					chosen_idx: 0,
         					rt: -1
         			}
-        			
+        			display_element.empty();
         			plugin.end(trial, display_element, empty_data);
-    			}, trial.timeout_messsage_timing))
+    			}, trial.timeout_message_timing))
     			
     			
-    		}), trial.timeout);
+    		},trial.timeout));
     	}
     	
     	
