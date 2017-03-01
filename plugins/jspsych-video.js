@@ -61,7 +61,9 @@ jsPsych.plugins.video = (function() {
     trial.prompt = trial.prompt || "";
     trial.autoplay = typeof trial.autoplay == 'undefined' ? true : trial.autoplay;
     trial.controls = typeof trial.controls == 'undefined' ? false : trial.controls;
+    trial.choices = trial.choices || ["q", "p"];
 
+    
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -92,17 +94,25 @@ jsPsych.plugins.video = (function() {
     }
 
     document.getElementById('jspsych-video-player').onended = function(){
-      end_trial();
+      jsPsych.pluginAPI.getKeyboardResponse({
+    	callback_function : end_trial,
+    	valid_responses: trial.choices
+      });
+      //end_trial();
     }
 
     // function to end trial when it is time
-    var end_trial = function() {
+    var end_trial = function(info) {
 
       // gather the data to store for the trial
       var trial_data = {
-        stimulus: JSON.stringify(trial.sources)
+        stimulus: JSON.stringify(trial.sources),
+        rt: info.rt,
+        key_press: info.key
       };
-
+      if(trial.answer){
+    	 trial_data.correct = info.key === trial.answer; 
+      }
       // clear the display
       display_element.html('');
 
