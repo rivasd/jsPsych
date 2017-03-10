@@ -166,7 +166,6 @@ var after_block = {
 }
 
 jsPsych.init({
-  display_element: $('#jspsych-target'),
   timeline: [block, after_block],
   on_finish: function() {
     jsPsych.data.displayData();
@@ -264,7 +263,7 @@ None.
 
 ### Return value
 
-Returns the jQuery-object that contains the DOM element used for displaying the experiment.
+Returns the HTML DOM element used for displaying the experiment.
 
 ### Description
 
@@ -276,7 +275,7 @@ Get the DOM element that displays the experiment.
 var el = jsPsych.getDisplayElement();
 
 // hide the jsPsych display
-el.hide();
+el.style.visibility = 'hidden';
 ```
 ---
 ## jsPsych.init
@@ -296,7 +295,7 @@ The settings object can contain several parameters. The only *required* paramete
 Parameter | Type | Description
 --------- | ---- | -----------
 timeline | array | An array containing the objects that describe the experiment timeline. See [Creating an Experiment: The Timeline](../features/timeline.md).
-display_element | jQuery object | A jQuery-selected DOM element, e.g., `$('#target')` selects the element with the `id='target'` attribute. If left blank, then jsPsych will use the `<body>` element to display content (creating it if necessary). You can override this parameter at the trial level as well by specifying a display_element property on any timeline.
+display_element | string | The ID of an HTML element to display the experiment in. If left blank, then jsPsych will use the `<body>` element to display content (creating it if necessary). You can override this parameter at the trial level as well by specifying a display_element property on any timeline.
 on_finish | function | Function to execute when the experiment ends.
 on_trial_start | function | Function to execute when a new trial begins.
 on_trial_finish | function | Function to execute when a trial ends.
@@ -304,9 +303,11 @@ on_data_update | function | Function to execute every time data is stored using 
 on_interaction_data_update | function | Function to execute every time a new interaction event occurs. Interaction events include clicking on a different window (blur), returning to the experiment window (focus), entering full screen mode (fullscreenenter), and exiting full screen mode (fullscreenexit).
 exclusions | object | Specifies restrictions on the browser the subject can use to complete the experiment. See list of options below.
 show_progress_bar | boolean | If true, then [a progress bar](../features/progress-bar.md) is shown at the top of the page.
-max_load_time | numeric | The maximum number of milliseconds to wait for audio content to preload. If the wait time is exceeded an error message is displayed and the experiment stops. The default value is 60 seconds.
+preload_audio | array | An array of audio files to preload before starting the experiment.
+preload_images | array | An array of image files to preload before starting the experiment.
+max_load_time | numeric | The maximum number of milliseconds to wait for content to preload. If the wait time is exceeded an error message is displayed and the experiment stops. The default value is 60 seconds.
 fullscreen | boolean | If true, the experiment will run in fullscreen mode. See the [feature page](../features/fullscreen.md) for more details.
-default_iti | numeric | The default inter-trial interval in ms. The default value if none is specified is 1,000ms.
+default_iti | numeric | The default inter-trial interval in ms. The default value if none is specified is 0ms.
 
 Possible values for the exclusions parameter above.
 

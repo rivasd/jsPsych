@@ -10,7 +10,6 @@
 
 
 jsPsych.plugins['survey-multi-choice'] = (function() {
-
   var plugin = {};
 
   plugin.info = {
@@ -52,9 +51,7 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
       }
     }
   }
-
   plugin.trial = function(display_element, trial) {
-
     var plugin_id_name = "jspsych-survey-multi-choice";
     var plugin_id_selector = '#' + plugin_id_name;
     var _join = function( /*args*/ ) {
@@ -73,7 +70,7 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // inject CSS for trial
-    var node = display_element.append('<style id="jspsych-survey-multi-choice-css">')
+    var node = display_element.innerHTML += '<style id="jspsych-survey-multi-choice-css">';
     var cssstr = ".jspsych-survey-multi-choice-question { margin-top: 2em; margin-bottom: 2em; text-align: left; }"+
       ".jspsych-survey-multi-choice-text span.required {color: darkred;}"+
       ".jspsych-survey-multi-choice-horizontal .jspsych-survey-multi-choice-text {  text-align: center;}"+
@@ -81,22 +78,15 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
       ".jspsych-survey-multi-choice-horizontal .jspsych-survey-multi-choice-option {  display: inline-block;  margin-left: 1em;  margin-right: 1em;  vertical-align: top;}"+
       "label.jspsych-survey-multi-choice-text input[type='radio'] {margin-right: 1em;}"
 
-    $('#jspsych-survey-multi-choice-css').html(cssstr);
+    display_element.querySelector('#jspsych-survey-multi-choice-css').innerHTML = cssstr;
 
     // form element
     var trial_form_id = _join(plugin_id_name, "form");
-    display_element.append($('<form>', {
-      "id": trial_form_id
-    }));
-    var $trial_form = $("#" + trial_form_id);
-
+    display_element.innerHTML += '<form id="'+trial_form_id+'"></form>';
+    var trial_form = display_element.querySelector("#" + trial_form_id);
     // show preamble text
     var preamble_id_name = _join(plugin_id_name, 'preamble');
-    $trial_form.append($('<div>', {
-      "id": preamble_id_name,
-      "class": preamble_id_name
-    }));
-    $('#' + preamble_id_name).html(trial.preamble);
+    trial_form.innerHTML += '<div id="'+preamble_id_name+'" class="'+preamble_id_name+'">'+trial.preamble+'</div>';
 
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
@@ -105,86 +95,78 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
       if (trial.horizontal) {
         question_classes.push(_join(plugin_id_name, 'horizontal'));
       }
-
-      $trial_form.append($('<div>', {
-        "id": _join(plugin_id_name, i),
-        "class": question_classes.join(' ')
-      }));
-
+    
+      trial_form.innerHTML += '<div id="'+_join(plugin_id_name, i)+'" class="'+question_classes.join(' ')+'"></div>';
+    
       var question_selector = _join(plugin_id_selector, i);
-
+    
       // add question text
-      $(question_selector).append(
-        '<p class="' + plugin_id_name + '-text survey-multi-choice">' + trial.questions[i] + '</p>'
-      );
+      display_element.querySelector(question_selector).innerHTML += '<p class="' + plugin_id_name + '-text survey-multi-choice">' + trial.questions[i] + '</p>';
 
       // create option radio buttons
       for (var j = 0; j < trial.options[i].length; j++) {
         var option_id_name = _join(plugin_id_name, "option", i, j),
           option_id_selector = '#' + option_id_name;
-
+    
         // add radio button container
-        $(question_selector).append($('<div>', {
-          "id": option_id_name,
-          "class": _join(plugin_id_name, 'option')
-        }));
-
+        display_element.querySelector(question_selector).innerHTML += '<div id="'+option_id_name+'" class="'+_join(plugin_id_name, 'option')+'"></div>';
+    
         // add label and question text
-        var option_label = '<label class="' + plugin_id_name + '-text">' + trial.options[i][j] + '</label>';
-        $(option_id_selector).append(option_label);
-
-        // create radio button
+        var form = document.getElementById(option_id_name)
         var input_id_name = _join(plugin_id_name, 'response', i);
-        $(option_id_selector + " label").prepend('<input type="radio" name="' + input_id_name + '" value="' + trial.options[i][j] + '">');
+        var label = document.createElement('label');
+        label.setAttribute('class', plugin_id_name+'-text');
+        label.innerHTML = trial.options[i][j];
+        label.setAttribute('for', input_id_name)
+    
+        // create radio button
+        var input = document.createElement('input');
+        input.setAttribute('type', "radio");
+        input.setAttribute('name', input_id_name);
+        input.setAttribute('value', trial.options[i][j]);
+        form.appendChild(label);
+        form.insertBefore(input, label);
       }
 
       if (trial.required && trial.required[i]) {
         // add "question required" asterisk
-        $(question_selector + " p").append("<span class='required'>*</span>")
-
+        display_element.querySelector(question_selector + " p").innerHMTL += "<span class='required'>*</span>";
+    
         // add required property
-        $(question_selector + " input:radio").prop("required", true);
+        display_element.querySelector(question_selector + " input[type=radio]").required = true;
       }
     }
-
     // add submit button
-    $trial_form.append($('<input>', {
-      'type': 'submit',
-      'id': plugin_id_name + '-next',
-      'class': plugin_id_name + ' jspsych-btn',
-      'value': 'Submit Answers'
-    }));
+    trial_form.innerHTML += '<input type="submit" id="'+plugin_id_name+'-next" class="'+plugin_id_name+' jspsych-btn"></input>';
 
-    $trial_form.submit(function(event) {
-
+    trial_form.addEventListener('submit', function(event) {
       event.preventDefault();
-
+      var matches = display_element.querySelectorAll("div." + plugin_id_name + "-question");
       // measure response time
       var endTime = (new Date()).getTime();
       var response_time = endTime - startTime;
 
       // create object to hold responses
       var question_data = {};
-      $("div." + plugin_id_name + "-question").each(function(index) {
+      var matches = display_element.querySelectorAll("div." + plugin_id_name + "-question");
+      matches.forEach(function(match, index) {
         var id = "Q" + index;
-        var val = $(this).find("input:radio:checked").val();
+        var val = match.querySelector("input[type=radio]:checked").value;
         var obje = {};
         obje[id] = val;
-        $.extend(question_data, obje);
-      });
-
+        Object.assign(question_data, obje);
+      })
       // save data
       var trial_data = {
         "rt": response_time,
         "responses": JSON.stringify(question_data)
       };
-
-      display_element.html('');
-
+      display_element.innerHTML = '';
+    
       // next trial
       jsPsych.finishTrial(trial_data);
     });
-
+    
     var startTime = (new Date()).getTime();
   };
 
