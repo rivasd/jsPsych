@@ -114,7 +114,15 @@ jsPsych.plugins.similarity = (function() {
   };
   
   plugin.trial = function(display_element, trial) {
-
+	  
+	  //we dont have time to remove dependency on jQuery here, but jsPsych now gives us a DOMElement instead of a jQuery object, quick fis
+	  //TODO: remove jQuery dependency
+	  
+	  if(display_element instanceof Element){
+		  display_element = $(display_element)
+	  }
+	  
+	  
     // default parameters
     trial.labels = (typeof trial.labels === 'undefined') ? ["Not at all similar", "Identical"] : trial.labels;
     trial.intervals = trial.intervals || 100;
