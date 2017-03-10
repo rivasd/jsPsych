@@ -239,7 +239,7 @@ jsPsych.plugins.similarity = (function() {
 
     function showBlankScreen() {
 
-      display_element.querySelector('#jspsych-sim-stim').style.visibility = 'hidden';
+      $('#jspsych-sim-stim').css('visibility', 'hidden');
 
       trial.setTimeoutHandlers.push(setTimeout(function() {
         showSecondStim();
@@ -249,9 +249,9 @@ jsPsych.plugins.similarity = (function() {
     function showSecondStim() {
 
       if (!trial.is_html) {
-        display_element.querySelector('#jspsych-sim-stim').src = trial.stimuli[1];
+        $('#jspsych-sim-stim')[0].src = trial.stimuli[1];
       } else {
-        display_element.querySelector('#jspsych-sim-stim').innerHTML = trial.stimuli[1];
+        $('#jspsych-sim-stim')[0].innerHTML = trial.stimuli[1];
       }
 
       $('#jspsych-sim-stim').css({
@@ -276,7 +276,7 @@ jsPsych.plugins.similarity = (function() {
       
       if (trial.timing_second_stim > 0) {
         jsPsych.pluginAPI.setTimeout(function() {
-          display_element.querySelector("#jspsych-sim-stim").style.visibility = 'hidden';
+          $("#jspsych-sim-stim").css('visibility','hidden');
           if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
           }
