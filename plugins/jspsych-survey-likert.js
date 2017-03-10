@@ -46,7 +46,7 @@ jsPsych.plugins['survey-likert'] = (function() {
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // inject CSS for trial
-    var node = display_element.append('<style id="jspsych-survey-likert-css">')
+    var node = display_element.innerHTML += '<style id="jspsych-survey-likert-css"></style>';
     var cssstr = ".jspsych-survey-likert-statement { display:block; font-size: 18px; padding-top: 30px; margin-bottom:10px; }"+
       ".jspsych-survey-likert-opts { list-style:none; width:100%; margin:0; padding:0 0 35px; display:block; font-size: 14px; line-height:1.1em; }"+
       ".jspsych-survey-likert-opt-label { line-height: 1.1em; }"+
@@ -54,22 +54,18 @@ jsPsych.plugins['survey-likert'] = (function() {
       ".jspsych-survey-likert-opts:last-of-type { border-bottom: 0; }"+
       ".jspsych-survey-likert-opts li { display:inline-block; /*width:19%;*/ text-align:center; vertical-align: top; }"+
       ".jspsych-survey-likert-opts li input[type=radio] { display:block; position:relative; top:0; left:50%; margin-left:-6px; }"
-    $('#jspsych-survey-likert-css').html(cssstr);
+    display_element.querySelector('#jspsych-survey-likert-css').innerHTML = cssstr;
 
     // show preamble text
-    display_element.append($('<div>', {
-      "id": 'jspsych-survey-likert-preamble',
-      "class": 'jspsych-survey-likert-preamble'
-    }));
+    display_element.innerHTML += '<div id="jspsych-survey-likert-preamble" class="jspsych-survey-likert-preamble">'+trial.preamble+'</div>';
 
-    $('#jspsych-survey-likert-preamble').html(trial.preamble);
+    display_element.innerHTML += '<form id="jspsych-survey-likert-form">';
 
-    display_element.append('<form id="jspsych-survey-likert-form" name="jspsych-survey-likert-form">');
+    var form_element = display_element.querySelector('#jspsych-survey-likert-form');
     // add likert scale questions
     for (var i = 0; i < trial.questions.length; i++) {
-      form_element = $('#jspsych-survey-likert-form');
       // add question
-      form_element.append('<label class="jspsych-survey-likert-statement">' + trial.questions[i] + '</label>');
+      form_element.innerHTML += '<label class="jspsych-survey-likert-statement">' + trial.questions[i] + '</label>';
       // add options
       var width = 100 / trial.labels[i].length;
       options_string = '<ul class="jspsych-survey-likert-opts" data-radio-group="Q' + i + '">';
@@ -80,7 +76,7 @@ jsPsych.plugins['survey-likert'] = (function() {
         options_string += '<li style="width:' + width + '%"><input type="radio" name="Q' + i + '" value="' + j + '"'+ required +'><label class="jspsych-survey-likert-opt-label">' + trial.labels[i][j] + '</label></li>';
       }
       options_string += '</ul>';
-      form_element.append(options_string);
+      form_element.innerHTML += options_string;
     }
 
     // add submit button
@@ -116,7 +112,7 @@ jsPsych.plugins['survey-likert'] = (function() {
         "responses": JSON.stringify(question_data)
       };
 
-      display_element.html('');
+      display_element.innerHTML = '';
 
       // next trial
       jsPsych.finishTrial(trial_data);
