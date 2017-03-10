@@ -1846,6 +1846,49 @@ jsPsych.pluginAPI = (function() {
     }
     return undefined;
   }
+  
+  /**
+   * Waits for the cursor to be position at the center of a div before continuing with the callback. Adresses anchoring effects were a participant's
+   * response might be affected by the position of their mouse prior to the start of a new trial.
+   * 
+   * @param	{object}	opts			parameter object
+   * @param {Function}	opts.callback	What to do once the cursor is placed at the target location. receives the time taken to move the mouse as single parameter
+   * @param	{Number?}	opts.size		A value from 0-100 representing the percentage of the display element that counts as the center
+   * @param	{String}	opts.prompt		A small message to show at the top to remind participants what to do
+   * @author	Daniel Rivas
+   */
+  module.waitForCenteredMouse = function(opts){
+	  var size = opts.size || 10;
+	  opts.prompt = opts.prompt || "Move your mouse to the center of the screen to continue";
+	  
+	  var DOM_target = jsPsych.getDisplayElement()[0]; 
+	  
+	  var target_h = DOM_target.offsetHeight * (size/100);
+	  var target_w = DOM_target.offsetWidth * (size/100);
+	  
+	  var prompt = document.createElement("span");
+	  prompt.innerHTML = opts.prompt;
+	  prompt.className += "jspsych-prompt";
+	  DOM_target.insertBefore(prompt, DOM_target.firstChild);
+	  
+	  var dummy = document.createElement("div");
+	  dummy.innerHTML = '<div class="jspsych-anchor-target" id="jspsych-anchor-target" style="display:block; position:absolute; width:'+target_w+'px; height:'+ target_h+'px; top:50%; left:50%; transform: translate(-50%, -50%);"></div>'
+	  var target = dummy.firstChild;
+	  DOM_target.appendChild(target);
+	  var start_time = Date.now();
+	  
+	  function mouseCentered(e){
+		  e.stopPropagation();
+		  target.removeEventListener("mouseenter", mouseCentered);
+		  target.remove();
+		  prompt.remove();
+		  
+		  opts.callback( (Date.now() - start_time) );
+	  }
+	  
+	  
+	  target.addEventListener("mouseenter", mouseCentered);
+  }
 
   var keylookup = {
     'backspace': 8,
