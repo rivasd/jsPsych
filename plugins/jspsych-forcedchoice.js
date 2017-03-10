@@ -57,6 +57,8 @@ jsPsych.plugins["forcedchoice"] = (function() {
   
   plugin.trial = function(display_element, trial) {
 
+	  //TODO: remove jQuery dependency
+	  display_element = $(display_element);
     // set default values for parameters
     trial.is_html = trial.is_html || false;
     trial.timing_stim = trial.timing_stim || 1000;

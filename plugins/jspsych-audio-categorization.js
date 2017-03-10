@@ -16,6 +16,9 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
+	//TODO: remove jQuery dependency
+	  display_element = $(display_element);
+	  
     // default parameters
     trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.response_ends_trial = (typeof trial.response_ends_trial === 'undefined') ? true : trial.response_ends_trial;

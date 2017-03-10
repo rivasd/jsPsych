@@ -14,6 +14,8 @@ jsPsych.plugins["audio-similarity"] = (function() {
   
 	  plugin.trial = function(display_element, trial){
 	
+		  //TODO: remove jQuery dependency
+		  display_element = $(display_element);
 			// default parameters
 			trial.labels = (typeof trial.labels === 'undefined') ? ["Not at all similar", "Identical"] : trial.labels;
 			trial.intervals = trial.intervals || 100;

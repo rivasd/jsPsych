@@ -212,6 +212,9 @@ jsPsych.plugins["rating"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
+	  //TODO: remove jQuery dependency
+	  display_element = $(display_element);
+	  
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
