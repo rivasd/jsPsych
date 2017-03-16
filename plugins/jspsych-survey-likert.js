@@ -70,41 +70,43 @@ jsPsych.plugins['survey-likert'] = (function() {
       var width = 100 / trial.labels[i].length;
       options_string = '<ul class="jspsych-survey-likert-opts" data-radio-group="Q' + i + '">';
       for (var j = 0; j < trial.labels[i].length; j++) {
-    	  
-    	var required =   trial.required ? "required" : "";
-    	  
-        options_string += '<li style="width:' + width + '%"><input type="radio" name="Q' + i + '" value="' + j + '"'+ required +'><label class="jspsych-survey-likert-opt-label">' + trial.labels[i][j] + '</label></li>';
+    	
+        options_string += '<li style="width:' + width + '%"><input type="radio" name="Q' + i + '" value="' + j + '"';
+        if(trial.required){
+          options_string += ' required';
+        }
+        options_string += '><label class="jspsych-survey-likert-opt-label">' + trial.labels[i][j] + '</label></li>';
       }
       options_string += '</ul>';
       form_element.innerHTML += options_string;
     }
 
     // add submit button
-    form_element.append($('<input>', {
-      'id': 'jspsych-survey-likert-next',
-      'class': 'jspsych-survey-likert jspsych-btn',
-      'type': 'submit',
-      'for': 'jspsych-survey-likert-form'
-    }));
-    $("#jspsych-survey-likert-next").attr("value",'Submit Answers');
-    form_element.submit(function(e) {
-    	e.preventDefault();
+
+    form_element.innerHTML += '<input type="submit" id="jspsych-survey-likert-next" class="jspsych-survey-likert jspsych-btn" value="Submit Answers"></input>';
+
+    form_element.addEventListener('submit', function(e){
+      e.preventDefault();
       // measure response time
       var endTime = (new Date()).getTime();
       var response_time = endTime - startTime;
 
       // create object to hold responses
       var question_data = {};
-      $("#jspsych-survey-likert-form .jspsych-survey-likert-opts").each(function(index) {
-        var id = $(this).data('radio-group');
-        var response = $('input[name="' + id + '"]:checked').val();
-        if (typeof response == 'undefined') {
-          response = -1;
+
+      var matches = display_element.querySelectorAll('#jspsych-survey-likert-form .jspsych-survey-likert-opts');
+      for(var index = 0; index < matches.length; index++){
+        var id = matches[index].dataset['radioGroup'];
+        var el = display_element.querySelector('input[name="' + id + '"]:checked');
+        if (el === null) {
+          var response = "";
+        } else {
+          var response = parseInt(el.value);
         }
         var obje = {};
         obje[id] = response;
-        $.extend(question_data, obje);
-      });
+        Object.assign(question_data, obje);
+      }
 
       // save data
       var trial_data = {
