@@ -58,27 +58,7 @@ jsPsych.plugins.html = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial, ["check_fn"]);
     
-    //I also propose an optional default function that scans all input or textarea elements inside the target element, and builds a key value pair
-    function findAllInput(elt){
-    	var dict={};
-    	var inputElts = elt.find(":input"); //get all input elements within the target element
-    	inputElts.each(function(idx, input){
-    		input = $(input);
-    		var name = input.attr("name");
-    		var checked = input.prop('checked');
-    		if( checked === undefined ){
-    			//this is not a checkbox/radio
-    			if($.trim(input.val()) != ''){
-    				dict[name] = input.val();
-    			}
-    		}
-    		else if(checked){
-    			dict[name]=input.val()
-    		}
-    	});
-    	//we have to reiterate because the previous selector gets ALL radio/checkbox with the same name
-    	return dict;
-    }
+    
     
     
     var url = trial.url;
