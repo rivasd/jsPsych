@@ -69,6 +69,7 @@ jsPsych.plugins.html = (function() {
     load(display_element, url, function() {
       var t0 = (new Date()).getTime();
       var finish = function() {
+    	  var extraData = trial.check_fn ? check_fn(display_element) : false;
         if (trial.check_fn && !trial.check_fn(display_element)) { return };
         if (trial.cont_key) { document.removeEventListener('keydown', key_listener); }
         var trial_data = {
