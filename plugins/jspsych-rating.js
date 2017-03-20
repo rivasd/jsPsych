@@ -65,8 +65,8 @@ jsPsych.plugins["rating"] = (function() {
           //'width': item_width + 'px',
           'margin': '0px',
           'padding': '0px',
-          'text-align': 'center',
-          'position': 'absolute'
+          'text-align': 'center'
+          //'position': 'absolute'
         });
         
         var left = (spacing_interval * index) - (label.width()/2)
@@ -78,7 +78,7 @@ jsPsych.plugins["rating"] = (function() {
 	  		left = left - (label.width());
 	  	}
         
-        label.css('left', left);
+        //label.css('left', left);
         
       });
   }
