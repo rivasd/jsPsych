@@ -1884,7 +1884,7 @@ jsPsych.pluginAPI = (function() {
 	  var size = opts.size || 10;
 	  opts.prompt = opts.prompt || "Move your mouse to the center of the screen to continue";
 	  
-	  var DOM_target = jsPsych.getDisplayElement()[0]; 
+	  var DOM_target = jsPsych.getDisplayElement(); 
 	  
 	  var target_h = DOM_target.offsetHeight * (size/100);
 	  var target_w = DOM_target.offsetWidth * (size/100);
