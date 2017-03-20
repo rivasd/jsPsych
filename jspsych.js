@@ -1891,7 +1891,7 @@ jsPsych.pluginAPI = (function() {
 	  
 	  var prompt = document.createElement("span");
 	  prompt.innerHTML = opts.prompt;
-	  prompt.className += "jspsych-prompt";
+	  prompt.className += "jspsych-anchor-prompt";
 	  DOM_target.insertBefore(prompt, DOM_target.firstChild);
 	  
 	  var dummy = document.createElement("div");
