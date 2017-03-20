@@ -74,14 +74,14 @@ jsPsych.plugins["audio-abx"] = (function() {
 		            response = info;
 		          }
 		        
-		        prefetched_data.correct = function evaluate_correctness(){
+		        prefetched_data.correct = (function evaluate_correctness(){
 		        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.key_first) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.key_second)){
 				      	   return true;
 				    }
 				    else {
 				      	  return false;
 		            }		        
-		        }	
+		        })();	
 		      	end_trial(prefetched_data);
 		      };
 		      
