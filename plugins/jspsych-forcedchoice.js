@@ -52,7 +52,16 @@ jsPsych.plugins["forcedchoice"] = (function() {
 	  data.first = trial.stimuli[0];
 	  data.last = trial.stimuli[trial.stimuli.length-1];
 	  
-	  jsPsych.finishTrial(data);
+	  //add the anchoring thig
+	  jsPsych.pluginAPI.waitForCenteredMouse({
+		 callback: function(){
+			 jsPsych.finishTrial(data);
+		 } ,
+		 
+	  });
+	  
+	  
+	  
   };
   
   plugin.trial = function(display_element, trial) {
