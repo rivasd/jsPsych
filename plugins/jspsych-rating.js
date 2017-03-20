@@ -199,13 +199,27 @@ jsPsych.plugins["rating"] = (function() {
 		   		plugin.prompt.remove();
 		   		//remove flexbox
 		   		display_element.css('display', 'auto');
-		   		jsPsych.finishTrial(data);
+		   		
+		   		jsPsych.pluginAPI.waitForCenteredMouse({
+		   			callback: function(){
+		   				jsPsych.finishTrial(data);
+		   			}
+		   		});
+		   		
+		   		
+		   		
 		   	},trial.timeout_message_timing))
 	   }
 	   else{
 		   plugin.prompt.remove();
 		   display_element.css('display', 'auto');
-		   jsPsych.finishTrial(data);
+		   
+		   jsPsych.pluginAPI.waitForCenteredMouse({
+	   			callback: function(){
+	   				jsPsych.finishTrial(data);
+	   			}
+	   		});
+		   
 	   }
     };
   
