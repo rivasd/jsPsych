@@ -77,9 +77,19 @@ jsPsych.plugins.instructions = (function() {
     var start_time = (new Date()).getTime();
 
     var last_page_update_time = start_time;
-
+    
+    function btnListener(evt){
+    	evt.target.removeEventListener('click', btnListener);
+    	if(this.id === "jspsych-instructions-back"){
+    		back();
+    	}
+    	else if(this.id === 'jspsych-instructions-next'){
+    		next();
+    	}
+    }
+    
     function show_current_page() {
-      display_element.html(trial.pages[current_page]);
+      display_element.innerHTML = trial.pages[current_page];
 
       if (trial.show_clickable_nav) {
 
@@ -89,49 +99,37 @@ jsPsych.plugins.instructions = (function() {
         }
         nav_html += "<button id='jspsych-instructions-next' class='jspsych-btn'>Next &gt;</button></div>"
 
-        display_element.append(nav_html);
-
+        display_element.innerHTML += nav_html;
+        
         if (current_page != 0 && trial.allow_backward) {
-          $('#jspsych-instructions-back').on('click', function() {
-            clear_button_handlers();
-            back();
-          });
+          display_element.querySelector('#jspsych-instructions-back').addEventListener('click', btnListener);
         }
-
-        $('#jspsych-instructions-next').on('click', function() {
-          clear_button_handlers();
-          next();
-        });
-
+        
+        display_element.querySelector('#jspsych-instructions-next').addEventListener('click', btnListener);
       }
     }
 
-    function clear_button_handlers() {
-      $('#jspsych-instructions-next').off('click');
-      $('#jspsych-instructions-back').off('click');
-    }
-
     function next() {
-
+    
       add_current_page_to_view_history()
-
+    
       current_page++;
-
+    
       // if done, finish up...
       if (current_page >= trial.pages.length) {
         endTrial();
       } else {
         show_current_page();
       }
-
+    
     }
-
+    
     function back() {
-
+    
       add_current_page_to_view_history()
-
+    
       current_page--;
-
+    
       show_current_page();
     }
 
@@ -155,7 +153,7 @@ jsPsych.plugins.instructions = (function() {
         jsPsych.pluginAPI.cancelKeyboardResponse(keyboard_listener);
       }
 
-      display_element.html('');
+      display_element.innerHTML = '';
 
       var trial_data = {
         "view_history": JSON.stringify(view_history),

@@ -125,6 +125,7 @@ jsPsych.plugins.categorize = (function() {
 	  else return null;
   };
 
+
   plugin.trial = function(display_element, trial) {
 
     // default parameters
@@ -157,18 +158,9 @@ jsPsych.plugins.categorize = (function() {
     var trig = plugin.getTrigger(trial);
 
     if (!trial.is_html) {
-      // add image to display
-      display_element.append($('<img>', {
-        "src": trial.stimulus,
-        "class": 'jspsych-categorize-stimulus',
-        "id": 'jspsych-categorize-stimulus'
-      }));
+      display_element.innerHTML = '<img id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus" src="'+trial.stimulus+'"></img>';
     } else {
-      display_element.append($('<div>', {
-        "id": 'jspsych-categorize-stimulus',
-        "class": 'jspsych-categorize-stimulus',
-        "html": trial.stimulus
-      }));
+      display_element.innerHTML = '<div id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus">'+trial.stimulus+'</div>';
     }
     //send the correct stimulus presentation trigger
     if(trig && jsPsych.pluginAPI.hardwareConnected){
@@ -184,13 +176,13 @@ jsPsych.plugins.categorize = (function() {
     // hide image after time if the timing parameter is set
     if (trial.timing_stim > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
-        $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
+        display_element.querySelector('#jspsych-categorize-stimulus').style.visibility = 'hidden';
       }, trial.timing_stim);
     };
 
     // if prompt is set, show prompt
     if (trial.prompt !== "") {
-      display_element.append(trial.prompt);
+      display_element.innerHTML += trial.prompt;
     };
 
     var trial_data = {};
@@ -237,7 +229,7 @@ jsPsych.plugins.categorize = (function() {
     	  trial_data.timeout = false;
       }
 
-      display_element.html('');
+      display_element.innerHTML = '';
 
       var timeout = info.rt == -1;
       doFeedback(correct, timeout);
@@ -263,7 +255,7 @@ jsPsych.plugins.categorize = (function() {
     function doFeedback(correct, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
-        display_element.append(trial.timeout_message);
+        display_element.innerHTML += trial.timeout_message;
 
         //send trigger for feedback/error ERPs
         if(!trial.is_practice){
@@ -278,18 +270,9 @@ jsPsych.plugins.categorize = (function() {
         // show image during feedback if flag is set
         if (trial.show_stim_with_feedback) {
           if (!trial.is_html) {
-            // add image to display
-            display_element.append($('<img>', {
-              "src": trial.stimulus,
-              "class": 'jspsych-categorize-stimulus',
-              "id": 'jspsych-categorize-stimulus'
-            }));
+            display_element.innerHTML = '<img id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus" src="'+trial.stimulus+'"></img>';
           } else {
-            display_element.append($('<div>', {
-              "id": 'jspsych-categorize-stimulus',
-              "class": 'jspsych-categorize-stimulus',
-              "html": trial.stimulus
-            }));
+            display_element.innerHTML = '<div id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus">'+trial.stimulus+'</div>';
           }
         }
 
@@ -302,7 +285,7 @@ jsPsych.plugins.categorize = (function() {
         }
 
         // show the feedback
-        display_element.append(atext);
+        display_element.innerHTML += atext;
       }
       // check if force correct button press is set
       if (trial.force_correct_button_press && correct === false && ((timeout && trial.show_feedback_on_timeout) || !timeout)) {
@@ -328,7 +311,7 @@ jsPsych.plugins.categorize = (function() {
     }
 
     function endTrial() {
-      display_element.html("");
+      display_element.innerHTML = '';
       jsPsych.finishTrial(trial_data);
     }
 

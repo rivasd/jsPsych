@@ -114,7 +114,15 @@ jsPsych.plugins.similarity = (function() {
   };
   
   plugin.trial = function(display_element, trial) {
-
+	  
+	  //we dont have time to remove dependency on jQuery here, but jsPsych now gives us a DOMElement instead of a jQuery object, quick fis
+	  //TODO: remove jQuery dependency
+	  
+	  if(display_element instanceof Element){
+		  display_element = $(display_element)
+	  }
+	  
+	  
     // default parameters
     trial.labels = (typeof trial.labels === 'undefined') ? ["Not at all similar", "Identical"] : trial.labels;
     trial.intervals = trial.intervals || 100;
@@ -241,9 +249,9 @@ jsPsych.plugins.similarity = (function() {
     function showSecondStim() {
 
       if (!trial.is_html) {
-        $('#jspsych-sim-stim').attr('src', trial.stimuli[1]);
+        $('#jspsych-sim-stim')[0].src = trial.stimuli[1];
       } else {
-        $('#jspsych-sim-stim').html(trial.stimuli[1]);
+        $('#jspsych-sim-stim')[0].innerHTML = trial.stimuli[1];
       }
 
       $('#jspsych-sim-stim').css({
@@ -268,7 +276,7 @@ jsPsych.plugins.similarity = (function() {
       
       if (trial.timing_second_stim > 0) {
         jsPsych.pluginAPI.setTimeout(function() {
-          $("#jspsych-sim-stim").css('visibility', 'hidden');
+          $("#jspsych-sim-stim").css('visibility','hidden');
           if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
           }

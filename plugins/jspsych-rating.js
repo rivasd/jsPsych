@@ -199,19 +199,36 @@ jsPsych.plugins["rating"] = (function() {
 		   		plugin.prompt.remove();
 		   		//remove flexbox
 		   		display_element.css('display', 'auto');
-		   		jsPsych.finishTrial(data);
+		   		
+		   		jsPsych.pluginAPI.waitForCenteredMouse({
+		   			callback: function(){
+		   				jsPsych.finishTrial(data);
+		   			}
+		   		});
+		   		
+		   		
+		   		
 		   	},trial.timeout_message_timing))
 	   }
 	   else{
 		   plugin.prompt.remove();
 		   display_element.css('display', 'auto');
-		   jsPsych.finishTrial(data);
+		   
+		   jsPsych.pluginAPI.waitForCenteredMouse({
+	   			callback: function(){
+	   				jsPsych.finishTrial(data);
+	   			}
+	   		});
+		   
 	   }
     };
   
 
   plugin.trial = function(display_element, trial) {
 
+	  //TODO: remove jQuery dependency
+	  display_element = $(display_element);
+	  
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
