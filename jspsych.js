@@ -1886,8 +1886,8 @@ jsPsych.pluginAPI = (function() {
 	  
 	  var DOM_target = jsPsych.getDisplayElement(); 
 	  
-	  var target_h = DOM_target.offsetHeight * (size/100);
-	  var target_w = DOM_target.offsetWidth * (size/100);
+	  var target_h = 50;//DOM_target.offsetHeight * (size/100);
+	  var target_w = 50;//DOM_target.offsetWidth * (size/100);
 	  
 	  var prompt = document.createElement("span");
 	  prompt.innerHTML = opts.prompt;
