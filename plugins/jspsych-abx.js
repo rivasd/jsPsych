@@ -31,6 +31,7 @@ jsPsych.plugins.abx = (function() {
 		trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
 		trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
 		trial.prompt_position = trial.prompt_position || 1;
+		trial.response_wait = (typeof trial.response_wait == "undefined") ? false : trial.response_wait;
 		
 		
 		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
@@ -75,6 +76,7 @@ jsPsych.plugins.abx = (function() {
 		/** showImage(image_position_in_trial)
 		 *  function that takes the position of the image in the trial (0,1,2) 
 		 *  and append the appropriate stimuli on the screen
+		 *  BRAVO CATHERINE!!
 		 */
 	    
 	    function showImage(image_position_in_trial){
@@ -112,6 +114,7 @@ jsPsych.plugins.abx = (function() {
             	    visibility:'visible'  
               	});
 	        }
+	        
     	    //stimuli has been shown, send first trigger
     	    if(jsPsych.pluginAPI.hardwareConnected){
     	    	jsPsych.pluginAPI.hardware({
@@ -160,6 +163,36 @@ jsPsych.plugins.abx = (function() {
 		 * 
 		 */
 	    
+	      
+	    function acceptResponse(){
+	    	//start the response time calculation
+			rt_start_time = Date.now();
+	    	// start the response listener
+		    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+		      callback_function: after_response,
+		      valid_responses: trial.choices,
+		      persist: false,
+		      allow_held_key: false,
+		    });
+		    
+		    //start calculating the timeout
+		    if (trial.timing_response > 0) {
+			      jsPsych.pluginAPI.setTimeout(function() {
+			    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
+			    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
+			    	  $timeoutFeedback.text(trial.timeout_feedback);
+			    	  display_element.append($timeoutFeedback);
+			    	  prefetched_data.correct = false;
+			    	  prefetched_data.rt = -1;
+			    	  
+			    	  jsPsych.pluginAPI.setTimeout(function() {
+			        	  end_trial(prefetched_data);
+			          }, trial.timing_feedback); 
+				
+			      },trial.timeout);
+			};
+	    }
+	      
 	    
 	    //show the fixation cross
 		showFixationCross();
@@ -193,6 +226,11 @@ jsPsych.plugins.abx = (function() {
 				    		//show X
 				    		showImage(2);
 				    		
+				    		if(!trial.response_wait){
+				    			acceptResponse();
+				    		}
+				    		
+				    		
 				    		setTimeout(function(){
 				    			//hide X
 					    		$('#jspsych-sim-stim').css('visibility', 'hidden');
@@ -200,30 +238,9 @@ jsPsych.plugins.abx = (function() {
 								if (trial.prompt !== "" && trial.prompt_position === 2) {
 									display_element.append(trial.prompt);
 								}
-					    		//start the response time calculation
-				    			rt_start_time = Date.now();
-						    	// start the response listener
-							    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-							      callback_function: after_response,
-							      valid_responses: trial.choices,
-							      persist: false,
-							      allow_held_key: false,
-							    });
-							    //start calculating the timeout
-							    if (trial.timing_response > 0) {
-								      jsPsych.pluginAPI.setTimeout(function() {
-								    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
-								    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
-								    	  $timeoutFeedback.text(trial.timeout_feedback);
-								    	  display_element.append($timeoutFeedback);
-								    	  prefetched_data.correct = false;
-								    	  prefetched_data.rt = -1;
-								    	  
-								    	  jsPsych.pluginAPI.setTimeout(function() {
-								        	  end_trial(prefetched_data);
-								          }, trial.timing_feedback); 
-									
-								  },trial.timeout);};
+					    		if(trial.response_wait){
+					    			acceptResponse();
+					    		}
 							    						    
 				    		},trial.timing_stims);
 				    		
