@@ -166,7 +166,10 @@ jsPsych.plugins.abx = (function() {
 	      
 	    function acceptResponse(){
 	    	//start the response time calculation
-	    	display_element.append(trial.prompt);
+	    	if(! (typeof trial.prompt == 'undefined') && trial.prompt_position === 2){
+	    		display_element.append(trial.prompt);
+	    	}
+	    	
 			rt_start_time = Date.now();
 	    	// start the response listener
 		    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
