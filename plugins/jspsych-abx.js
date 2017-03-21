@@ -166,6 +166,7 @@ jsPsych.plugins.abx = (function() {
 	      
 	    function acceptResponse(){
 	    	//start the response time calculation
+	    	display_element.append(trial.prompt);
 			rt_start_time = Date.now();
 	    	// start the response listener
 		    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
@@ -234,10 +235,6 @@ jsPsych.plugins.abx = (function() {
 				    		setTimeout(function(){
 				    			//hide X
 					    		$('#jspsych-sim-stim').css('visibility', 'hidden');
-					    		//show the prompt if the researcher want it to be at this time in the trial
-								if (trial.prompt !== "" && trial.prompt_position === 2) {
-									display_element.append(trial.prompt);
-								}
 					    		if(trial.response_wait){
 					    			acceptResponse();
 					    		}
