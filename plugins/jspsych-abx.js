@@ -266,11 +266,9 @@ jsPsych.plugins.abx = (function() {
 								          }, trial.timing_feedback); 
 									
 								  },trial.timeout);};
-=======
 					    		if(trial.response_wait){
 					    			acceptResponse();
 					    		}
->>>>>>> branch 'UQAM' of https://github.com/rivasd/jsPsych
 							    						    
 				    		},trial.timing_stims);
 				    		
