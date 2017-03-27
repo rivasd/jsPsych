@@ -65,8 +65,8 @@ jsPsych.plugins["rating"] = (function() {
           //'width': item_width + 'px',
           'margin': '0px',
           'padding': '0px',
-          'text-align': 'center',
-          'position': 'absolute'
+          'text-align': 'center'
+          //'position': 'absolute'
         });
         
         var left = (spacing_interval * index) - (label.width()/2)
@@ -78,7 +78,7 @@ jsPsych.plugins["rating"] = (function() {
 	  		left = left - (label.width());
 	  	}
         
-        label.css('left', left);
+        //label.css('left', left);
         
       });
   }
@@ -199,19 +199,36 @@ jsPsych.plugins["rating"] = (function() {
 		   		plugin.prompt.remove();
 		   		//remove flexbox
 		   		display_element.css('display', 'auto');
-		   		jsPsych.finishTrial(data);
+		   		
+		   		jsPsych.pluginAPI.waitForCenteredMouse({
+		   			callback: function(){
+		   				jsPsych.finishTrial(data);
+		   			}
+		   		});
+		   		
+		   		
+		   		
 		   	},trial.timeout_message_timing))
 	   }
 	   else{
 		   plugin.prompt.remove();
 		   display_element.css('display', 'auto');
-		   jsPsych.finishTrial(data);
+		   
+		   jsPsych.pluginAPI.waitForCenteredMouse({
+	   			callback: function(){
+	   				jsPsych.finishTrial(data);
+	   			}
+	   		});
+		   
 	   }
     };
   
 
   plugin.trial = function(display_element, trial) {
 
+	  //TODO: remove jQuery dependency
+	  display_element = $(display_element);
+	  
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function

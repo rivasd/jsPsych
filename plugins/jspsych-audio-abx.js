@@ -14,6 +14,8 @@ jsPsych.plugins["audio-abx"] = (function() {
 
 	plugin.trial = function(display_element, trial){
 	
+		//TODO: remove jQuery dependency
+		display_element = $(display_element);
 			// default parameters		
 			trial.timing_gap = trial.timing_gap || 500; 
 			trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
@@ -74,14 +76,14 @@ jsPsych.plugins["audio-abx"] = (function() {
 		            response = info;
 		          }
 		        
-		        prefetched_data.correct = function evaluate_correctness(){
+		        prefetched_data.correct = (function evaluate_correctness(){
 		        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.key_first) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.key_second)){
 				      	   return true;
 				    }
 				    else {
 				      	  return false;
 		            }		        
-		        }	
+		        })();	
 		      	end_trial(prefetched_data);
 		      };
 		      

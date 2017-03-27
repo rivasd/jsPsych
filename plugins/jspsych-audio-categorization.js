@@ -16,6 +16,9 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
+	//TODO: remove jQuery dependency
+	  display_element = $(display_element);
+	  
     // default parameters
     trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.response_ends_trial = (typeof trial.response_ends_trial === 'undefined') ? true : trial.response_ends_trial;
@@ -25,6 +28,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     if(typeof trial.key_answer === "string"){
       trial.key_answer = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer);
     }
+    trial.text_answer = (typeof trial.text_answer == "undefined") ? "" : trial.text_answer;
     
     trial.timing_feedback = trial.timing_feedback || 200; //duration of the appereance of the feedback (in ms)
     trial.timeout_feedback = trial.timeout_feedback || 'Answer faster!';
@@ -128,6 +132,10 @@ jsPsych.plugins["audio-categorization"] = (function() {
       else {
     	  if (info.key)
     	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
+    	  
+    	  if(trial.text_answer){
+    	      trial.incorrect_feedback.replace("%ANS%", trial.text_answer);
+    	  }
     	  $incorrectFeedback.text(trial.incorrect_feedback);
     	  display_element.append($incorrectFeedback);
     	  prefetched_data.correct = false;

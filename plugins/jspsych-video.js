@@ -61,7 +61,9 @@ jsPsych.plugins.video = (function() {
     trial.prompt = trial.prompt || "";
     trial.autoplay = typeof trial.autoplay == 'undefined' ? true : trial.autoplay;
     trial.controls = typeof trial.controls == 'undefined' ? false : trial.controls;
+    trial.choices = trial.choices || ["q", "p"];
 
+    
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -84,27 +86,35 @@ jsPsych.plugins.video = (function() {
     }
     video_html +="</video>"
 
-    display_element.append(video_html);
+    display_element.innerHTML += video_html;
 
     //show prompt if there is one
     if (trial.prompt !== "") {
-      display_element.append(trial.prompt);
+      display_element.innerHTML += trial.prompt;
     }
 
-    document.getElementById('jspsych-video-player').onended = function(){
-      end_trial();
+    display_element.querySelector('#jspsych-video-player').onended = function(){
+      jsPsych.pluginAPI.getKeyboardResponse({
+    	callback_function : end_trial,
+    	valid_responses: trial.choices
+      });
+      //end_trial();
     }
 
     // function to end trial when it is time
-    var end_trial = function() {
+    var end_trial = function(info) {
 
       // gather the data to store for the trial
       var trial_data = {
-        stimulus: JSON.stringify(trial.sources)
+        stimulus: JSON.stringify(trial.sources),
+        rt: info.rt,
+        key_press: info.key
       };
-
+      if(trial.answer){
+    	 trial_data.correct = info.key === trial.answer; 
+      }
       // clear the display
-      display_element.html('');
+      display_element.innerHTML = '';
 
       // move on to the next trial
       jsPsych.finishTrial(trial_data);
