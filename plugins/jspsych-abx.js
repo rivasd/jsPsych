@@ -238,7 +238,6 @@ jsPsych.plugins.abx = (function() {
 				    		setTimeout(function(){
 				    			//hide X
 					    		$('#jspsych-sim-stim').css('visibility', 'hidden');
-<<<<<<< HEAD
 					    		//show the prompt if the researcher want it to be at this time in the trial
 								if (trial.prompt !== "" && trial.prompt_position === 2) {
 									display_element.append(trial.prompt);
