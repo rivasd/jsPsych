@@ -207,7 +207,7 @@ jsPsych.plugins.abx = (function() {
 							      allow_held_key: false,
 							    });
 							    //start calculating the timeout
-							    if (trial.timing_response > 0) {
+							    if (trial.timeout > 0) {
 								      jsPsych.pluginAPI.setTimeout(function() {
 								    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
 								    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
