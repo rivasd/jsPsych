@@ -186,6 +186,7 @@ jsPsych.plugins.abx = (function() {
 			    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
 			    	  $timeoutFeedback.text(trial.timeout_feedback);
 			    	  $("#jspsych-abx-prompt").remove();
+			    	  $("#jspsych-abx-stim").remove();
 			    	  display_element.append($timeoutFeedback);
 			    	  prefetched_data.correct = false;
 			    	  prefetched_data.rt = -1;
