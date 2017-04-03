@@ -167,7 +167,7 @@ jsPsych.plugins.abx = (function() {
 	    function acceptResponse(){
 	    	//start the response time calculation
 	    	if(! (typeof trial.prompt == 'undefined')){
-	    		display_element.append(trial.prompt);
+	    		display_element.append($("<p></p>", {id:'jspsych-abx-prompt'}).text(trial.prompt));
 	    	}
 	    	
 			rt_start_time = Date.now();
@@ -185,6 +185,7 @@ jsPsych.plugins.abx = (function() {
 			    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
 			    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
 			    	  $timeoutFeedback.text(trial.timeout_feedback);
+			    	  $("#jspsych-abx-prompt").remove();
 			    	  display_element.append($timeoutFeedback);
 			    	  prefetched_data.correct = false;
 			    	  prefetched_data.rt = -1;
