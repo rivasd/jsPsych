@@ -25,14 +25,22 @@ jsPsych.plugins.abx = (function() {
 		trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
 		trial.timeout_feedback = trial.timeout_feedback || "Please respond faster";
 		trial.timeout_message_timing = trial.timeout_message_timing || 1000
-		trial.choices = trial.choices || ['a','b'];			
+		trial.choices = trial.choices || ['a','b'];
+		trial.choices = trial.choices.map(function(el){
+			if(typeof el === "string"){
+				return jsPsych.pluginAPI.convertKeyCharacterToKeyCode(el);
+			}
+			else return el;
+		})
+		
+		
 		trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 		trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
 		trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
 		trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
 		trial.prompt_position = trial.prompt_position || 1;
 		trial.response_wait = (typeof trial.response_wait == "undefined") ? false : trial.response_wait;
-		
+		trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;
 		
 		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 		
@@ -148,7 +156,7 @@ jsPsych.plugins.abx = (function() {
 	          }
 	        
 	        prefetched_data.correct = (function evaluate_correctness(){
-	        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.key_first) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.key_second)){
+	        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.choices[0]) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.choices[1])){
 			      	   return true;
 			    }
 			    else {
@@ -264,13 +272,14 @@ jsPsych.plugins.abx = (function() {
           // gather the data to store for the trial
           var trial_data = {
             "rt": prefetched_data.rt,
-            "A": trial.stimuli[0],
-            "B": trial.stimuli[1],
-            "X": trial.stimuli[2],
             "key_press": response.key,
             "correct": prefetched_data.correct
           };
-
+          if(trial.return_stim){
+        	  trial_data.A = trial.stimuli[0];
+        	  trial_data.B = trial.stimuli[1];
+        	  trial_data.X = trial.stimuli[2];
+          }
           // clear the display
           display_element.html('');
 
