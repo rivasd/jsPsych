@@ -23,7 +23,7 @@ jsPsych.plugins.abx = (function() {
 		trial.timing_stims = trial.timing_stims || 1000; // duration of the appearance of the three stimuli
 		trial.timing_gap = trial.timing_gap || 500; // default 1000ms
 		trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
-		trial.timeout_feedback = trial.timeout_message || "Please respond faster";
+		trial.timeout_feedback = trial.timeout_message || "<p>Please respond faster<p>";
 		trial.timeout_message_timing = trial.timeout_message_timing || 1000
 		trial.choices = trial.choices || ['a','b'];			
 		trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
@@ -167,7 +167,7 @@ jsPsych.plugins.abx = (function() {
 	    function acceptResponse(){
 	    	//start the response time calculation
 	    	if(! (typeof trial.prompt == 'undefined')){
-	    		display_element.append($("<p></p>", {id:'jspsych-abx-prompt'}).text(trial.prompt));
+	    		display_element.append($(trial.prompt).attr("id", "jspsych-abx-prompt"));
 	    	}
 	    	
 			rt_start_time = Date.now();
