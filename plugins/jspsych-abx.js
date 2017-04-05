@@ -23,16 +23,24 @@ jsPsych.plugins.abx = (function() {
 		trial.timing_stims = trial.timing_stims || 1000; // duration of the appearance of the three stimuli
 		trial.timing_gap = trial.timing_gap || 500; // default 1000ms
 		trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
-		trial.timeout_feedback = trial.timeout_message || "<p>Please respond faster</p>";
+		trial.timeout_feedback = trial.timeout_feedback || "Please respond faster";
 		trial.timeout_message_timing = trial.timeout_message_timing || 1000
-		trial.choices = trial.choices || ['a','b'];			
+		trial.choices = trial.choices || ['a','b'];
+		trial.choices = trial.choices.map(function(el){
+			if(typeof el === "string"){
+				return jsPsych.pluginAPI.convertKeyCharacterToKeyCode(el);
+			}
+			else return el;
+		})
+		
+		
 		trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 		trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
 		trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
 		trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
 		trial.prompt_position = trial.prompt_position || 1;
 		trial.response_wait = (typeof trial.response_wait == "undefined") ? false : trial.response_wait;
-		
+		trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;
 		
 		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 		
@@ -84,7 +92,7 @@ jsPsych.plugins.abx = (function() {
 	    	    if (!trial.is_html) {
 	    	      display_element.append($('<img>', {
 	    	        "src": trial.stimuli[image_position_in_trial],
-	    	        "id": 'jspsych-sim-stim',
+	    	        "id": 'jspsych-abx-stim',
 	    	        'class': 'jspsych-genstim',
 	    	        'class': 'jspsych-abx-image'+image_position_in_trial
 	    	      }));
@@ -92,7 +100,7 @@ jsPsych.plugins.abx = (function() {
 	    	    else {
 	    	      display_element.append($('<div>', {
 	    	        "html": trial.stimuli[image_position_in_trial],
-	    	        "id": 'jspsych-sim-stim',
+	    	        "id": 'jspsych-abx-stim',
 	    	        'class': 'jspsych-genstim',
 	    	        'class': 'jspsych-abx-image'+image_position_in_trial
 	    	      }));
@@ -100,16 +108,16 @@ jsPsych.plugins.abx = (function() {
 	        }
 	        else{
 	        	if (!trial.is_html) {
-	                $('#jspsych-sim-stim').attr({
+	                $('#jspsych-abx-stim').attr({
 	                	'src': trial.stimuli[image_position_in_trial],
 	                	'class': 'jspsych-abx-image'+image_position_in_trial
 	                });
 	            } 
 	        	else {
-	                $('#jspsych-sim-stim').html(trial.stimuli[image_position_in_trial]);
+	                $('#jspsych-abx-stim').html(trial.stimuli[image_position_in_trial]);
 	            }
 
-                $('#jspsych-sim-stim').css({
+                $('#jspsych-abx-stim').css({
             	    "align-self":'center',  
             	    visibility:'visible'  
               	});
@@ -148,7 +156,7 @@ jsPsych.plugins.abx = (function() {
 	          }
 	        
 	        prefetched_data.correct = (function evaluate_correctness(){
-	        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.key_first) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.key_second)){
+	        	if ((trial.stimuli[0] === trial.stimuli[2] && response.key == trial.choices[0]) || (trial.stimuli[1] === trial.stimuli[2] && response.key == trial.choices[1])){
 			      	   return true;
 			    }
 			    else {
@@ -166,8 +174,8 @@ jsPsych.plugins.abx = (function() {
 	      
 	    function acceptResponse(){
 	    	//start the response time calculation
-	    	if(! (typeof trial.prompt == 'undefined') && trial.prompt_position === 2){
-	    		display_element.append(trial.prompt);
+	    	if(! (typeof trial.prompt == 'undefined')){
+	    		display_element.append($(trial.prompt).attr("id", "jspsych-abx-prompt"));
 	    	}
 	    	
 			rt_start_time = Date.now();
@@ -185,6 +193,8 @@ jsPsych.plugins.abx = (function() {
 			    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
 			    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
 			    	  $timeoutFeedback.text(trial.timeout_feedback);
+			    	  $("#jspsych-abx-prompt").remove();
+			    	  $("#jspsych-abx-stim").remove();
 			    	  display_element.append($timeoutFeedback);
 			    	  prefetched_data.correct = false;
 			    	  prefetched_data.rt = -1;
@@ -204,37 +214,34 @@ jsPsych.plugins.abx = (function() {
 		showFixationCross();
 		//After the amount of time determined for the fixation cross
 		
-		setTimeout(function(){
+		jsPsych.pluginAPI.setTimeout(function(){
 			//take the fixation cross of the screen
 	    	display_element.empty();
-	    	//show the prompt
-			if (trial.prompt !== "" && trial.prompt_position === 1) {
-				display_element.append(trial.prompt);
-			}
 	    	//Show A
 	    	showImage(0);
 	    	
 	    	//after a customized number of time
-	    	setTimeout(function(){
+	    	jsPsych.pluginAPI.setTimeout(function(){
 	    		//hide A
-	    		$('#jspsych-sim-stim').css('visibility', 'hidden');
+	    		$('#jspsych-abx-stim').css('visibility', 'hidden');
 	    		
-	    		setTimeout(function(){
+	    		jsPsych.pluginAPI.setTimeout(function(){
 		    		//show B
 		    		showImage(1);
 		    		
 		    		//after a customized number of time
-		    		setTimeout(function(){
+		    		jsPsych.pluginAPI.setTimeout(function(){
 		    			//hide B
-			    		$('#jspsych-sim-stim').css('visibility', 'hidden');
+			    		$('#jspsych-abx-stim').css('visibility', 'hidden');
 			    		
-			    		setTimeout(function(){
+			    		jsPsych.pluginAPI.setTimeout(function(){
 				    		//show X
 				    		showImage(2);
 				    		
 				    		if(!trial.response_wait){
 				    			acceptResponse();
 				    		}
+<<<<<<< HEAD
 				    		
 				    		
 				    		setTimeout(function(){
@@ -275,6 +282,13 @@ jsPsych.plugins.abx = (function() {
 					    		}
 							    						    
 				    		},trial.timing_stims);
+=======
+				    		else{
+				    			jsPsych.pluginAPI.setTimeout(function(){
+				    				acceptResponse();
+				    			}, trial.timing_stims);
+				    		}
+>>>>>>> branch 'UQAM' of https://github.com/rivasd/jsPsych
 				    		
 			    		}, trial.timing_gap);
 			    		
@@ -303,13 +317,14 @@ jsPsych.plugins.abx = (function() {
           // gather the data to store for the trial
           var trial_data = {
             "rt": prefetched_data.rt,
-            "A": trial.stimuli[0],
-            "B": trial.stimuli[1],
-            "X": trial.stimuli[2],
             "key_press": response.key,
             "correct": prefetched_data.correct
           };
-
+          if(trial.return_stim){
+        	  trial_data.A = trial.stimuli[0];
+        	  trial_data.B = trial.stimuli[1];
+        	  trial_data.X = trial.stimuli[2];
+          }
           // clear the display
           display_element.html('');
 
