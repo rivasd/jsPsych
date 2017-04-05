@@ -190,6 +190,8 @@ jsPsych.plugins.abx = (function() {
 			    	  prefetched_data.rt = -1;
 			    	  
 			    	  jsPsych.pluginAPI.setTimeout(function() {
+			    		  jsPsych.pluginAPI.clearAllTimeouts();
+			  	          display_element.empty();
 			        	  end_trial(prefetched_data);
 			          }, trial.timing_feedback); 
 				
@@ -262,6 +264,8 @@ jsPsych.plugins.abx = (function() {
 								    	  prefetched_data.rt = -1;
 								    	  
 								    	  jsPsych.pluginAPI.setTimeout(function() {
+								    		  jsPsych.pluginAPI.clearAllTimeouts();
+								  	          display_element.empty();
 								        	  end_trial(prefetched_data);
 								          }, trial.timing_feedback); 
 									
