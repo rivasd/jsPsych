@@ -241,54 +241,11 @@ jsPsych.plugins.abx = (function() {
 				    		if(!trial.response_wait){
 				    			acceptResponse();
 				    		}
-<<<<<<< HEAD
-				    		
-				    		
-				    		setTimeout(function(){
-				    			//hide X
-					    		$('#jspsych-sim-stim').css('visibility', 'hidden');
-					    		//show the prompt if the researcher want it to be at this time in the trial
-								if (trial.prompt !== "" && trial.prompt_position === 2) {
-									display_element.append(trial.prompt);
-								}
-					    		//start the response time calculation
-				    			rt_start_time = Date.now();
-						    	// start the response listener
-							    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-							      callback_function: after_response,
-							      valid_responses: trial.choices,
-							      persist: false,
-							      allow_held_key: false,
-							    });
-							    //start calculating the timeout
-							    if (trial.timeout > 0) {
-								      jsPsych.pluginAPI.setTimeout(function() {
-								    	  jsPsych.pluginAPI.cancelAllKeyboardResponses();
-								    	  var $timeoutFeedback = $('<p></p>', {id:'timeoutFeedback'});
-								    	  $timeoutFeedback.text(trial.timeout_feedback);
-								    	  display_element.append($timeoutFeedback);
-								    	  prefetched_data.correct = false;
-								    	  prefetched_data.rt = -1;
-								    	  
-								    	  jsPsych.pluginAPI.setTimeout(function() {
-								    		  jsPsych.pluginAPI.clearAllTimeouts();
-								  	          display_element.empty();
-								        	  end_trial(prefetched_data);
-								          }, trial.timing_feedback); 
-									
-								  },trial.timeout);};
-					    		if(trial.response_wait){
-					    			acceptResponse();
-					    		}
-							    						    
-				    		},trial.timing_stims);
-=======
 				    		else{
 				    			jsPsych.pluginAPI.setTimeout(function(){
 				    				acceptResponse();
 				    			}, trial.timing_stims);
 				    		}
->>>>>>> branch 'UQAM' of https://github.com/rivasd/jsPsych
 				    		
 			    		}, trial.timing_gap);
 			    		
