@@ -62,6 +62,7 @@ jsPsych.plugins.video = (function() {
     trial.autoplay = typeof trial.autoplay == 'undefined' ? true : trial.autoplay;
     trial.controls = typeof trial.controls == 'undefined' ? false : trial.controls;
     trial.choices = trial.choices || ["q", "p"];
+    trial.hide_onend = (typeof trial.hide_onend == "undefined") ? true : false;
 
     
     // if any trial variables are functions
@@ -98,6 +99,9 @@ jsPsych.plugins.video = (function() {
     	callback_function : end_trial,
     	valid_responses: trial.choices
       });
+      if(trial.hide_onend){
+    	  this.style.display = "none";
+      }
       //end_trial();
     }
 

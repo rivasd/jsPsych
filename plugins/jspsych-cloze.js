@@ -44,8 +44,7 @@ jsPsych.plugins['cloze'] = (function(){
   plugin.trial = function(display_element, trial){
 
 	trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
-	trial.submit_text = trial.submit_text || "Submit Answers";
+	trial.button_label = trial.button_label || "Submit Answers";
 
 
 	var replacementCount = 0;
@@ -95,7 +94,7 @@ jsPsych.plugins['cloze'] = (function(){
 
 		var data = {
 			rt: Date.now() - startTime,
-			answers : results,
+			answers : JSON.stringify(results),
 			score: totalScore
 		};
 		content.remove();
@@ -112,7 +111,7 @@ jsPsych.plugins['cloze'] = (function(){
 	var submit_btn = document.createElement("button");
 	submit_btn.className = "jspsych-cloze-submit";
 	submit_btn.id = "jspsych-cloze-submit";
-	submit_btn.textContent = trial.submit_text;
+	submit_btn.textContent = trial.button_label;
 	content.appendChild(submit_btn);
 
 
