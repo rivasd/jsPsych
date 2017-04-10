@@ -35,8 +35,9 @@ jsPsych.plugins["rating"] = (function() {
           "height": "3em",
           "margin": "10px 0px 0px 0px",
           "padding": "0px",
-          "display": "block",
-          "position": "relative"
+          "display": "flex",
+          "position": "relative",
+          "justify-content": "space-between"
         }
       }));
 
@@ -99,7 +100,7 @@ jsPsych.plugins["rating"] = (function() {
 			  'display': 'inline-block',
 			  'cursor': 'pointer',
 			  'border': 'solid black',
-			  'margin': '10px',
+			  'margin': '10px 0px',
 			  'padding': '5px',
 			  'width' : '20px',
 			  'height': '20px'
