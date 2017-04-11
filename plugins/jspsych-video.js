@@ -63,6 +63,9 @@ jsPsych.plugins.video = (function() {
     trial.controls = typeof trial.controls == 'undefined' ? false : trial.controls;
     trial.choices = trial.choices || ["q", "p"];
     trial.hide_onend = (typeof trial.hide_onend == "undefined") ? true : false;
+    trial.timing_feedback = trial.timing_feedback || 1000;
+    trial.correct_text = trial.correct_text || "response recorded";
+    trial.incorrect_text = trial.incorrect_text || "response recorded";
 
     
     // if any trial variables are functions
@@ -116,12 +119,25 @@ jsPsych.plugins.video = (function() {
       };
       if(trial.answer){
     	 trial_data.correct = info.key === trial.answer; 
+    	 
       }
       // clear the display
       display_element.innerHTML = '';
+      
+      if(trial.answer){
+    	  //show feedback
+    	  display_element.innerHTML = '<p class="jspsych-feedback jspsych-feedback-"' + trial_data.correct ? "correct" : "incorrect"+'"> '+trial_data.correct? trial.correct_text : trial.incorrect_text +'</p>';
+    	  jsPsych.pluginAPI.setTimeout(function(){
+    		  display_element.innerHTML = '';
+    		  jsPsych.finishTrial(trial_data);
+    	  }, trial.timing_feedback)
+      }
+      else{
+    	// move on to the next trial
+          jsPsych.finishTrial(trial_data);
+      }
 
-      // move on to the next trial
-      jsPsych.finishTrial(trial_data);
+      
     };
 
   };
