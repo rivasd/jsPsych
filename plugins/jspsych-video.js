@@ -117,14 +117,14 @@ jsPsych.plugins.video = (function() {
         rt: info.rt,
         key_press: info.key
       };
-      if(trial.answer){
-    	 trial_data.correct = info.key === trial.answer; 
+      if(trial.key_answer){
+    	 trial_data.correct = info.key === trial.key_answer; 
     	 
       }
       // clear the display
       display_element.innerHTML = '';
       
-      if(trial.answer){
+      if(trial.key_answer){
     	  //show feedback
     	  display_element.innerHTML = '<p class="jspsych-feedback jspsych-feedback-"' + trial_data.correct ? "correct" : "incorrect"+'"> '+trial_data.correct? trial.correct_text : trial.incorrect_text +'</p>';
     	  jsPsych.pluginAPI.setTimeout(function(){
