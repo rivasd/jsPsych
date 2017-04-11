@@ -13,7 +13,6 @@ key_first | numeric or string | *undefined* | Which key the subject should press
 key_second | numeric or string | *undefined* | Which key the subject should press to indicate that the target is the second sound.
 prompt | string | "" | This string can contain HTML markup. Any content here will be displayed below the stimulus. The intention is that it can be used to provide a reminder about the action the subject is supposed to take (e.g. which key to press).
 timing_gap | numeric | 500 | How long to wait between each sound in milliseconds.
-timing_ab | numeric | -1 | How long to show A and B in milliseconds. If the value of this parameter is -1, then the stimuli will remain on the screen until a response is given.
 timeout | numeric | -1 | The maximum duration to wait for a response in milliseconds, measured from the end of the third sound. If -1, then the trial will wait indefinitely for a response.
 timeout_feedback | string | "Please respond faster" | A message to indicate to the participant that the time left to answer ran out. Will be shown only if a timeout is set.
 timing_feedback | numeric | 1000 | How long to show the timeout feedback for in milliseconds.
@@ -28,7 +27,7 @@ A | string | The sound presented in first
 B | string | The sound presented in second
 X | string | The sound presented in last (the target).
 key_press | numeric | Indicates which key the subject pressed. The value is the [numeric key code](http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes) corresponding to the subject's response.
-rt | numeric | The response time in milliseconds for the subject to make a response. The time is measured from when the A and B stimuli first appear on the screen until the subject's response.
+rt | numeric | The response time in milliseconds for the subject to make a response. The time is measured from the end of the third sound until the subject's response.
 correct | boolean | True if the subject picks the correct answer.
 
 ## Examples
