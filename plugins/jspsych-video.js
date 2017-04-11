@@ -118,7 +118,7 @@ jsPsych.plugins.video = (function() {
         key_press: info.key
       };
       if(trial.key_answer){
-    	 trial_data.correct = info.key === trial.key_answer; 
+    	 trial_data.correct = info.key === jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_answer); 
     	 
       }
       // clear the display
