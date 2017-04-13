@@ -126,7 +126,7 @@ jsPsych.plugins.video = (function() {
       
       if(trial.key_answer){
     	  //show feedback
-    	  display_element.innerHTML = '<p class="jspsych-feedback jspsych-feedback-"' + trial_data.correct ? "correct" : "incorrect"+'"> '+trial_data.correct? trial.correct_text : trial.incorrect_text +'</p>';
+    	  display_element.innerHTML = '<p class="jspsych-feedback jspsych-feedback-' + trial_data.correct ? 'correct' : 'incorrect'+'"> '+trial_data.correct? trial.correct_text : trial.incorrect_text +'</p>';
     	  jsPsych.pluginAPI.setTimeout(function(){
     		  display_element.innerHTML = '';
     		  jsPsych.finishTrial(trial_data);
