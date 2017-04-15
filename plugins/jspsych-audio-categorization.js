@@ -157,6 +157,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     //if the researcher want to force the participant to listen to the whole sound before answering
     if(trial.forced_listening){
 	    source.onended = function(){
+	    	rt_start_time = Date.now();
 	    		if (trial.show_icon){
 	    			$speaker_icon.remove();
 	    		}
