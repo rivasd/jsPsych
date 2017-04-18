@@ -204,7 +204,8 @@ jsPsych.plugins["rating"] = (function() {
 		   		jsPsych.pluginAPI.waitForCenteredMouse({
 		   			callback: function(){
 		   				jsPsych.finishTrial(data);
-		   			}
+		   			},
+		   			prompt: trial.center_prompt
 		   		});
 		   		
 		   		
@@ -247,7 +248,7 @@ jsPsych.plugins["rating"] = (function() {
     trial.show_ticks = (typeof trial.show_ticks === 'undefined') ? false : trial.show_ticks;
     trial.return_stim = trial.return_stim || true;
     trial.response = trial.response || 'slider'; //type of response you give (slider or boxes)
-    
+    trial.center_prompt = trial.center_prompt || "Move your mouse inside the square to continue";
     
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
