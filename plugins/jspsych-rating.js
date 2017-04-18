@@ -219,7 +219,8 @@ jsPsych.plugins["rating"] = (function() {
 		   jsPsych.pluginAPI.waitForCenteredMouse({
 	   			callback: function(){
 	   				jsPsych.finishTrial(data);
-	   			}
+	   			},
+	   			prompt: trial.center_prompt
 	   		});
 		   
 	   }
