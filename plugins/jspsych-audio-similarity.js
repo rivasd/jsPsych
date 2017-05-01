@@ -102,7 +102,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    	jsPsych.pluginAPI.hardware({
 	    	    		target: 'parallel',
 	    	    		action: 'trigger',
-	    	    		payload: categories[soundOrder]
+	    	    		payload: trial.categories[soundOrder]
 	    	    	});
 	    	    }
 	        };
