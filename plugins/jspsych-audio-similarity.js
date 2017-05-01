@@ -47,7 +47,7 @@ jsPsych.plugins["audio-similarity"] = (function() {
 		    var source;
 		    
 		    trial.setTimeoutHandlers = [];
-		   
+            //jouer son 1		   
 		    playSound(0);
 	    	if(trial.timing_first_stim > 0){
 		    	setTimeout(function(){    		
@@ -97,8 +97,8 @@ jsPsych.plugins["audio-similarity"] = (function() {
 	    	    startTime = context.currentTime + 0.1;
 	    	    source.start(startTime);
 	    	    
-	    	  //send the correct stimulus presentation trigger if the chrome extension is active, you are note in a practice block and you have access to the category of the stimuli
-	    	    if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice && !(typeof categories[soundOrder] === 'undefined')){
+	    	  //send the correct stimulus presentation trigger if the chrome extension is active, you are not in a practice block and you have access to the category of the stimuli
+	    	    if(jsPsych.pluginAPI.hardwareConnected && !trial.is_practice && !(typeof trial.categories[soundOrder] === 'undefined')){
 	    	    	jsPsych.pluginAPI.hardware({
 	    	    		target: 'parallel',
 	    	    		action: 'trigger',

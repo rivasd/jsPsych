@@ -20,12 +20,11 @@ jsPsych.plugins["audio-abx"] = (function() {
 			trial.timing_gap = trial.timing_gap || 500; 
 			trial.timeout = trial.timeout || 3000 //how much time do the subject have to answer after the sound began to play before the trial ends. If -1 the trial won't end until the subject give an answer.
 			trial.timeout_feedback = trial.timeout_feedback || "<p>Please respond faster</p>";
-			trial.timing_feedback = trial.timing_feedback || 1000 // how long to show the timeout feedback for
-			trial.choices = trial.choices || ['a','b'];			
+			trial.timing_feedback = trial.timing_feedback || 1000 // how long to show the timeout feedback for			
 			trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
 			trial.key_first = (typeof trial.key_first === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_first) : trial.key_first;
 			trial.key_second = (typeof trial.key_second === 'string') ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.key_second) : trial.key_second;
-			
+			trial.choices = trial.choices || [trial.key_first, trial.key_second];
 			
 			trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 			
