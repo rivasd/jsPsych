@@ -29,9 +29,9 @@ jsPsych.plugins["audio-similarity"] = (function() {
 			trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
 			trial.timeout_message_timing = trial.timeout_message_timing || 1000;
 			if(trial.categories){
-				trial.categories.forEach(function(category, idx){
+				trial.categories.forEach(function(category, idx, categories){
 					if(typeof category === "string"){
-					    category = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(category);
+					    categories[idx] = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(category);
 					    }
 				});	
 			}
