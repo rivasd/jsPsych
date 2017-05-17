@@ -133,7 +133,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
     	  
     	  if(trial.text_answer){
-    	      trial.incorrect_feedback.replace("%ANS%", trial.text_answer);
+    	      trial.incorrect_feedback = trial.incorrect_feedback.replace("%ANS%", trial.text_answer);
     	  }
     	  $incorrectFeedback.text(trial.incorrect_feedback);
     	  display_element.append($incorrectFeedback);
