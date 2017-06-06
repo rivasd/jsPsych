@@ -94,27 +94,63 @@ jsPsych.plugins['same-different'] = (function() {
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
-    // show image
-    if (!trial.is_html) {
-      display_element.innerHTML = '<img class="jspsych-same-different-stimulus" src="'+trial.stimuli[0]+'"></img>';
-    } else {
-      display_element.innerHTML = '<div class="jspsych-same-different-stimulus">'+trial.stimuli[0]+'</div>';
+    
+    
+    
+    /** showFixationCross()
+	 *  fucntion that makes a fixation cross appear on the screen
+	 *
+	 */
+    function showFixationCross(){
+    	display_element.empty();
+    
+    	if(display_element.css("position")==="static"){
+    		display_element.css("position", "relative");
+    	}
+	
+        var $paragraph = $('<p> + </p>');
+        
+        display_element.append($paragraph);
+        $paragraph.css({
+        	"font-size":"350%",
+        	"display": 'flex',
+        	"justify-content": "center", /* align horizontal */
+        	"align-items": "center" /* align vertical */
+    	    //"position":"absolute",
+    	    //"left": "50%"
+    	    //"top": "50%",
+    	    //"transform": "translate(-50%, -50%)"   
+        });
+        $paragraph.addClass('jspsych-genstim');
     }
+    showFixationCross();
+    
+    jsPsych.pluginAPI.setTimeout(function(){
 
-    var first_stim_info;
-    if (trial.timing_first_stim > 0) {
-      jsPsych.pluginAPI.setTimeout(function() {
-        showBlankScreen();
-      }, trial.timing_first_stim);
-    } else {
-      function afterKeyboardResponse(info) {
-        first_stim_info = info;
-        showBlankScreen();
-      }
-      jsPsych.pluginAPI.getKeyboardResponse(afterKeyboardResponse, [], 'date', false);
-    }
+	    // show image
+	    if (!trial.is_html) {
+	      display_element.innerHTML = '<img class="jspsych-same-different-stimulus" src="'+trial.stimuli[0]+'"></img>';
+	    } else {
+	      display_element.innerHTML = '<div class="jspsych-same-different-stimulus">'+trial.stimuli[0]+'</div>';
+	    }
+    
 
+
+	    var first_stim_info;
+	    if (trial.timing_first_stim > 0) {
+	      jsPsych.pluginAPI.setTimeout(function() {
+	        showBlankScreen();
+	      }, trial.timing_first_stim);
+	    } else {
+	      function afterKeyboardResponse(info) {
+	        first_stim_info = info;
+	        showBlankScreen();
+	      }
+	      jsPsych.pluginAPI.getKeyboardResponse(afterKeyboardResponse, [], 'date', false);
+	    }
+    }, 500);
+    
+    
     function showBlankScreen() {
       display_element.querySelector('.jspsych-same-different-stimulus').outerHTML = '';
 
