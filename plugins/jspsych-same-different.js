@@ -95,10 +95,12 @@ jsPsych.plugins['same-different'] = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
+    display_element = $(display_element);
+    
     
     
     /** showFixationCross()
-	 *  fucntion that makes a fixation cross appear on the screen
+	 *  function that makes a fixation cross appear on the screen
 	 *
 	 */
     function showFixationCross(){
