@@ -94,8 +94,7 @@ jsPsych.plugins['same-different'] = (function() {
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-    
-    display_element = $(display_element);
+
     
     
     
@@ -104,6 +103,7 @@ jsPsych.plugins['same-different'] = (function() {
 	 *
 	 */
     function showFixationCross(){
+    	var display_element = $(display_element);
     	display_element.empty();
     
     	if(display_element.css("position")==="static"){
