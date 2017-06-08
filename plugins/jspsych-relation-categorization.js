@@ -14,7 +14,7 @@ jsPsych.plugins['relation-categorization'] = (function() {
 
   jsPsych.pluginAPI.registerPreload('relation-categorization', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
 
-}
+
 
   plugin.trial = function(display_element, trial) {
 
@@ -213,7 +213,6 @@ jsPsych.plugins['relation-categorization'] = (function() {
          jsPsych.finishTrial(trial_data);
        };
 
-    }
 
   };
 
