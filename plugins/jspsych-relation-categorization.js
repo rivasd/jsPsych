@@ -54,7 +54,7 @@ jsPsych.plugins['relation-categorization'] = (function() {
 	
         var $paragraph = $('<p> + </p>');
         
-        display_element2.append($paragraph);
+        display_element.append($paragraph);
         $paragraph.css({
         	"font-size":"350%",
         	"display": 'flex',
