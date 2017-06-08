@@ -165,6 +165,8 @@ jsPsych.plugins['relation-categorization'] = (function() {
 
         // kill any remaining setTimeout handlers
         jsPsych.pluginAPI.clearAllTimeouts();
+        
+
 
         var correct = false;
 
@@ -179,45 +181,33 @@ jsPsych.plugins['relation-categorization'] = (function() {
           correct = true;
         }
 
-        var trial_data = {
+        var prefetched_data = {
           "rt": info.rt,
-          "answer": trial.answer,
           "correct": correct,
-          "stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]]),
           "key_press": info.key
         };
-        if (first_stim_info) {
-          trial_data["rt_stim1"] = first_stim_info.rt;
-          trial_data["key_press_stim1"] = first_stim_info.key;
-        }
 
         display_element.html('');
+        
+        // kill keyboard listeners
+        jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
-        end_trial(trial_data);
+        end_trial(prefetched_data);
       }
-
+      
+      
+      
  	 var end_trial = function(prefetched_data) {
-
-         // kill any remaining setTimeout handlers
-         jsPsych.pluginAPI.clearAllTimeouts();
-
-
-         // kill keyboard listeners
-         jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
          // gather the data to store for the trial
          var trial_data = {
            "rt": prefetched_data.rt,
-           "key_press": response.key,
+           "answer": trial.answer,
+           "key_press": prefetched_data.key_press,
            "correct": prefetched_data.correct
          };
-         if(trial.return_stim){
        	  trial_data.A = trial.stimuli[0];
        	  trial_data.B = trial.stimuli[1];
-       	  trial_data.X = trial.stimuli[2];
-         }
-         // clear the display
-         display_element.html('');
 
          // move on to the next trial
          jsPsych.finishTrial(trial_data);
