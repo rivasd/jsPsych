@@ -1,8 +1,8 @@
 /**
  * jspsych-relation-categorization
- * Josh de Leeuw
+ * Catherine Prévost
  *
- * plugin for showing a pair of stimuli at the same time and recording a 'same' or 'different' response
+ * plugin for showing a pair of stimuli at the same time and recording a 'same' or 'different' response, option to show a feedback or not
  *
  * documentation: docs.jspsych.org
  *
@@ -31,6 +31,13 @@ jsPsych.plugins['relation-categorization'] = (function() {
     
     trial.timeout_feedback = trial.timeout_feedback || 'too long!';
     trial.timeout = trial.timeout || -1;
+    
+    trial.is_there_feedback = trial.is_there_feedback || false;
+    trial.timing_feedback = trial.timing_feedback || 750;
+    trial.correct = trial.correct || 'correct';
+    trial.incorrect = trial.incorrect || 'incorrect';
+    
+    trial.response_wait = trial.response_wait || true;
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -86,13 +93,13 @@ jsPsych.plugins['relation-categorization'] = (function() {
 	    else {
 	      display_element.append($('<div>', {
 	        "html": trial.stimuli[0],
-	        "id": 'jspsych-relcat-stim',
+	        "id": 'jspsych-relcat-stim1',
 	        'class': 'jspsych-genstim',
 	        'class': 'jspsych-relcat-image1'
 	      }));
 	      display_element.append($('<div>', {
 		        "html": trial.stimuli[1],
-		        "id": 'jspsych-relcat-stim',
+		        "id": 'jspsych-relcat-stim2',
 		        'class': 'jspsych-genstim',
 		        'class': 'jspsych-relcat-image2'
 		  }));
@@ -101,6 +108,8 @@ jsPsych.plugins['relation-categorization'] = (function() {
     }
     
     function acceptResponse(){
+    	var prefetched_data = {}
+    	
     	//start the response time calculation
     	if(! (typeof trial.prompt == 'undefined')){
     		display_element.append($(trial.prompt).attr("id", "jspsych-relcat-prompt"));
@@ -149,25 +158,39 @@ jsPsych.plugins['relation-categorization'] = (function() {
     	//Show Stimuli
     	showImages();
    					    		
-    		if(!trial.response_wait){
-    			acceptResponse();
-    		}
-    		else{
-    			jsPsych.pluginAPI.setTimeout(function(){
-    				acceptResponse();
-    			}, trial.timing_stims);
-    		}
+		if(!trial.response_wait){
+			acceptResponse();
+		}
+		else{
+			jsPsych.pluginAPI.setTimeout(function(){
+				acceptResponse();
+			}, trial.timing_stims);
+		}
     	
     }, trial.timing_fixation_cross);
-    
+    	
+	
+	function doFeedback(correct) {
 
+        // substitute answer in feedback string.
+        var atext = "";
+        if (correct) {
+          atext = trial.correct.replace("%ANS%", trial.text_answer);
+        } else {
+          atext = trial.incorrect.replace("%ANS%", trial.text_answer);
+        }
+
+        // show the feedback
+        display_element.append(atext);
+
+   }
+	
       var after_response = function(info) {
+    	display_element.empty();
 
         // kill any remaining setTimeout handlers
         jsPsych.pluginAPI.clearAllTimeouts();
-        
-
-
+       
         var correct = false;
 
         var skey = typeof trial.same_key == 'string' ? jsPsych.pluginAPI.convertKeyCharacterToKeyCode(trial.same_key) : trial.same_key;
@@ -180,23 +203,42 @@ jsPsych.plugins['relation-categorization'] = (function() {
         if (info.key == dkey && trial.answer == 'different') {
           correct = true;
         }
-
-        var prefetched_data = {
-          "rt": info.rt,
-          "correct": correct,
-          "key_press": info.key
-        };
-
-        display_element.html('');
         
-        // kill keyboard listeners
-        jsPsych.pluginAPI.cancelAllKeyboardResponses();
+        var prefetched_data = {
+                "rt": info.rt,
+                "correct": correct,
+                "key_press": info.key
+         };
+        
+        if(trial.is_there_feedback){
+        	doFeedback(correct);
+            
+            jsPsych.pluginAPI.setTimeout(function(){
+            		
+            	display_element.empty();
+            	
+            	// kill keyboard listeners
+                jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
-        end_trial(prefetched_data);
-      }
+                end_trial(prefetched_data);
+      	
+            }, trial.timing_feedback);
+        }
+        
+        else{
+        	display_element.empty();
+        	
+        	// kill keyboard listeners
+            jsPsych.pluginAPI.cancelAllKeyboardResponses();
+
+            end_trial(prefetched_data);
+        	      	
+        }
+              
+        
+   }
       
-      
-      
+          
  	 var end_trial = function(prefetched_data) {
 
          // gather the data to store for the trial
