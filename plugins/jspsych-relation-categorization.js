@@ -37,7 +37,6 @@ jsPsych.plugins['relation-categorization'] = (function() {
     trial.correct = trial.correct || 'correct';
     trial.incorrect = trial.incorrect || 'incorrect';
     
-    trial.response_wait = trial.response_wait || true;
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -111,9 +110,6 @@ jsPsych.plugins['relation-categorization'] = (function() {
     	var prefetched_data = {}
     	
     	//start the response time calculation
-    	if(! (typeof trial.prompt == 'undefined')){
-    		display_element.append($(trial.prompt).attr("id", "jspsych-relcat-prompt"));
-    	}
     	
 		rt_start_time = Date.now();
     	// start the response listener
@@ -157,12 +153,16 @@ jsPsych.plugins['relation-categorization'] = (function() {
     	display_element.empty();
     	//Show Stimuli
     	showImages();
+    	if(!(typeof trial.prompt == 'undefined')){
+    		display_element.append($(trial.prompt).attr("id", "jspsych-relcat-prompt"));
+    	}
    					    		
 		if(!trial.response_wait){
 			acceptResponse();
 		}
 		else{
 			jsPsych.pluginAPI.setTimeout(function(){
+				display_element.empty();
 				acceptResponse();
 			}, trial.timing_stims);
 		}
