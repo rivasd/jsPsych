@@ -181,7 +181,7 @@ jsPsych.plugins['relation-categorization'] = (function() {
         }
 
         // show the feedback
-        display_element.append(atext);
+        display_element.append($(atext).attr("class", "jspsych-relcat-feedback"));
 
    }
 	
