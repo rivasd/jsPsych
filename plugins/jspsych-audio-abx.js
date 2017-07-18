@@ -123,6 +123,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 
 
 			function executeExp(){
+				display_element.empty();
 				playSound(0); //playing sound A
 				source.onended = function(){
 					setTimeout(
