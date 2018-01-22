@@ -22,6 +22,7 @@ var jsPsych = (function() {
   var current_trial = {};
   var current_trial_finished = false;
   // target DOM element
+  var DOM_container;
   var DOM_target;
   // time that the experiment began
   var exp_start_time;
@@ -44,6 +45,10 @@ var jsPsych = (function() {
   //
 
   core.init = function(options) {
+
+    if(typeof options.timeline === 'undefined'){
+      console.error('No timeline declared in jsPsych.init. Cannot start experiment.')
+    }
 
     // reset variables
     timeline = null;
@@ -76,9 +81,10 @@ var jsPsych = (function() {
       'preload_audio': [],
       'exclusions': {},
       'show_progress_bar': false,
+      'auto_update_progress_bar': true,
       'auto_preload': true,
+      'show_preload_progress_bar': true,
       'max_load_time': 60000,
-      'fullscreen': false,
       'default_iti': 0
     };
 
@@ -116,10 +122,16 @@ var jsPsych = (function() {
       }
     }
     opts.display_element.innerHTML = '<div class="jspsych-content-wrapper"><div id="jspsych-content"></div></div>';
+    DOM_container = opts.display_element;
     DOM_target = document.querySelector('#jspsych-content');
 
+    // add tabIndex attribute to scope event listeners
+    opts.display_element.tabIndex = 0;
+
     // add CSS class to DOM_target
-    opts.display_element.className += ' jspsych-display-element';
+    if(opts.display_element.className.indexOf('jspsych-display-element') == -1){
+      opts.display_element.className += ' jspsych-display-element';
+    }
     DOM_target.className += 'jspsych-content';
 
     // create experiment timeline
@@ -127,6 +139,11 @@ var jsPsych = (function() {
       timeline: opts.timeline
     });
 
+    // below code resets event listeners that may have lingered from
+    // a previous incomplete experiment loaded in same DOM.
+    jsPsych.pluginAPI.reset(opts.display_element);
+    // create keyboard event listeners
+    jsPsych.pluginAPI.createKeyboardEventListeners(opts.display_element);
     // create listeners for user browser interaction
     jsPsych.data.createInteractionListeners();
 
@@ -135,35 +152,18 @@ var jsPsych = (function() {
       function(){
         // success! user can continue...
         // start experiment, with or without preloading
-        if(opts.preload_images.length > 0){
-          jsPsych.pluginAPI.preloadImages(opts.preload_images, load_audio);
+        if(opts.auto_preload){
+          jsPsych.pluginAPI.autoPreload(timeline, startExperiment, opts.preload_images, opts.preload_audio, opts.show_preload_progress_bar);
+          if(opts.max_load_time > 0){
+            setTimeout(function(){
+              if(!loaded){
+                loadFail();
+              }
+            }, opts.max_load_time);
+          }
         } else {
-          load_audio();
+          startExperiment();
         }
-
-        function load_audio(){
-          if(opts.preload_audio.length > 0){
-            jsPsych.pluginAPI.preloadAudioFiles(opts.preload_audio, auto_preload);
-          } else {
-            auto_preload();
-          }
-        }
-
-        function auto_preload(){
-          if(opts.auto_preload){
-            jsPsych.pluginAPI.autoPreload(timeline, startExperiment);
-            if(opts.max_load_time > 0){
-              setTimeout(function(){
-                if(!loaded){
-                  loadFail();
-                }
-              }, opts.max_load_time);
-            }
-          } else {
-            startExperiment();
-          }
-        }
-
       },
       function(){
         // fail. incompatible user.
@@ -197,6 +197,10 @@ var jsPsych = (function() {
   core.getDisplayElement = function() {
     return DOM_target;
   };
+
+  core.getDisplayContainerElement = function(){
+    return DOM_container;
+  }
 
   core.finishTrial = function(data) {
 
@@ -237,15 +241,15 @@ var jsPsych = (function() {
     }
     
     // wait for iti
-    if (typeof current_trial.timing_post_trial == 'undefined') {
+    if (typeof current_trial.post_trial_gap === null) {
       if (opts.default_iti > 0) {
         setTimeout(nextTrial, opts.default_iti);
       } else {
         nextTrial();
       }
     } else {
-      if (current_trial.timing_post_trial > 0) {
-        setTimeout(nextTrial, current_trial.timing_post_trial);
+      if (current_trial.post_trial_gap > 0) {
+        setTimeout(nextTrial, current_trial.post_trial_gap);
       } else {
         nextTrial();
       }
@@ -344,7 +348,7 @@ var jsPsych = (function() {
       if (typeof timeline_parameters == 'undefined') {
         // returns a clone of the trial_parameters to
         // protect functions.
-        return Object.assign({}, trial_parameters);
+        return jsPsych.utils.deepCopy(trial_parameters);
       } else {
         if (progress.current_location >= timeline_parameters.timeline.length) {
           return null;
@@ -375,6 +379,12 @@ var jsPsych = (function() {
     // set the order for going through the timeline variables array
     // TODO: this is where all the sampling options can be implemented
     this.setTimelineVariablesOrder = function() {
+
+      // check to make sure this node has variables
+      if(typeof timeline_parameters === 'undefined' || typeof timeline_parameters.timeline_variables === 'undefined'){
+        return;
+      }
+
       var order = [];
       for(var i=0; i<timeline_parameters.timeline_variables.length; i++){
         order.push(i);
@@ -384,9 +394,11 @@ var jsPsych = (function() {
         if(timeline_parameters.sample.type == 'custom'){
           order = timeline_parameters.sample.fn(order);
         } else if(timeline_parameters.sample.type == 'with-replacement'){
-          order = jsPsych.randomization.sample(order, timeline_parameters.sample.size, true);
+          order = jsPsych.randomization.sampleWithReplacement(order, timeline_parameters.sample.size, timeline_parameters.sample.weights);
         } else if(timeline_parameters.sample.type == 'without-replacement'){
-          order = jsPsych.randomization.sample(order, timeline_parameters.sample.size, false);
+          order = jsPsych.randomization.sampleWithoutReplacement(order, timeline_parameters.sample.size);
+        } else if(timeline_parameters.sample.type == 'fixed-repetitions'){
+          order = jsPsych.randomization.repeat(order, timeline_parameters.sample.size, false);
         }
       }
 
@@ -484,7 +496,7 @@ var jsPsych = (function() {
         // if we're all done with the repetitions, check if there is a loop function.
         else if (typeof timeline_parameters.loop_function !== 'undefined') {
           if (timeline_parameters.loop_function(this.generatedData())) {
-            this.reset(); // TODO: fix this probably...
+            this.reset();
             return parent_node.advance();
           } else {
             progress.done = true;
@@ -574,6 +586,7 @@ var jsPsych = (function() {
       progress.current_variable_set = 0;
       progress.current_iteration++;
       progress.done = false;
+      this.setTimelineVariablesOrder();
       if (typeof timeline_parameters != 'undefined') {
         for (var i = 0; i < timeline_parameters.timeline.length; i++) {
           timeline_parameters.timeline[i].reset();
@@ -668,7 +681,7 @@ var jsPsych = (function() {
 
       // check if there is a timeline parameter
       // if there is, then this node has its own timeline
-      if (typeof parameters.timeline !== 'undefined') {
+      if ((typeof parameters.timeline !== 'undefined') || (typeof jsPsych.plugins[trial_type] == 'function')) {
 
         // create timeline properties
         timeline_parameters = {
@@ -706,7 +719,7 @@ var jsPsych = (function() {
         var trial_type = parameters.type;
         if (typeof trial_type == 'undefined') {
           console.error('Trial level node is missing the "type" parameter. The parameters for the node are: ' + JSON.stringify(parameters));
-        } else if (typeof jsPsych.plugins[trial_type] == 'undefined') {
+        } else if ((typeof jsPsych.plugins[trial_type] == 'undefined') && (trial_type.toString().replace(/\s/g,'') != "function(){returntimeline.timelineVariable(varname);}")) {
           console.error('No plugin loaded for trials of type "' + trial_type + '"');
         }
         // create a deep copy of the parameters for the trial
@@ -720,49 +733,18 @@ var jsPsych = (function() {
 
     loaded = true;
 
-    var fullscreen = opts.fullscreen;
-
-    // fullscreen setup
-    if (fullscreen) {
-      // check if keys are allowed in fullscreen mode
-      var keyboardNotAllowed = typeof Element !== 'undefined' && 'ALLOW_KEYBOARD_INPUT' in Element;
-      if (keyboardNotAllowed) {
-        go();
-      } else {
-        DOM_target.innerHTML = '<div style=""><p>The experiment will launch in fullscreen mode when you click the button below.</p><button id="jspsych-fullscreen-btn" class="jspsych-btn">Launch Experiment</button></div>';
-        var listener = DOM_target.querySelector('#jspsych-fullscreen-btn').addEventListener('click', function() {
-          var element = document.documentElement;
-          if (element.requestFullscreen) {
-            element.requestFullscreen();
-          } else if (element.mozRequestFullScreen) {
-            element.mozRequestFullScreen();
-          } else if (element.webkitRequestFullscreen) {
-            element.webkitRequestFullscreen();
-          } else if (element.msRequestFullscreen) {
-            element.msRequestFullscreen();
-          }
-          DOM_target.querySelector('#jspsych-fullscreen-btn').removeEventListener('click', listener);
-          DOM_target.innerHTML = '';
-          setTimeout(go, 1000);
-        });
-      }
-    } else {
-      go();
+    // show progress bar if requested
+    if (opts.show_progress_bar === true) {
+      drawProgressBar();
     }
 
-    function go() {
-      // show progress bar if requested
-      if (opts.show_progress_bar === true) {
-        drawProgressBar();
-      }
+    // record the start time
+    exp_start_time = new Date();
 
-      // record the start time
-      exp_start_time = new Date();
+    // begin!
+    timeline.advance();
+    doTrial(timeline.trial());
 
-      // begin!
-      timeline.advance();
-      doTrial(timeline.trial());
-    }
   }
 
   function finishExperiment(isAborted) {
@@ -787,6 +769,7 @@ var jsPsych = (function() {
     } else if (document.webkitExitFullscreen) {
       document.webkitExitFullscreen();
     }
+    opts.on_finish(jsPsych.data.get());
 
   }
 
@@ -805,7 +788,7 @@ var jsPsych = (function() {
     var complete = timeline.advance();
 
     // update progress bar if shown
-    if (opts.show_progress_bar === true) {
+    if (opts.show_progress_bar === true && opts.auto_update_progress_bar == true) {
       updateProgressBar();
     }
 
@@ -820,19 +803,84 @@ var jsPsych = (function() {
 
   function doTrial(trial) {
 
+    current_trial = trial;
+
+    // process all timeline variables for this trial
+    evaluateTimelineVariables(trial);
+
+    // evaluate variables that are functions
+    evaluateFunctionParameters(trial);
+
+    // get default values for parameters
+    setDefaultValues(trial);
+
     // call experiment wide callback
     opts.on_trial_start(trial);
 
-    current_trial = trial;
-
-    // check if trial has it's own display element
-    var display_element = DOM_target;
-    if(typeof trial.display_element !== 'undefined'){
-      display_element = trial.display_element;
+    // call trial specific callback if it exists
+    if(typeof trial.on_start == 'function'){
+      trial.on_start(trial);
     }
 
     // execute trial method
-    jsPsych.plugins[trial.type].trial(display_element, trial);
+    jsPsych.plugins[trial.type].trial(DOM_target, trial);
+
+    // call trial specific loaded callback if it exists
+    if(typeof trial.on_load == 'function'){
+      trial.on_load();
+    }
+  }
+
+  function evaluateTimelineVariables(trial){
+    var keys = Object.keys(trial);
+
+    for (var i = 0; i < keys.length; i++) {
+      // timeline variables on the root level
+      if (typeof trial[keys[i]] == "function" && trial[keys[i]].toString().replace(/\s/g,'') == "function(){returntimeline.timelineVariable(varname);}") {
+        trial[keys[i]] = trial[keys[i]].call();
+      }
+      // timeline variables that are nested in objects
+      if (typeof trial[keys[i]] == "object" && trial[keys[i]] !== null){
+        evaluateTimelineVariables(trial[keys[i]]);
+      }
+    }
+  }
+
+  function evaluateFunctionParameters(trial){
+
+    // first, eval the trial type if it is a function
+    if(typeof trial.type === 'function'){
+      trial.type = trial.type.call();
+    }
+
+    // now eval the whole trial
+    var keys = Object.keys(trial);
+
+    for (var i = 0; i < keys.length; i++) {
+      if(keys[i] !== 'type'){
+        if(
+          (typeof jsPsych.plugins.universalPluginParameters[keys[i]] !== 'undefined' && jsPsych.plugins.universalPluginParameters[keys[i]].type !== jsPsych.plugins.parameterType.FUNCTION ) ||
+          (typeof jsPsych.plugins[trial.type].info.parameters[keys[i]] !== 'undefined' && jsPsych.plugins[trial.type].info.parameters[keys[i]].type !== jsPsych.plugins.parameterType.FUNCTION)
+        ) {
+          if (typeof trial[keys[i]] == "function") {
+            trial[keys[i]] = trial[keys[i]].call();
+          }
+        }
+      }
+    }
+  }
+
+  function setDefaultValues(trial){
+    var trial_parameters = Object.keys(jsPsych.plugins[trial.type].info.parameters);
+    for(var i=0; i<trial_parameters.length; i++){
+      if(typeof trial[trial_parameters[i]] == 'undefined' || trial[trial_parameters[i]] === null){
+        if(typeof jsPsych.plugins[trial.type].info.parameters[trial_parameters[i]].default == 'undefined'){
+          console.error('You must specify a value for the '+trial_parameters[i]+' parameter in the '+trial.type+' plugin.');
+        } else {
+          trial[trial_parameters[i]] = jsPsych.plugins[trial.type].info.parameters[trial_parameters[i]].default;
+        }
+      }
+    }
   }
 
   function loadFail(){
@@ -903,27 +951,74 @@ var jsPsych = (function() {
 
     document.querySelector('#jspsych-progressbar-inner').style.width = progress.percent_complete + "%";
   }
-  
+
+  core.setProgressBar = function(proportion_complete){
+    proportion_complete = Math.max(Math.min(1,proportion_complete),0);
+    document.querySelector('#jspsych-progressbar-inner').style.width = (proportion_complete*100) + "%";
+  }
+
   //Leave a trace in the DOM that jspsych was loaded
   document.documentElement.setAttribute('jspsych', 'present');
 
   return core;
 })();
 
-jsPsych.plugins = {
+jsPsych.plugins = (function() {
+
+  var module = {};
 
   // enumerate possible parameter types for plugins
-  parameterType: {
+  module.parameterType = {
     BOOL: 0,
     STRING: 1,
     INT: 2,
     FLOAT: 3,
     FUNCTION: 4,
     KEYCODE: 5,
-    SELECT: 6
+    SELECT: 6,
+    HTML_STRING: 7,
+    IMAGE: 8,
+    AUDIO: 9,
+    VIDEO: 10,
+    OBJECT: 11,
+    COMPLEX: 12
   }
 
-};
+  module.universalPluginParameters = {
+    data: {
+      type: module.parameterType.OBJECT,
+      pretty_name: 'Data',
+      default: {},
+      description: 'Data to add to this trial (key-value pairs)'
+    },
+    on_start: {
+      type: module.parameterType.FUNCTION,
+      pretty_name: 'On start',
+      default: function() { return; },
+      description: 'Function to execute when trial begins'
+    },
+    on_finish: {
+      type: module.parameterType.FUNCTION,
+      pretty_name: 'On finish',
+      default: function() { return; },
+      description: 'Function to execute when trial is finished'
+    },
+    on_load: {
+      type: module.parameterType.FUNCTION,
+      pretty_name: 'On load',
+      default: function() { return; },
+      description: 'Function to execute after the trial has loaded'
+    },
+    post_trial_gap: {
+      type: module.parameterType.INT,
+      pretty_name: 'Post trial gap',
+      default: null,
+      description: 'Length of gap between the end of this trial and the start of the next trial'
+    }
+  }
+
+  return module;
+})();
 
 jsPsych.data = (function() {
 
@@ -996,7 +1091,7 @@ jsPsych.data = (function() {
     }
 
     data_collection.readOnly = function(){
-      return DataCollection(deepExtend([], trials));
+      return DataCollection(jsPsych.utils.deepCopy(trials));
     }
 
     data_collection.addToAll = function(properties){
@@ -1021,9 +1116,9 @@ jsPsych.data = (function() {
       // [{p1: v1, p2:v2}, {p1:v2}]
       // {p1: v1}
       if(!Array.isArray(filters)){
-        var f = deepExtend([], [filters]);
+        var f = jsPsych.utils.deepCopy([filters]);
       } else {
-        var f = deepExtend([], filters);
+        var f = jsPsych.utils.deepCopy(filters);
       }
 
       var filtered_data = [];
@@ -1077,7 +1172,7 @@ jsPsych.data = (function() {
       if(!Array.isArray(columns)){
         columns = [columns];
       }
-      var o = deepExtend([], trials);
+      var o = jsPsych.utils.deepCopy(trials);
       for (var i = 0; i < o.length; i++) {
         for (var j in columns) {
           delete o[i][columns[j]];
@@ -1630,22 +1725,45 @@ jsPsych.randomization = (function() {
     return random_shuffle;
   }
 
-  module.sample = function(arr, size, withReplacement) {
-    if (withReplacement == false) {
-      if (size > arr.length) {
-        console.error("jsPsych.randomization.sample cannot take a sample " +
-          "larger than the size of the set of items to sample from when " +
-          "sampling without replacement.");
+  module.sampleWithoutReplacement = function(arr, size){
+    if (size > arr.length) {
+      console.error("Cannot take a sample " +
+        "larger than the size of the set of items to sample.");
+    }
+    return jsPsych.randomization.shuffle(arr).slice(0,size);
+  }
+
+  module.sampleWithReplacement = function(arr, size, weights) {
+    var normalized_weights = [];
+    if(typeof weights !== 'undefined'){
+      if(weights.length !== arr.length){
+        console.error('The length of the weights array must equal the length of the array '+
+        'to be sampled from.');
+      }
+      var weight_sum = 0;
+      for(var i=0; i<weights.length; i++){
+        weight_sum += weights[i];
+      }
+      for(var i=0; i<weights.length; i++){
+        normalized_weights.push( weights[i] / weight_sum );
+      }
+    } else {
+      for(var i=0; i<arr.length; i++){
+        normalized_weights.push( 1 / arr.length );
       }
     }
+
+    var cumulative_weights = [normalized_weights[0]];
+    for(var i=1; i<normalized_weights.length; i++){
+      cumulative_weights.push(normalized_weights[i] + cumulative_weights[i-1]);
+    }
+
     var samp = [];
-    var shuff_arr = shuffle(arr);
     for (var i = 0; i < size; i++) {
-      if (!withReplacement) {
-        samp.push(shuff_arr.pop());
-      } else {
-        samp.push(shuff_arr[Math.floor(Math.random() * shuff_arr.length)]);
-      }
+      var rnd = Math.random();
+      var index = 0;
+      while(rnd > cumulative_weights[index]) { index++; }
+      samp.push(arr[index]);
     }
     return samp;
   }
@@ -1742,16 +1860,27 @@ jsPsych.pluginAPI = (function() {
 
   var held_keys = {};
 
-  // keyboard events
-  document.addEventListener('keydown', function(e){
+  var root_keydown_listener = function(e){
     for(var i=0; i<keyboard_listeners.length; i++){
       keyboard_listeners[i].fn(e);
     }
     held_keys[e.keyCode] = true;
-  });
-  document.addEventListener('keyup', function(e){
+  }
+  var root_keyup_listener = function(e){
     held_keys[e.keyCode] = false;
-  });
+  }
+
+  module.reset = function(root_element){
+    keyboard_listeners = [];
+    held_keys = {};
+    root_element.removeEventListener('keydown', root_keydown_listener);
+    root_element.removeEventListener('keyup', root_keyup_listener);
+  }
+
+  module.createKeyboardEventListeners = function(root_element){
+    root_element.addEventListener('keydown', root_keydown_listener);
+    root_element.addEventListener('keyup', root_keyup_listener);
+  }
 
   module.getKeyboardResponse = function(parameters) {
     //parameters are: callback_function, valid_responses, rt_method, persist, audio_context, audio_context_start_time, allow_held_key?
@@ -1791,8 +1920,9 @@ jsPsych.pluginAPI = (function() {
         if(parameters.valid_responses != jsPsych.NO_KEYS){
           for (var i = 0; i < parameters.valid_responses.length; i++) {
             if (typeof parameters.valid_responses[i] == 'string') {
-              if (typeof keylookup[parameters.valid_responses[i]] !== 'undefined') {
-                if (e.keyCode == keylookup[parameters.valid_responses[i]]) {
+              var kc = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(parameters.valid_responses[i]);
+              if (typeof kc !== 'undefined') {
+                if (e.keyCode == kc) {
                   valid_response = true;
                 }
               } else {
@@ -1855,6 +1985,7 @@ jsPsych.pluginAPI = (function() {
 
   module.convertKeyCharacterToKeyCode = function(character) {
     var code;
+    character = character.toLowerCase();
     if (typeof keylookup[character] !== 'undefined') {
       code = keylookup[character];
     }
@@ -1911,6 +2042,17 @@ jsPsych.pluginAPI = (function() {
 	  
 	  
 	  target.addEventListener("mouseenter", mouseCentered);
+  }
+
+  module.compareKeys = function(key1, key2){
+    // convert to numeric values no matter what
+    if(typeof key1 == 'string') {
+      key1 = module.convertKeyCharacterToKeyCode(key1);
+    }
+    if(typeof key2 == 'string') {
+      key2 = module.convertKeyCharacterToKeyCode(key2);
+    }
+    return key1 == key2;
   }
 
   var keylookup = {
@@ -1972,32 +2114,6 @@ jsPsych.pluginAPI = (function() {
     'x': 88,
     'y': 89,
     'z': 90,
-    'A': 65,
-    'B': 66,
-    'C': 67,
-    'D': 68,
-    'E': 69,
-    'F': 70,
-    'G': 71,
-    'H': 72,
-    'I': 73,
-    'J': 74,
-    'K': 75,
-    'L': 76,
-    'M': 77,
-    'N': 78,
-    'O': 79,
-    'P': 80,
-    'Q': 81,
-    'R': 82,
-    'S': 83,
-    'T': 84,
-    'U': 85,
-    'V': 86,
-    'W': 87,
-    'X': 88,
-    'Y': 89,
-    'Z': 90,
     '0numpad': 96,
     '1numpad': 97,
     '2numpad': 98,
@@ -2013,18 +2129,18 @@ jsPsych.pluginAPI = (function() {
     'minus': 109,
     'decimal': 110,
     'divide': 111,
-    'F1': 112,
-    'F2': 113,
-    'F3': 114,
-    'F4': 115,
-    'F5': 116,
-    'F6': 117,
-    'F7': 118,
-    'F8': 119,
-    'F9': 120,
-    'F10': 121,
-    'F11': 122,
-    'F12': 123,
+    'f1': 112,
+    'f2': 113,
+    'f3': 114,
+    'f4': 115,
+    'f5': 116,
+    'f6': 117,
+    'f7': 118,
+    'f8': 119,
+    'f9': 120,
+    'f10': 121,
+    'f11': 122,
+    'f12': 123,
     '=': 187,
     ',': 188,
     '.': 190,
@@ -2051,39 +2167,6 @@ jsPsych.pluginAPI = (function() {
     }
     timeout_handlers = [];
   }
-
-  // plugin parameter evaluation //
-
-  module.evaluateFunctionParameters = function(trial, protect) {
-
-    // keys that are always protected
-    var always_protected = ['on_finish'];
-
-    protect = (typeof protect === 'undefined') ? [] : protect;
-
-    protect = protect.concat(always_protected);
-
-    var keys = Object.keys(trial);
-
-    for (var i = 0; i < keys.length; i++) {
-
-      var process = true;
-      for (var j = 0; j < protect.length; j++) {
-        if (protect[j] == keys[i]) {
-          process = false;
-          break;
-        }
-      }
-
-      if (typeof trial[keys[i]] == "function" && process) {
-        trial[keys[i]] = trial[keys[i]].call();
-      }
-
-    }
-
-    return trial;
-
-  };
 
   // audio //
 
@@ -2119,7 +2202,8 @@ jsPsych.pluginAPI = (function() {
 
   module.preloadAudioFiles = function(files, callback_complete, callback_load) {
 
-    files = flatten(files);
+    files = jsPsych.utils.flatten(files);
+    files = jsPsych.utils.unique(files);
 
     var n_loaded = 0;
     var loadfn = (typeof callback_load === 'undefined') ? function() {} : callback_load;
@@ -2185,7 +2269,8 @@ jsPsych.pluginAPI = (function() {
   module.preloadImages = function(images, callback_complete, callback_load) {
 
     // flatten the images array
-    images = flatten(images);
+    images = jsPsych.utils.flatten(images);
+    images = jsPsych.utils.unique(images);
 
     var n_loaded = 0;
     var loadfn = (typeof callback_load === 'undefined') ? function() {} : callback_load;
@@ -2236,10 +2321,10 @@ jsPsych.pluginAPI = (function() {
     preloads.push(preload);
   }
 
-  module.autoPreload = function(timeline, callback) {
+  module.autoPreload = function(timeline, callback, images, audio, progress_bar) {
     // list of items to preload
-    var images = [];
-    var audio = [];
+    images = typeof images === 'undefined' ? [] : images;
+    audio = typeof audio === 'undefined' ? [] : audio;
 
     // construct list
     for (var i = 0; i < preloads.length; i++) {
@@ -2252,12 +2337,33 @@ jsPsych.pluginAPI = (function() {
         if (typeof trials[j][param] !== 'undefined' && typeof trials[j][param] !== 'function') {
           if ( typeof func == 'undefined' || func(trials[j]) ){
             if (media == 'image') {
-              images = images.concat(flatten([trials[j][param]]));
+              images = images.concat(jsPsych.utils.flatten([trials[j][param]]));
             } else if (media == 'audio') {
-              audio = audio.concat(flatten([trials[j][param]]));
+              audio = audio.concat(jsPsych.utils.flatten([trials[j][param]]));
             }
           }
         }
+      }
+    }
+
+    images = jsPsych.utils.unique(images);
+    audio  = jsPsych.utils.unique(audio);
+
+    var total_n = images.length + audio.length;
+    var loaded = 0;
+
+    if(progress_bar){
+      var pb_html = "<div id='jspsych-loading-progress-bar-container' style='height: 10px; width: 300px; background-color: #ddd;'>";
+      pb_html += "<div id='jspsych-loading-progress-bar' style='height: 10px; width: 0%; background-color: #777;'></div>";
+      pb_html += "</div>";
+      jsPsych.getDisplayElement().innerHTML = pb_html;
+    }
+
+    function update_loading_progress_bar(){
+      loaded++;
+      if(progress_bar){
+        var percent_loaded = (loaded/total_n)*100;
+        jsPsych.getDisplayElement().querySelector('#jspsych-loading-progress-bar').style.width = percent_loaded+"%";
       }
     }
 
@@ -2267,8 +2373,8 @@ jsPsych.pluginAPI = (function() {
     module.preloadImages(images, function() {
       module.preloadAudioFiles(audio, function() {
         callback();
-      });
-    });
+      }, update_loading_progress_bar);
+    }, update_loading_progress_bar);
   }
   
   /**
@@ -2300,40 +2406,56 @@ jsPsych.pluginAPI = (function() {
 })();
 
 // methods used in multiple modules //
+jsPsych.utils = (function() {
 
-function flatten(arr, out) {
-  out = (typeof out === 'undefined') ? [] : out;
-  for (var i = 0; i < arr.length; i++) {
-    if (Array.isArray(arr[i])) {
-      flatten(arr[i], out);
-    } else {
-      out.push(arr[i]);
-    }
-  }
-  return out;
-}
+	var module = {};
 
-function deepExtend(out) {
-  out = out || {};
+	module.flatten = function(arr, out) {
+		out = (typeof out === 'undefined') ? [] : out;
+		for (var i = 0; i < arr.length; i++) {
+			if (Array.isArray(arr[i])) {
+				module.flatten(arr[i], out);
+			} else {
+				out.push(arr[i]);
+			}
+		}
+		return out;
+	}
 
-  for (var i = 1; i < arguments.length; i++) {
-    var obj = arguments[i];
+	module.unique = function(arr) {
+		var out = [];
+		for (var i = 0; i < arr.length; i++) {
+			if (arr.indexOf(arr[i]) == i) {
+				out.push(arr[i]);
+			}
+		}
+		return out;
+	}
 
-    if (!obj)
-      continue;
-
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        if (typeof obj[key] === 'object')
-          out[key] = deepExtend(out[key], obj[key]);
-        else
-          out[key] = obj[key];
+	module.deepCopy = function(obj) {
+    if(!obj) return obj;
+    var out;
+    if(Array.isArray(obj)){
+      out = [];
+      for(var i = 0; i<obj.length; i++){
+        out.push(module.deepCopy(obj[i]));
       }
+      return out;
+    } else if(typeof obj === 'object'){
+      out = {};
+      for(var key in obj){
+        if(obj.hasOwnProperty(key)){
+          out[key] = module.deepCopy(obj[key]);
+        }
+      }
+      return out;
+    } else {
+      return obj;
     }
   }
 
-  return out;
-};
+	return module;
+})();
 
 // polyfill for Object.assign to support IE
 if (typeof Object.assign != 'function') {
@@ -2392,5 +2514,12 @@ if (!Array.prototype.includes) {
       k++;
     }
     return false;
+  };
+}
+
+// polyfill for Array.isArray
+if (!Array.isArray) {
+  Array.isArray = function(arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
   };
 }

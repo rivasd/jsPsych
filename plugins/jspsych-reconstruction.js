@@ -19,57 +19,45 @@ jsPsych.plugins['reconstruction'] = (function() {
     description: '',
     parameters: {
       stim_function: {
-        type: [jsPsych.plugins.parameterType.FUNCTION],
+        type: jsPsych.plugins.parameterType.FUNCTION,
+        pretty_name: 'Stimulus function',
         default: undefined,
-        no_function: false,
-        description: ''
+        description: 'A function with a single parameter that returns an HTML-formatted string representing the stimulus.'
       },
       starting_value: {
-        type: [jsPsych.plugins.parameterType.FLOAT],
+        type: jsPsych.plugins.parameterType.FLOAT,
+        pretty_name: 'Starting value',
         default: 0.5,
-        no_function: false,
-        description: ''
+        description: 'The starting value of the stimulus parameter.'
       },
       step_size: {
-        type: [jsPsych.plugins.parameterType.FLOAT],
+        type: jsPsych.plugins.parameterType.FLOAT,
+        pretty_name: 'Step size',
         default: 0.05,
-        no_function: false,
-        description: ''
+        description: 'The change in the stimulus parameter caused by pressing one of the modification keys.'
       },
       key_increase: {
-        type: [jsPsych.plugins.parameterType.KEYCODE],
+        type: jsPsych.plugins.parameterType.KEYCODE,
+        pretty_name: 'Key increase',
         default: 'h',
-        no_function: false,
-        description: ''
+        description: 'The key to press for increasing the parameter value.'
       },
       key_decrease: {
-        type: [jsPsych.plugins.parameterType.KEYCODE],
+        type: jsPsych.plugins.parameterType.KEYCODE,
+        pretty_name: 'Key decrease',
         default: 'g',
-        no_function: false,
-        description: ''
+        description: 'The key to press for decreasing the parameter value.'
       },
       button_label: {
-        type: [jsPsych.plugins.parameterType.STRING],
-        default: '',
-        no_function: false,
-        description: 'Submit Answers'
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Button label',
+        default:  'Continue',
+        description: 'The text that appears on the button to finish the trial.'
       }
     }
   }
 
   plugin.trial = function(display_element, trial) {
-
-    // default parameter values
-    trial.starting_value = (typeof trial.starting_value == 'undefined') ? 0.5 : trial.starting_value;
-    trial.step_size = trial.step_size || 0.05;
-    trial.key_increase = trial.key_increase || 'h';
-    trial.key_decrease = trial.key_decrease || 'g';
-    trial.button_label = typeof trial.button_label === 'undefined' ? 'Submit Answers' : trial.button_label;
-
-    // if any trial variables are functions
-    // this evaluates the function and replaces
-    // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial, ['stim_function']);
 
     // current param level
     var param = trial.starting_value;
@@ -121,6 +109,9 @@ jsPsych.plugins['reconstruction'] = (function() {
       // measure response time
       var endTime = (new Date()).getTime();
       var response_time = endTime - startTime;
+
+      // clear keyboard response
+      jsPsych.pluginAPI.cancelKeyboardResponse(key_listener);
 
       // save data
       var trial_data = {

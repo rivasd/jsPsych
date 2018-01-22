@@ -81,19 +81,23 @@ jsPsych.plugins["single-stim"] = (function() {
     trial.is_html = (typeof trial.is_html == 'undefined') ? false : trial.is_html;
     trial.prompt = trial.prompt || "";
 
-    var new_html = '';
     // display stimulus
     if (!trial.is_html) {
-      new_html = '<img src="'+trial.stimulus+'" id="jspsych-single-stim-stimulus"></img>';
+      display_element.append($('<img>', {
+        src: trial.stimulus,
+        id: 'jspsych-single-stim-stimulus'
+      }));
     } else {
-      new_html = '<div id="jspsych-single-stim-stimulus">'+trial.stimulus+'</div>';
+      display_element.append($('<div>', {
+        html: trial.stimulus,
+        id: 'jspsych-single-stim-stimulus'
+      }));
     }
 
-    // add prompt
-    new_html += trial.prompt;
-
-    // draw
-    display_element.innerHTML = new_html;
+    //show prompt if there is one
+    if (trial.prompt !== "") {
+      display_element.append(trial.prompt);
+    }
 
     // store response
     var response = {
@@ -120,7 +124,7 @@ jsPsych.plugins["single-stim"] = (function() {
       };
 
       // clear the display
-      display_element.innerHTML = '';
+      display_element.html('');
 
       // move on to the next trial
       jsPsych.finishTrial(trial_data);
@@ -131,7 +135,7 @@ jsPsych.plugins["single-stim"] = (function() {
 
       // after a valid response, the stimulus will have the CSS class 'responded'
       // which can be used to provide visual feedback that a response was recorded
-      display_element.querySelector('#jspsych-single-stim-stimulus').className += ' responded';
+      $("#jspsych-single-stim-stimulus").addClass('responded');
 
       // only record the first response
       if (response.key == -1) {
@@ -154,14 +158,14 @@ jsPsych.plugins["single-stim"] = (function() {
       });
     }
 
-    // hide stimulus if timing_stim is set
+    // hide image if timing is set
     if (trial.timing_stim > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
-        display_element.querySelector('#jspsych-single-stim-stimulus').style.visibility = 'hidden';
+        $('#jspsych-single-stim-stimulus').css('visibility', 'hidden');
       }, trial.timing_stim);
     }
 
-    // end trial if timing_response is set
+    // end trial if time limit is set
     if (trial.timing_response > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
         end_trial();

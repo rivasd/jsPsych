@@ -22,48 +22,39 @@ jsPsych.plugins['vsl-grid-scene'] = (function() {
     description: '',
     parameters: {
       stimuli: {
-        type: [jsPsych.plugins.parameterType.STRING],
+        type: jsPsych.plugins.parameterType.IMAGE,
+        pretty_name: 'Stimuli',
         array: true,
         default: undefined,
-        no_function: false,
-        description: ''
+        description: 'An array that defines a grid.'
       },
       image_size: {
-        type: [jsPsych.plugins.parameterType.INT],
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Image size',
         array: true,
         default: [100,100],
-        no_function: false,
-        description: ''
+        description: 'Array specifying the width and height of the images to show.'
       },
-      timing_duration: {
-        type: [jsPsych.plugins.parameterType.INT],
+      trial_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Trial duration',
         default: 2000,
-        no_function: false,
-        description: ''
+        description: 'How long to show the stimulus for in milliseconds.'
       }
     }
   }
 
   plugin.trial = function(display_element, trial) {
 
-    // default parameter values
-    trial.image_size = trial.image_size || [100, 100];
-    trial.timing_duration = typeof trial.timing_duration === 'undefined' ? 2000 : trial.timing_duration;
-
-    // if any trial variables are functions
-    // this evaluates the function and replaces
-    // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
     display_element.innerHTML = plugin.generate_stimulus(trial.stimuli, trial.image_size);
 
     jsPsych.pluginAPI.setTimeout(function() {
       endTrial();
-    }, trial.timing_duration);
+    }, trial.trial_duration);
 
     function endTrial() {
 
-      display_element.innerHMTL = '';
+      display_element.innerHTML = '';
 
       var trial_data = {
         "stimulus": JSON.stringify(trial.stimuli)
@@ -78,36 +69,33 @@ jsPsych.plugins['vsl-grid-scene'] = (function() {
     var ncols = pattern[0].length;
 
     // create blank element to hold code that we generate
-    display_element.innerHTML += '<div id="jspsych-vsl-grid-scene-dummy" css="display: none;"></div>';
+    var html = '<div id="jspsych-vsl-grid-scene-dummy" css="display: none;">';
 
     // create table
-    display_element.querySelector('#jspsych-vsl-grid-scene-dummy').innerHTML += '<table id="jspsych-vsl-grid-scene table" '+
-      'style="border-collapse: collapse; margin-left: auto; margin-right: auto;"></table>';
+    html += '<table id="jspsych-vsl-grid-scene table" '+
+      'style="border-collapse: collapse; margin-left: auto; margin-right: auto;">';
 
     for (var row = 0; row < nrows; row++) {
-      display_element.querySelector('#jspsych-vsl-grid-scene-table').innerHTML += '<tr id="jspsych-vsl-grid-scene-table-row-'+row+'" css="height: '+image_size[1]+'px;">';
+      html += '<tr id="jspsych-vsl-grid-scene-table-row-'+row+'" css="height: '+image_size[1]+'px;">';
 
       for (var col = 0; col < ncols; col++) {
-        display_element.querySelector('#jspsych-vsl-grid-scene-table-row-' + row).innerHTML += '<td id="jspsych-vsl-grid-scene-table-' + row + '-' + col +'" '+
+        html += '<td id="jspsych-vsl-grid-scene-table-' + row + '-' + col +'" '+
           'style="padding: '+ (image_size[1] / 10) + 'px ' + (image_size[0] / 10) + 'px; border: 1px solid #555;">'+
-          '<div id="jspsych-vsl-grid-scene-table-cell-' + row + '-' + col + '" style="width: '+image_size[0]+'px; height: '+image_size[1]+'px;"></div>';
-      }
-    }
-
-
-    for (var row = 0; row < nrows; row++) {
-      for (var col = 0; col < ncols; col++) {
+          '<div id="jspsych-vsl-grid-scene-table-cell-' + row + '-' + col + '" style="width: '+image_size[0]+'px; height: '+image_size[1]+'px;">';
         if (pattern[row][col] !== 0) {
-          display_element.querySelector('#jspsych-vsl-grid-scene-table-cell-' + row + '-' + col).innerHTML = '<img '+
+          html += '<img '+
             'src="'+pattern[row][col]+'" style="width: '+image_size[0]+'px; height: '+image_size[1]+'"></img>';
         }
+        html += '</div>';
+        html += '</td>';
       }
+      html += '</tr>';
     }
 
-    var html_out = display_element.querySelector('#jspsych-vsl-grid-scene-dummy').innerHTML;
-    display_element.querySelector('#jspsych-vsl-grid-scene-dummy').outerHTML = '';
+    html += '</table>';
+    html += '</div>';
 
-    return html_out;
+    return html;
 
   };
 

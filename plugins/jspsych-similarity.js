@@ -82,12 +82,6 @@ jsPsych.plugins.similarity = (function() {
         default: '',
         no_function: false,
         description: ''
-      },
-      button_label: {
-        type: [jsPsych.plugins.parameterType.STRING],
-        default: '',
-        no_function: false,
-        description: 'Submit Answers'
       }
     }
   }
@@ -406,7 +400,7 @@ jsPsych.plugins.similarity = (function() {
       display_element.append($('<button>', {
         'id': 'next',
         'class': 'sim',
-        'html': trial.button_label
+        'html': 'Submit Answer'
       }));
        
       // if prompt is set, show prompt

@@ -1,57 +1,69 @@
 const root = '../../';
 
 require(root + 'jspsych.js');
+require(root + 'plugins/jspsych-html-keyboard-response.js');
 
 describe('#getKeyboardResponse', function(){
+  beforeEach(function(){
+    var t = {
+      type: 'html-keyboard-response',
+      stimulus: 'foo',
+      choices: ['Q']
+    }
+
+    jsPsych.init({
+      timeline: [t]
+    })
+  });
   test('should execute a function after successful keypress', function(){
     var callback = jest.fn();
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback});
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(1);
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(1);
   });
   test('should execute only valid keys', function(){
     var callback = jest.fn();
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback, valid_responses: [13]});
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 54}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 54}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 54}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 54}));
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 13}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 13}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 13}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 13}));
     expect(callback.mock.calls.length).toBe(1);
   });
   test('should not respond when jsPsych.NO_KEYS is used', function(){
     var callback = jest.fn();
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback, valid_responses: jsPsych.NO_KEYS});
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 54}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 54}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 54}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 54}));
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(0);
   });
   test('should not respond to held keys when allow_held_key is false', function(){
     var callback = jest.fn();
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback, valid_responses: jsPsych.ALL_KEYS, allow_held_key: false});
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(0);
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(1);
   });
   test('should respond to held keys when allow_held_key is true', function(){
     var callback = jest.fn();
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback, valid_responses: jsPsych.ALL_KEYS, allow_held_key: true});
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(1);
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
   });
 })
 
@@ -61,8 +73,8 @@ describe('#cancelKeyboardResponse', function(){
     var listener = jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback});
     expect(callback.mock.calls.length).toBe(0);
     jsPsych.pluginAPI.cancelKeyboardResponse(listener);
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(0);
   });
 });
@@ -73,9 +85,20 @@ describe('#cancelAllKeyboardResponses', function(){
     jsPsych.pluginAPI.getKeyboardResponse({callback_function: callback});
     expect(callback.mock.calls.length).toBe(0);
     jsPsych.pluginAPI.cancelAllKeyboardResponses();
-    document.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
-    document.dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keydown', {keyCode: 32}));
+    document.querySelector('.jspsych-display-element').dispatchEvent(new KeyboardEvent('keyup', {keyCode: 32}));
     expect(callback.mock.calls.length).toBe(0);
+  });
+});
+
+describe('#compareKeys', function(){
+  test('should compare keys regardless of type', function(){
+    expect(jsPsych.pluginAPI.compareKeys('q', 81)).toBe(true);
+    expect(jsPsych.pluginAPI.compareKeys(81, 81)).toBe(true);
+    expect(jsPsych.pluginAPI.compareKeys('q', 'Q')).toBe(true);
+    expect(jsPsych.pluginAPI.compareKeys(80, 81)).toBe(false);
+    expect(jsPsych.pluginAPI.compareKeys('q','1')).toBe(false);
+    expect(jsPsych.pluginAPI.compareKeys('q',80)).toBe(false);
   });
 });
 
@@ -96,30 +119,6 @@ describe('#convertKeyCodeToKeyCharacter', function(){
     expect(jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(13)).toBe('enter');
   });
 });
-
-describe('#evaluateFunctionParameters', function(){
-  test('should convert functions to their return value', function(){
-    var trial = {
-      p: function() { return 1; }
-    }
-    jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-    expect(trial.p).toBe(1);
-  });
-  test('should allow protecting functions', function(){
-    var trial = {
-      p: function() { return 1; }
-    }
-    jsPsych.pluginAPI.evaluateFunctionParameters(trial, ['p']);
-    expect(typeof trial.p).toBe('function');
-  });
-  test('should always protect on_finish', function(){
-    var trial = {
-      on_finish: function() { return 1; }
-    }
-    jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-    expect(typeof trial.on_finish).toBe('function');
-  });
-})
 
 describe('#setTimeout', function(){
   test('basic setTimeout control with centralized storage', function(){

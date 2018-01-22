@@ -12,20 +12,50 @@ jsPsych.plugins["resize"] = (function() {
 
   var plugin = {};
 
+  plugin.info = {
+    name: 'resize',
+    description: '',
+    parameters: {
+      item_height: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Item height',
+        default: 1,
+        description: 'The height of the item to be measured.'
+      },
+      item_width: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Item width',
+        default: 1,
+        description: 'The width of the item to be measured.'
+      },
+      prompt: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Prompt',
+        default: null,
+        description: 'The content displayed below the resizable box and above the button.'
+      },
+      pixels_per_unit: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Pixels per unit',
+        default: 100,
+        description: 'After the scaling factor is applied, this many pixels will equal one unit of measurement.'
+      },
+      starting_size: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Starting size',
+        default: 100,
+        description: 'The initial size of the box, in pixels, along the larget dimension.'
+      },
+      button_label: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Button label',
+        default:  'Continue',
+        description: 'Label to display on the button to complete calibration.'
+      },
+    }
+  }
+
   plugin.trial = function(display_element, trial) {
-
-    // if any trial variables are functions
-    // this evaluates the function and replaces
-    // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
-    // default trial paramters
-    trial.item_height = trial.item_height || 1;
-    trial.item_width = trial.item_width || 1;
-    trial.prompt = trial.prompt || ' ';
-    trial.pixels_per_unit = trial.pixels_per_unit ||  100;
-    trial.starting_size = trial.starting_size || 100;
-    trial.button_label = trial.button_label || "Done";
 
     var aspect_ratio = trial.item_width / trial.item_height;
 
@@ -42,7 +72,9 @@ jsPsych.plugins["resize"] = (function() {
     var html ='<div id="jspsych-resize-div" style="border: 2px solid steelblue; height: '+start_div_height+'px; width:'+start_div_width+'px; margin: 7px auto; background-color: lightsteelblue; position: relative;">';
     html += '<div id="jspsych-resize-handle" style="cursor: nwse-resize; background-color: steelblue; width: 10px; height: 10px; border: 2px solid lightsteelblue; position: absolute; bottom: 0; right: 0;"></div>';
     html += '</div>';
-    html += trial.prompt;
+    if (trial.prompt !== null){
+      html += trial.prompt;
+    }
     html += '<a class="jspsych-btn" id="jspsych-resize-btn">'+trial.button_label+'</a>';
 
     // render
@@ -60,7 +92,6 @@ jsPsych.plugins["resize"] = (function() {
 
     var mousedownevent = function(e){
       e.preventDefault();
-      e.stopPropagation();
       dragging = true;
       origin_x = e.pageX;
       origin_y = e.pageY;
@@ -80,15 +111,15 @@ jsPsych.plugins["resize"] = (function() {
 
     var resizeevent = function(e){
       if(dragging){
-        var dx = (e.pageX - origin_x)*2;
-        var dy = (e.pageY - origin_y)*2;
+        var dx = (e.pageX - origin_x);
+        var dy = (e.pageY - origin_y);
 
-        if(dx >= dy){
-          scale_div.style.width = Math.max(10, cx+dx) + "px";
-          scale_div.style.height = Math.round(Math.max(10, cx+dx) / aspect_ratio ) + "px";
+        if(Math.abs(dx) >= Math.abs(dy)){
+          scale_div.style.width = Math.round(Math.max(20, cx+dx*2)) + "px";
+          scale_div.style.height = Math.round(Math.max(20, cx+dx*2) / aspect_ratio ) + "px";
         } else {
-          scale_div.style.height = Math.max(10, cy+dy) + "px";
-          scale_div.style.width = Math.round(aspect_ratio * Math.max(10, cy+dy)) + "px";
+          scale_div.style.height = Math.round(Math.max(20, cy+dy*2)) + "px";
+          scale_div.style.width = Math.round(aspect_ratio * Math.max(20, cy+dy*2)) + "px";
         }
       }
     }
@@ -100,7 +131,7 @@ jsPsych.plugins["resize"] = (function() {
     var final_height_px, final_width_px;
     function scale() {
       final_width_px = scale_div.offsetWidth;
-      final_height_px = scale_div.offsetHeight;
+      //final_height_px = scale_div.offsetHeight;
 
       var pixels_unit_screen = final_width_px / trial.item_width;
 

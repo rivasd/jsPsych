@@ -2,9 +2,8 @@
 <html>
 
 <head>
-  
   <script src="../jspsych.js"></script>
-  <script src="../plugins/jspsych-single-stim.js"></script>
+  <script src="../plugins/jspsych-image-keyboard-response.js"></script>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <style>
     img {
@@ -12,7 +11,7 @@
     }
   </style>
 </head>
-
+<body></body>
 <script>
   var images = ["img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/7.gif", "img/8.gif", "img/9.gif", "img/10.gif"];
 
@@ -24,9 +23,9 @@
   }
 
   var block = {
-    type: 'single-stim',
+    type: 'image-keyboard-response',
     choices: [89, 78], // Y or N
-    prompt: '<p class="center-content">Press Y to Continue. Press N to end the experiment</p>',
+    prompt: '<p>Press Y to Continue. Press N to end the experiment</p>',
     on_finish: function(data) {
       if (data.key_press == 78) {
         jsPsych.endExperiment('The experiment was ended. This is the end message.');
@@ -37,10 +36,7 @@
 
 
   jsPsych.init({
-    timeline: [block],
-    on_finish: function() {
-      jsPsych.data.displayData();
-    }
+    timeline: [block]
   });
 </script>
 

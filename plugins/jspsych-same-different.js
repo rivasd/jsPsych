@@ -154,7 +154,7 @@ jsPsych.plugins['same-different'] = (function() {
     
     
     function showBlankScreen() {
-      display_element.querySelector('.jspsych-same-different-stimulus').outerHTML = '';
+      $('.jspsych-same-different-stimulus').remove();
 
       jsPsych.pluginAPI.setTimeout(function() {
         showSecondStim();
@@ -163,20 +163,28 @@ jsPsych.plugins['same-different'] = (function() {
 
     function showSecondStim() {
       if (!trial.is_html) {
-        display_element.innerHTML += '<img class="jspsych-same-different-stimulus" id="jspsych-same-different-second-stimulus" src="'+trial.stimuli[1]+'"></img>';
+        display_element.append($('<img>', {
+          src: trial.stimuli[1],
+          "class": 'jspsych-same-different-stimulus',
+          id: 'jspsych-same-different-second-stimulus'
+        }));
       } else {
-        display_element.innerHTML += '<div class="jspsych-same-different-stimulus" id="jspsych-same-different-second-stimulus">'+trial.stimuli[1]+'</div>';
+        display_element.append($('<div>', {
+          html: trial.stimuli[1],
+          "class": 'jspsych-same-different-stimulus',
+          id: 'jspsych-same-different-second-stimulus'
+        }));
       }
 
       if (trial.timing_second_stim > 0) {
         jsPsych.pluginAPI.setTimeout(function() {
-          display_element.querySelector('#jspsych-same-different-second-stimulus').style.visibility = 'hidden';
+          $("#jspsych-same-different-second-stimulus").css('visibility', 'hidden');
         }, trial.timing_second_stim);
       }
 
       //show prompt here
       if (trial.prompt !== "") {
-        display_element.innerHTML += trial.prompt;
+        display_element.append(trial.prompt);
       }
 
       var after_response = function(info) {
@@ -209,7 +217,7 @@ jsPsych.plugins['same-different'] = (function() {
           trial_data["key_press_stim1"] = first_stim_info.key;
         }
 
-        display_element.innerHTML = '';
+        display_element.html('');
 
         jsPsych.finishTrial(trial_data);
       }

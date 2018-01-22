@@ -66,7 +66,7 @@ jsPsych.plugins.html = (function() {
       url = trial.url + "?time=" + (new Date().getTime());
     }
 
-    load(display_element, url, function() {
+    display_element.load(trial.url, function() {
       var t0 = (new Date()).getTime();
       var finish = function() {
     	  var extraData = trial.check_fn ? trial.check_fn(display_element) : false;
@@ -85,28 +85,15 @@ jsPsych.plugins.html = (function() {
         
         jsPsych.finishTrial(trial_data);
       };
-      if (trial.cont_btn) { display_element.querySelector('#'+trial.cont_btn).addEventListener('click', finish); }
+      if (trial.cont_btn) $('#' + trial.cont_btn).click(finish);
       if (trial.cont_key) {
         var key_listener = function(e) {
           if (e.which == trial.cont_key) finish();
         };
-        display_element.addEventListener('keydown', key_listener);
+        $(document).keydown(key_listener);
       }
     });
   };
-
-  // helper to load via XMLHttpRequest
-  function load(element, file, callback){
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", file, true);
-    xmlhttp.onreadystatechange = function(){
-        if(xmlhttp.status == 200 && xmlhttp.readyState == 4){ //Check if loaded
-            element.innerHTML = xmlhttp.responseText;
-            callback();
-        }
-    }
-    xmlhttp.send();
-  }
 
   return plugin;
 })();

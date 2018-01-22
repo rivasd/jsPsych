@@ -80,8 +80,6 @@ jsPsych.plugins["button-response"] = (function() {
     trial.timing_response = trial.timing_response || -1; // if -1, then wait for response forever
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
-    trial.margin_vertical = trial.margin_vertical || "0px";
-    trial.margin_horizontal = trial.margin_horizontal || "8px";
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -90,9 +88,17 @@ jsPsych.plugins["button-response"] = (function() {
 
     // display stimulus
     if (!trial.is_html) {
-      display_element.innerHTML = '<img src="'+trial.stimulus+'" id="jspsych-button-response-stimulus"></img>';
+      display_element.append($('<img>', {
+        src: trial.stimulus,
+        id: 'jspsych-button-response-stimulus',
+        class: 'block-center'
+      }));
     } else {
-      display_element.innerHTML = '<div id="jspsych-button-response-stimulus">'+trial.stimulus+'</div>';
+      display_element.append($('<div>', {
+        html: trial.stimulus,
+        id: 'jspsych-button-response-stimulus',
+        class: 'block-center'
+      }));
     }
 
     //display buttons
@@ -108,20 +114,20 @@ jsPsych.plugins["button-response"] = (function() {
         buttons.push(trial.button_html);
       }
     }
-    display_element.innerHTML += '<div id="jspsych-button-response-btngroup"></div>';
+    display_element.append('<div id="jspsych-button-response-btngroup" class="center-content block-center"></div>')
     for (var i = 0; i < trial.choices.length; i++) {
       var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
-      display_element.querySelector('#jspsych-button-response-btngroup').insertAdjacentHTML('beforeend',
-        '<div class="jspsych-button-response-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-button-response-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
-      display_element.querySelector('#jspsych-button-response-button-' + i).addEventListener('click', function(e){
-        var choice = e.currentTarget.dataset.choice;
-        after_response(choice);
-      });
+      $('#jspsych-button-response-btngroup').append(
+        $(str).attr('id', 'jspsych-button-response-button-' + i).data('choice', i).addClass('jspsych-button-response-button').on('click', function(e) {
+          var choice = $('#' + this.id).data('choice');
+          after_response(choice);
+        })
+      );
     }
 
     //show prompt if there is one
     if (trial.prompt !== "") {
-      display_element.insertAdjacentHTML('beforeend', trial.prompt);
+      display_element.append(trial.prompt);
     }
 
     // store response
@@ -144,14 +150,10 @@ jsPsych.plugins["button-response"] = (function() {
 
       // after a valid response, the stimulus will have the CSS class 'responded'
       // which can be used to provide visual feedback that a response was recorded
-      display_element.querySelector('#jspsych-button-response-stimulus').className += ' responded';
+      $("#jspsych-button-response-stimulus").addClass('responded');
 
       // disable all the buttons after a response
-      var btns = document.querySelector('.jspsych-button-response-button');
-      for(var i=0; i<btns.length; i++){
-        //btns[i].removeEventListener('click');
-        btns[i].setAttribute('disabled', 'disabled');
-      }
+      $('.jspsych-button-response-button').off('click').attr('disabled', 'disabled');
 
       if (trial.response_ends_trial) {
         end_trial();
@@ -172,7 +174,7 @@ jsPsych.plugins["button-response"] = (function() {
       };
 
       // clear the display
-      display_element.innerHTML = '';
+      display_element.html('');
 
       // move on to the next trial
       jsPsych.finishTrial(trial_data);
@@ -184,7 +186,7 @@ jsPsych.plugins["button-response"] = (function() {
     // hide image if timing is set
     if (trial.timing_stim > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
-        display_element.querySelector('#jspsych-button-response-stimulus').style.visibility = 'hidden';
+        $('#jspsych-button-response-stimulus').css('visibility', 'hidden');
       }, trial.timing_stim);
     }
 

@@ -72,31 +72,24 @@ jsPsych.plugins["single-audio"] = (function() {
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
-    // setup stimulus
+    // play stimulus
     var context = jsPsych.pluginAPI.audioContext();
-    if(context !== null){
-      var source = context.createBufferSource();
-      source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
-      source.connect(context.destination);
-    } else {
-      var audio = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
-      audio.currentTime = 0;
-    }
+    var source = context.createBufferSource();
+    source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.stimulus);
+    source.connect(context.destination);
+    startTime = context.currentTime + 0.1;
+    source.start(startTime);
 
     // set up end event if trial needs it
     if(trial.trial_ends_after_audio){
-      if(context !== null){
-        source.onended = function() {
-          end_trial();
-        }
-      } else {
-        audio.addEventListener('end', end_trial);
+      source.onended = function() {
+        end_trial();
       }
     }
 
     // show prompt if there is one
     if (trial.prompt !== "") {
-      display_element.innerHTML = trial.prompt;
+      display_element.append(trial.prompt);
     }
 
     // store response
@@ -112,27 +105,20 @@ jsPsych.plugins["single-audio"] = (function() {
       jsPsych.pluginAPI.clearAllTimeouts();
 
       // stop the audio file if it is playing
-      // remove end event listeners if they exist
-      if(context !== null){
-        source.stop();
-        source.onended = function() { }
-      } else {
-        audio.pause();
-        audio.removeEventListener('end', end_trial);
-      }
+      source.stop();
 
       // kill keyboard listeners
       jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
 
       // gather the data to store for the trial
       var trial_data = {
-        "rt": context !== null ? response.rt * 1000 : response.rt,
+        "rt": response.rt * 1000,
         "stimulus": trial.stimulus,
         "key_press": response.key
       };
 
       // clear the display
-      display_element.innerHTML = '';
+      display_element.html('');
 
       // move on to the next trial
       jsPsych.finishTrial(trial_data);
@@ -151,35 +137,16 @@ jsPsych.plugins["single-audio"] = (function() {
       }
     };
 
-    // start audio
-    if(context !== null){
-      startTime = context.currentTime + 0.1;
-      source.start(startTime);
-    } else {
-      audio.play();
-    }
-
     // start the response listener
-    if(context !== null) {
-      var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-        callback_function: after_response,
-        valid_responses: trial.choices,
-        rt_method: 'audio',
-        persist: false,
-        allow_held_key: false,
-        audio_context: context,
-        audio_context_start_time: startTime
-      });
-    } else {
-      var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-        callback_function: after_response,
-        valid_responses: trial.choices,
-        rt_method: 'date',
-        persist: false,
-        allow_held_key: false
-      });
-    }
-
+    var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+      callback_function: after_response,
+      valid_responses: trial.choices,
+      rt_method: 'audio',
+      persist: false,
+      allow_held_key: false,
+      audio_context: context,
+      audio_context_start_time: startTime
+    });
     // end trial if time limit is set
     if (trial.timing_response > 0) {
       jsPsych.pluginAPI.setTimeout(function() {

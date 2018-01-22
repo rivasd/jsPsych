@@ -12,24 +12,93 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
 
   var plugin = {};
 
+  plugin.info = {
+    name: 'serial-reaction-time',
+    description: '',
+    parameters: {
+      grid: {
+        type: jsPsych.plugins.parameterType.BOOL,
+        pretty_name: 'Grid',
+        array: true,
+        default: [[1,1,1,1]],
+        description: 'This array represents the grid of boxes shown on the screen.'
+      },
+      target: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Target',
+        array: true,
+        default: undefined,
+        description: 'The location of the target. The array should be the [row, column] of the target.'
+      },
+      choices: {
+        type: jsPsych.plugins.parameterType.KEYCODE,
+        pretty_name: 'Choices',
+        array: true,
+        default: [['3','5','7','9']],
+        description: ' Each entry in this array is the key that should be pressed for that corresponding location in the grid.'
+      },
+      grid_square_size: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Grid square size',
+        default: 100,
+        description: 'The width and height in pixels of each square in the grid.'
+      },
+      target_color: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Target color',
+        default: "#999",
+        description: 'The color of the target square.'
+      },
+      response_ends_trial: {
+        type: jsPsych.plugins.parameterType.BOOL,
+        pretty_name: 'Response ends trial',
+        default: true,
+        description: 'If true, trial ends when user makes a response.'
+      },
+      pre_target_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Pre-target duration',
+        default: 0,
+        description: 'The number of milliseconds to display the grid before the target changes color.'
+      },
+      trial_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Trial duration',
+        default: null,
+        description: 'How long to show the trial.'
+      },
+      show_response_feedback: {
+        type: jsPsych.plugins.parameterType.BOOL,
+        pretty_name: 'Show response feedback',
+        default: false,
+        description: 'If true, show feedback indicating where the user responded and whether it was correct.'
+      },
+      feedback_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Feedback duration',
+        default: 200,
+        description: 'The length of time in milliseconds to show the feedback.'
+      },
+      fade_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Fade duration',
+        default: null,
+        description: 'If a positive number, the target will progressively change color at the start of the trial, with the transition lasting this many milliseconds.'
+      },
+      prompt: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Prompt',
+        default: null,
+        no_function: false,
+        description: ' Any content here will be displayed below the stimulus.'
+      },
+    }
+  }
+
   plugin.trial = function(display_element, trial) {
 
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
-    trial.grid = trial.grid || [[1,1,1,1]];
-    trial.choices = trial.choices || [['3','5','7','9']];
-    trial.grid_square_size = trial.grid_square_size || 100;
-    trial.target_color = trial.target_color || "#999";
-    trial.response_ends_trial = (typeof trial.response_ends_trial === 'undefined') ? true : trial.response_ends_trial;
-    trial.timing_pre_target = (typeof trial.timing_pre_target === 'undefined') ? 0 : trial.timing_pre_target;
-    trial.timing_max_duration = trial.timing_max_duration || -1; // if -1, then wait for response forever
-    trial.show_response_feedback = (typeof trial.show_response_feedback === 'undefined') ? true : trial.show_response_feedback;
-    trial.feedback_duration = (typeof trial.feedback_duration === 'undefined') ? 50 : trial.feedback_duration;
-    trial.fade_duration = (typeof trial.fade_duration === 'undefined') ? -1 : trial.fade_duration;
-    trial.prompt = (typeof trial.prompt === 'undefined') ? "" : trial.prompt;
-
     // create a flattened version of the choices array
-    var flat_choices = flatten(trial.choices);
+    var flat_choices = jsPsych.utils.flatten(trial.choices);
     while(flat_choices.indexOf('') > -1){
       flat_choices.splice(flat_choices.indexOf(''),1);
     }
@@ -38,23 +107,29 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
     var stimulus = this.stimulus(trial.grid, trial.grid_square_size);
     display_element.innerHTML = stimulus;
 
-		if(trial.timing_pre_target <= 0){
+		if(trial.pre_target_duration <= 0){
 			showTarget();
 		} else {
 			jsPsych.pluginAPI.setTimeout(function(){
 				showTarget();
-			}, trial.timing_pre_target);
+			}, trial.pre_target_duration);
 		}
 
 		//show prompt if there is one
-    if (trial.prompt !== "") {
+    if (trial.prompt !== null) {
       display_element.innerHTML += trial.prompt;
     }
 
 		var keyboardListener = {};
 
+    var response = {
+      rt: null,
+      key: false,
+      correct: false
+    }
+
 		function showTarget(){
-      if(trial.fade_duration == -1){
+      if(trial.fade_duration == null){
         display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+trial.target[0]+'-'+trial.target[1]).style.backgroundColor = trial.target_color;
       } else {
         display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+trial.target[0]+'-'+trial.target[1]).style.transition = "background-color "+trial.fade_duration;
@@ -67,11 +142,22 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
         allow_held_key: false
       });
 
-			if(trial.timing_max_duration > -1){
-				jsPsych.pluginAPI.setTimeout(endTrial, trial.timing_max_duration);
+			if(trial.trial_duration > null){
+				jsPsych.pluginAPI.setTimeout(showFeedback, trial.trial_duration);
 			}
 
 		}
+
+    function showFeedback() {
+      if(response.rt == null || trial.show_response_feedback == false){
+        endTrial();
+      } else {
+        var color = response.correct ? '#0f0' : '#f00';
+        display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+response.responseLoc[0]+'-'+response.responseLoc[1]).style.transition = "";
+        display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+response.responseLoc[0]+'-'+response.responseLoc[1]).style.backgroundColor = color;
+        jsPsych.pluginAPI.setTimeout(endTrial, trial.feedback_duration);
+      }
+    }
 
     function endTrial() {
 
@@ -100,17 +186,11 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
 
     };
 
-		var response = {
-      rt: -1,
-      key: false,
-      correct: false
-    }
-
     // function to handle responses by the subject
     function after_response(info) {
 
 			// only record first response
-      response = response.rt == -1 ? info : response;
+      response = response.rt == null ? info : response;
 
 			// check if the response is correct
 			var responseLoc = [];
@@ -123,17 +203,15 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
 					}
 				}
 			}
-
+      response.responseLoc = responseLoc;
 			response.correct = (JSON.stringify(responseLoc) == JSON.stringify(trial.target));
 
-			if (trial.show_response_feedback){
-				var color = response.correct ? '#0f0' : '#f00';
-        display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+responseLoc[0]+'-'+responseLoc[1]).style.transition = "";
-        display_element.querySelector('#jspsych-serial-reaction-time-stimulus-cell-'+responseLoc[0]+'-'+responseLoc[1]).style.backgroundColor = color;
-			}
-
-      if (trial.response_ends_trial) {
-        endTrial();
+			if (trial.response_ends_trial) {
+        if (trial.show_response_feedback){
+  				showFeedback(response.correct);
+  			} else {
+          endTrial();
+        }
       }
     };
 

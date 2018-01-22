@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    
     <script src="../jspsych.js"></script>
     <script src="../plugins/jspsych-survey-multi-choice.js"></script>
     <link rel="stylesheet" href="../css/jspsych.css"></link>
   </head>
-
+  <body></body>
   <script>
-
-  // defining groups of questions that will go together.
-  var page_1_questions = ["I like vegetables.", "I like fruit."];
 
   // definiting two different response scales that can be used.
   var page_1_options = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
@@ -18,17 +14,12 @@
 
   var multi_choice_block = {
       type: 'survey-multi-choice',
-      questions: page_1_questions,
-      options: [page_1_options, page_2_options],  // need one scale for every question on a page
-      required: [true, false]   // set whether questions are required
+      questions: [{prompt: "I like vegetables", options: page_1_options, required:true,}, {prompt: "I like fruit", options: page_2_options, required: false}],
   };
 
   var multi_choice_block_horizontal = {
       type: 'survey-multi-choice',
-      questions: page_1_questions,
-      options: [page_1_options, page_2_options],  // need one scale for every question on a page
-      required: [true, false],   // set whether questions are required
-      horizontal: true  // centres questions and makes options display horizontally
+      questions: [{prompt: "I like vegetables", options: page_1_options, required: true, horizontal: true,}, {prompt: "I like fruit", options: page_2_options, required: false, horizontal: false}],
   };
 
   jsPsych.init({

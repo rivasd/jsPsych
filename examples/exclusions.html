@@ -2,9 +2,8 @@
 <html>
 
 <head>
-  
   <script src="../jspsych.js"></script>
-  <script src="../plugins/jspsych-single-stim.js"></script>
+  <script src="../plugins/jspsych-html-keyboard-response.js"></script>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <style>
     img {
@@ -17,9 +16,8 @@
 </body>
 <script>
   var trial_1 = {
-    type: 'single-stim',
-    stimulus: 'The experiment has begun!',
-    is_html: true
+    type: 'html-keyboard-response',
+    stimulus: 'The experiment started because your viewing window is at least 1000x500 pixels and you running a browser that supports the WebAudio API. To see the exclusions in action, shrink this window and refresh the page.',
   }
 
 

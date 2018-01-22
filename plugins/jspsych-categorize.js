@@ -158,9 +158,18 @@ jsPsych.plugins.categorize = (function() {
     var trig = plugin.getTrigger(trial);
 
     if (!trial.is_html) {
-      display_element.innerHTML = '<img id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus" src="'+trial.stimulus+'"></img>';
+      // add image to display
+      display_element.append($('<img>', {
+        "src": trial.stimulus,
+        "class": 'jspsych-categorize-stimulus',
+        "id": 'jspsych-categorize-stimulus'
+      }));
     } else {
-      display_element.innerHTML = '<div id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus">'+trial.stimulus+'</div>';
+      display_element.append($('<div>', {
+        "id": 'jspsych-categorize-stimulus',
+        "class": 'jspsych-categorize-stimulus',
+        "html": trial.stimulus
+      }));
     }
     //send the correct stimulus presentation trigger
     if(trig && jsPsych.pluginAPI.hardwareConnected){
@@ -176,7 +185,7 @@ jsPsych.plugins.categorize = (function() {
     // hide image after time if the timing parameter is set
     if (trial.timing_stim > 0) {
       jsPsych.pluginAPI.setTimeout(function() {
-        display_element.querySelector('#jspsych-categorize-stimulus').style.visibility = 'hidden';
+        $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
       }, trial.timing_stim);
     };
 
@@ -229,7 +238,7 @@ jsPsych.plugins.categorize = (function() {
     	  trial_data.timeout = false;
       }
 
-      display_element.innerHTML = '';
+      display_element.html('');
 
       var timeout = info.rt == -1;
       doFeedback(correct, timeout);
@@ -270,9 +279,18 @@ jsPsych.plugins.categorize = (function() {
         // show image during feedback if flag is set
         if (trial.show_stim_with_feedback) {
           if (!trial.is_html) {
-            display_element.innerHTML = '<img id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus" src="'+trial.stimulus+'"></img>';
+            // add image to display
+            display_element.append($('<img>', {
+              "src": trial.stimulus,
+              "class": 'jspsych-categorize-stimulus',
+              "id": 'jspsych-categorize-stimulus'
+            }));
           } else {
-            display_element.innerHTML = '<div id="jspsych-categorize-stimulus" class="jspsych-categorize-stimulus">'+trial.stimulus+'</div>';
+            display_element.append($('<div>', {
+              "id": 'jspsych-categorize-stimulus',
+              "class": 'jspsych-categorize-stimulus',
+              "html": trial.stimulus
+            }));
           }
         }
 
@@ -285,7 +303,7 @@ jsPsych.plugins.categorize = (function() {
         }
 
         // show the feedback
-        display_element.innerHTML += atext;
+        display_element.append(atext);
       }
       // check if force correct button press is set
       if (trial.force_correct_button_press && correct === false && ((timeout && trial.show_feedback_on_timeout) || !timeout)) {
@@ -311,7 +329,7 @@ jsPsych.plugins.categorize = (function() {
     }
 
     function endTrial() {
-      display_element.innerHTML = '';
+      display_element.html("");
       jsPsych.finishTrial(trial_data);
     }
 

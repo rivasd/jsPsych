@@ -17,43 +17,40 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
     description: '',
     parameters: {
       questions: {
-        type: [jsPsych.plugins.parameterType.STRING],
+        type: jsPsych.plugins.parameterType.COMPLEX,
         array: true,
-        default: undefined,
-        no_function: false,
-        description: ''
-      },
-      options: {
-        type: [jsPsych.plugins.parameterType.STRING],
-        array: true,
-        default: undefined,
-        no_function: false,
-        description: ''
-      },
-      required: {
-        type: [jsPsych.plugins.parameterType.BOOL],
-        array: true,
-        default: false,
-        no_function: false,
-        description: ''
-      },
-      horitzontal: {
-        type: [jsPsych.plugins.parameterType.BOOL],
-        default: false,
-        no_function: false,
-        description: ''
+        pretty_name: 'Questions',
+        nested: {
+          prompt: {type: jsPsych.plugins.parameterType.STRING,
+                     pretty_name: 'Prompt',
+                     default: undefined,
+                     description: 'The strings that will be associated with a group of options.'},
+          options: {type: jsPsych.plugins.parameterType.STRING,
+                     pretty_name: 'Options',
+                     array: true,
+                     default: undefined,
+                     description: 'Displays options for an individual question.'},
+          required: {type: jsPsych.plugins.parameterType.BOOL,
+                     pretty_name: 'Required',
+                     default: false,
+                     description: 'Subject will be required to pick an option for each question.'},
+          horizontal: {type: jsPsych.plugins.parameterType.BOOL,
+                        pretty_name: 'Horizontal',
+                        default: false,
+                        description: 'If true, then questions are centered and options are displayed horizontally.'},
+        }
       },
       preamble: {
-        type: [jsPsych.plugins.parameterType.STRING],
-        default: '',
-        no_function: false,
-        description: ''
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Preamble',
+        default: null,
+        description: 'HTML formatted string to display at the top of the page above all the questions.'
       },
       button_label: {
-        type: [jsPsych.plugins.parameterType.STRING],
-        default: '',
-        no_function: false,
-        description: ''
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Button label',
+        default:  'Continue',
+        description: 'Label of the button.'
       }
     }
   }
@@ -65,20 +62,8 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
       return arr.join(separator = '-');
     }
 
-    // trial defaults
-    trial.preamble = typeof trial.preamble == 'undefined' ? "" : trial.preamble;
-    trial.required = typeof trial.required == 'undefined' ? null : trial.required;
-    trial.horizontal = typeof trial.required == 'undefined' ? false : trial.horizontal;
-    //If button_label is empty, the browser's language will be used to determine the button label.
-    trial.button_label = typeof trial.button_label === 'undefined' ? '' : trial.button_label;
-
-    // if any trial variables are functions
-    // this evaluates the function and replaces
-    // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
     // inject CSS for trial
-    var node = display_element.innerHTML += '<style id="jspsych-survey-multi-choice-css">';
+    display_element.innerHTML = '<style id="jspsych-survey-multi-choice-css"></style>';
     var cssstr = ".jspsych-survey-multi-choice-question { margin-top: 2em; margin-bottom: 2em; text-align: left; }"+
       ".jspsych-survey-multi-choice-text span.required {color: darkred;}"+
       ".jspsych-survey-multi-choice-horizontal .jspsych-survey-multi-choice-text {  text-align: center;}"+
@@ -94,27 +79,28 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
     var trial_form = display_element.querySelector("#" + trial_form_id);
     // show preamble text
     var preamble_id_name = _join(plugin_id_name, 'preamble');
-    trial_form.innerHTML += '<div id="'+preamble_id_name+'" class="'+preamble_id_name+'">'+trial.preamble+'</div>';
-
+    if(trial.preamble !== null){
+      trial_form.innerHTML += '<div id="'+preamble_id_name+'" class="'+preamble_id_name+'">'+trial.preamble+'</div>';
+    }
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
-      // create question container
-      var question_classes = [_join(plugin_id_name, 'question')];
-      if (trial.horizontal) {
-        question_classes.push(_join(plugin_id_name, 'horizontal'));
-      }
+        // create question container
+        var question_classes = [_join(plugin_id_name, 'question')];
+        if (trial.questions[i].horizontal) {
+          question_classes.push(_join(plugin_id_name, 'horizontal'));
+        }
 
-      trial_form.innerHTML += '<div id="'+_join(plugin_id_name, i)+'" class="'+question_classes.join(' ')+'"></div>';
+        trial_form.innerHTML += '<div id="'+_join(plugin_id_name, i)+'" class="'+question_classes.join(' ')+'"></div>';
 
-      var question_selector = _join(plugin_id_selector, i);
+        var question_selector = _join(plugin_id_selector, i);
 
-      // add question text
-      display_element.querySelector(question_selector).innerHTML += '<p class="' + plugin_id_name + '-text survey-multi-choice">' + trial.questions[i] + '</p>';
+        // add question text
+        display_element.querySelector(question_selector).innerHTML += '<p class="' + plugin_id_name + '-text survey-multi-choice">' + trial.questions[i].prompt + '</p>';
 
       // create option radio buttons
-      for (var j = 0; j < trial.options[i].length; j++) {
+      for (var j = 0; j < trial.questions[i].options.length; j++) {
         var option_id_name = _join(plugin_id_name, "option", i, j),
-          option_id_selector = '#' + option_id_name;
+        option_id_selector = '#' + option_id_name;
 
         // add radio button container
         display_element.querySelector(question_selector).innerHTML += '<div id="'+option_id_name+'" class="'+_join(plugin_id_name, 'option')+'"></div>';
@@ -125,7 +111,7 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
         var input_id = _join(plugin_id_name, 'response', i, j);
         var label = document.createElement('label');
         label.setAttribute('class', plugin_id_name+'-text');
-        label.innerHTML = trial.options[i][j];
+        label.innerHTML = trial.questions[i].options[j];
         label.setAttribute('for', input_id)
 
         // create radio button
@@ -133,14 +119,14 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
         input.setAttribute('type', "radio");
         input.setAttribute('name', input_name);
         input.setAttribute('id', input_id);
-        input.setAttribute('value', trial.options[i][j]);
+        input.setAttribute('value', trial.questions[i].options[j]);
         form.appendChild(label);
         form.insertBefore(input, label);
       }
 
-      if (trial.required && trial.required[i]) {
+      if (trial.questions[i].required) {
         // add "question required" asterisk
-        display_element.querySelector(question_selector + " p").innerHMTL += "<span class='required'>*</span>";
+        display_element.querySelector(question_selector + " p").innerHTML += "<span class='required'>*</span>";
 
         // add required property
         display_element.querySelector(question_selector + " input[type=radio]").required = true;
