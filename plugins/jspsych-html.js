@@ -57,33 +57,56 @@ jsPsych.plugins.html = (function() {
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial, ["check_fn"]);
-
+    
+    
+    
+    
     var url = trial.url;
     if (trial.force_refresh) {
       url = trial.url + "?time=" + (new Date().getTime());
     }
 
-    display_element.load(trial.url, function() {
+    load(display_element, url, function() {
       var t0 = (new Date()).getTime();
       var finish = function() {
-        if (trial.check_fn && !trial.check_fn(display_element)) return;
-        if (trial.cont_key) $(document).unbind('keydown', key_listener);
+    	  var extraData = trial.check_fn ? trial.check_fn(display_element) : false;
+        if (trial.check_fn && !trial.check_fn(display_element)) { return };
+        if (trial.cont_key) { document.removeEventListener('keydown', key_listener); }
         var trial_data = {
           rt: (new Date()).getTime() - t0,
           url: trial.url
         };
-        display_element.empty();
+        
+        if (typeof extraData != 'boolean'){
+        	trial_data = $.extend({}, trial_data, extraData); // merge the data. Shallow merge on purpose
+        }
+        
+        display_element.innerHTML = '';
+        
         jsPsych.finishTrial(trial_data);
       };
-      if (trial.cont_btn) $('#' + trial.cont_btn).click(finish);
+      if (trial.cont_btn) { display_element.querySelector('#'+trial.cont_btn).addEventListener('click', finish); }
       if (trial.cont_key) {
         var key_listener = function(e) {
           if (e.which == trial.cont_key) finish();
         };
-        $(document).keydown(key_listener);
+        display_element.addEventListener('keydown', key_listener);
       }
     });
   };
+
+  // helper to load via XMLHttpRequest
+  function load(element, file, callback){
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", file, true);
+    xmlhttp.onreadystatechange = function(){
+        if(xmlhttp.status == 200 && xmlhttp.readyState == 4){ //Check if loaded
+            element.innerHTML = xmlhttp.responseText;
+            callback();
+        }
+    }
+    xmlhttp.send();
+  }
 
   return plugin;
 })();

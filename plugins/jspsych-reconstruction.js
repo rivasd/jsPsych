@@ -47,6 +47,12 @@ jsPsych.plugins['reconstruction'] = (function() {
         default: 'g',
         no_function: false,
         description: ''
+      },
+      button_label: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: 'Submit Answers'
       }
     }
   }
@@ -58,6 +64,7 @@ jsPsych.plugins['reconstruction'] = (function() {
     trial.step_size = trial.step_size || 0.05;
     trial.key_increase = trial.key_increase || 'h';
     trial.key_decrease = trial.key_decrease || 'g';
+    trial.button_label = typeof trial.button_label === 'undefined' ? 'Submit Answers' : trial.button_label;
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -102,19 +109,12 @@ jsPsych.plugins['reconstruction'] = (function() {
 
       //console.log(param);
 
-      display_element.html('');
-
-      display_element.append($('<div id="jspsych-reconstruction-stim-container"></div>'));
-
-      $('#jspsych-reconstruction-stim-container').html(trial.stim_function(param));
+      display_element.innerHTML = '<div id="jspsych-reconstruction-stim-container">'+trial.stim_function(param)+'</div>';
 
       // add submit button
-      display_element.append($('<button>', {
-        'id': 'jspsych-reconstruction-next',
-        'class': 'jspsych-btn jspsych-reconstruction'
-      }));
-      $("#jspsych-reconstruction-next").html('Submit Answers');
-      $("#jspsych-reconstruction-next").click(endTrial);
+      display_element.innerHTML += '<button id="jspsych-reconstruction-next" class="jspsych-btn jspsych-reconstruction">'+trial.button_label+'</button>';
+
+      display_element.querySelector('#jspsych-reconstruction-next').addEventListener('click', endTrial);
     }
 
     function endTrial() {
@@ -129,7 +129,7 @@ jsPsych.plugins['reconstruction'] = (function() {
         "start_value": trial.starting_value
       };
 
-      display_element.html('');
+      display_element.innerHTML = '';
 
       // next trial
       jsPsych.finishTrial(trial_data);

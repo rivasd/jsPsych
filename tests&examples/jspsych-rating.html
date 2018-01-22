@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-ui.min.js"></script>
+  <script src="../jspsych.js"></script>
+  <script src="../plugins/jspsych-rating.js"></script>
+  <script src="../plugins/jspsych-forcedchoice.js"></script>
+  <script src="../plugins/jspsych-call-function.js"></script>
+  <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <link rel="stylesheet" href="css/jquery-ui.css"></link>
+  <style>
+    img {
+      width: 300px;
+    }
+    .jspsych-choice-item {
+	  border: solid;
+	  margin: 5px;
+	  padding: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jspsych-target"></div>
+</body>
+<script>
+
+
+
+  var trial_1 = {
+    stimulus: 'img/happy_face_1.jpg',
+  }
+
+  var trial_2 = {
+    stimulus: 'img/sad_face_1.jpg',
+  }
+
+  var trial_3 = {
+    stimulus: '<p>:)</p>',
+    is_html: true
+  }
+  //Global object that will hold the pairs of artwork. forced-choice trials will fetch their stimuli from here dynamically using simple array index with jsPsych's functions-as-plugin-params
+  var choiceTimeline;
+  var forcedChoiceTrialCounter = 0; 
+  
+  var node = {
+    type: 'rating',
+    timing_stim: 0.500,
+    timeline: [trial_1, trial_2, trial_3],
+    response: 'slider',
+    ratings:["-3","-2","-1","0","1","2","3"],
+    choices: [89, 78], // Y or N
+    show_ticks : true,
+    labels : ["-3","-2","-1","0","1","2","3"],
+    prompt: '<p class="center-content">Do you like the piece of art?</p>'
+    
+  }
+	  
+  jsPsych.init({
+    display_element: $('#jspsych-target'),
+    timeline: [node],
+    on_finish: function() {
+      jsPsych.data.displayData();
+    },
+    default_iti: 250
+  });
+</script>
+
+</html>

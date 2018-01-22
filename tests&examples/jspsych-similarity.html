@@ -2,16 +2,44 @@
 <html>
 
 <head>
-  <script src="js/jquery.min.js"></script>
-  <script src="js/jquery-ui.min.js"></script>
+	<script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script>
+  <script
+  src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"
+  integrity="sha256-0YPKAwZP7Mp3ALMRVB2i8GXeEndvCq3eSl/WsAl1Ryk="
+  crossorigin="anonymous"></script>
   <script src="../jspsych.js"></script>
   <script src="../plugins/jspsych-similarity.js"></script>
   <link rel="stylesheet" href="css/jquery-ui.css"></link>
   <link rel="stylesheet" href="../css/jspsych.css"></link>
   <style>
-    img {
+    .jspsych-genstim {
       width: 300px;
+      height: 300px;
+      display: block;
+      margin: 0 auto;
+      text-align: center;
     }
+    #jspsych-target{	
+	/* text-align: left; */
+	min-height:500px;
+	padding: 10px;
+	/* text-align: center; */
+	display: flex;
+	flex-direction : column;
+	justify-content: center;
+	align-items: center;
+	}
+		
+	.jspsych-sim-centered{
+	height: 310px;
+	width:  310px;
+	margin: auto;
+	font-size: 350%;
+	}
+	
   </style>
 </head>
 
@@ -19,7 +47,11 @@
   var block_1 = {
     type: 'similarity',
     stimuli: ['img/happy_face_1.jpg', 'img/sad_face_1.jpg'],
-    prompt: '<p class="center-content">How similar are these pictures?</p>'
+    prompt: '<p class="center-content">How similar are these pictures?</p>',
+    timing_first_stim : '1000',
+    timing_second_stim : '1000',
+    timeout: -1,
+    timing_fixation_cross: 3000
   }
 
   jsPsych.init({

@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head> 
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-ui.min.js"></script>
+  <script src="../jspsych.js"></script>
+  <script src="../plugins/jspsych-visualnback.js"></script>
+  <script src="../plugins/jspsych-instructions.js"></script>
+  <link rel="stylesheet" href="css/jquery-ui.css"></link>
+  <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <style>
+    img {
+      width: 300px;
+    }
+    #jspsych-target {
+    	position:relative;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jspsych-target"></div>
+</body>
+<script>
+  var block_1 = {
+    type: 'visualnback',
+    n: 4,
+    stimuli:10,
+    timeout: 1500,
+    correct: "good choice!",
+    incorrect: 'Incorrect choice...',
+    feedback_timing: 1000,
+    response_key: [13],
+    show_feedback: false
+  }
+  
+  var timeline =[{
+	  type: 'instructions',
+	  pages: [
+	    'Welcome to this demo of our visual n-back task plugin for jsPsych!<br><br>Use the arrow keys to navigate',
+	    "10 round targets will be created on the screen. At each trial, one of them will be of different color. Your task" +
+	    " will be to press the ENTER key only when the colored target is the same target that was colored 4 trials ago!",
+	    "When you are ready to start, press the right arrow key!"
+	    ]
+  }];
+  for(var i=0; i< 20; i++){
+  	timeline.push(block_1);
+  }
+  
+
+  jsPsych.init({
+    display_element: $('#jspsych-target'),
+    timeline: timeline,
+    on_finish: function() {
+      jsPsych.data.displayData();
+    }
+  });
+</script>
+
+</html>

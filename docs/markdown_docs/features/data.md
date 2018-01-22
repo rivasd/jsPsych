@@ -1,22 +1,22 @@
-# Data Storage
+## Data in jsPsych: permanent and non-permanent data.
 
 There are two very different kinds of data storage: data stored in **memory** and data stored **permanently**. Data stored permanently exists even after the browser running jsPsych closes, typically in a database or in a file on a server. Data stored in memory exists only as long the browser window running jsPsych is open.
 
-jsPsych has many features for interacting with data stored in memory, but relatively few for permanent data storage. This is a deliberate choice, mainly because there are dozens of ways that data could be stored permanently and this strategy avoids locking in one particular solution. However, saving data permanently is obviously a crucial component of any experiment, and the second half of this page contains a few suggestions on how to accomplish permanent data storage.
+jsPsych has many features for interacting with data stored in memory, but few for permanent data storage. This is a deliberate choice as there are dozens of ways that data could be stored permanently and jsPsych does not lock you into one particular solution. However, saving data permanently is obviously a crucial component of any experiment, and the second half of this page contains a few suggestions on how to accomplish permanent data storage.
 
 ## Storing data in jsPsych's data structure
 
-jsPsych has a centralized array of data that is filled in as the experiment runs. Each trial adds an entry to this array, and you can access the content of the array with various functions, including `jsPsych.data.getData()`, which returns the entire contents of jsPsych's data array.
+jsPsych has a centralized collection of data that is built as the experiment runs. Each trial adds to the collection, and you can access the data with various functions, including `jsPsych.data.get()`, which returns the entire set of data.
 
-In many cases, data collection will be automatic and hidden. Plugins save data on their own, so it is not uncommon to have the only interaction with the data be at the end of the experiment when it is time to save it in a more permanent manner (see sections below about how to do this). However, there are some situations in which you may want to interact with the data; in particular, you may want to store additional data that the plugins are not recording, like a subject identifier or condition assignment. You may also want to add data on a trial by trial basis. For example, in a Stroop paradigm you would want to label which trials are congruent and which are incongruent. These scenarios are explored below.
+In most cases, data collection will be automatic and hidden. Plugins save data on their own so it is not uncommon to have the only interaction with the data be at the end of the experiment when it is time to save it in a permanent manner (see sections below about how to do this). However, there are some situations in which you may want to interact with the data; in particular, you may want to store additional data that the plugins are not recording, like a subject identifier or condition assignment. You may also want to add data on a trial by trial basis. For example, in a Stroop paradigm you would want to label which trials are congruent and which are incongruent. These scenarios are explored below.
 
 ### Adding data to all trials
 
-Often it is useful to add a piece of data to *all* of the trials in the experiment. For example, appending the subject ID to each trial. This can be done easily with the `jsPsych.data.addProperties` function. Here is an example:
+Often it is useful to add a piece of data to *all* of the trials in the experiment. For example, appending the subject ID to each trial. This can be done  with the `jsPsych.data.addProperties()` function. Here is an example:
 
-```
-// generate a random subject ID
-var subject_id = Math.floor(Math.random()*100000);
+```javascript
+// generate a random subject ID with 15 characters
+var subject_id = jsPsych.randomization.randomID(15);
 
 // pick a random condition for the subject at the start of the experiment
 var condition_assignment = jsPsych.randomization.sample(['conditionA', 'conditionB', 'conditionC'],1)[0];
@@ -33,7 +33,7 @@ jsPsych.data.addProperties({
 
 Data can be added to a particular trial by setting the `data` parameter for the trial. The `data` parameter is an object of key-value pairs, and each pair is added to the data for that trial.
 
-```
+```js
 var trial = {
   type: 'single-stim',
   stimulus: 'imgA.jpg',
@@ -43,7 +43,7 @@ var trial = {
 
 Data declared in this way is also saved in the trials on any nested timelines:
 
-```
+```js
 var block = {
   type: 'single-stim',
   data: { image_type: 'A' },
@@ -54,6 +54,73 @@ var block = {
 }
 ```
 
+## Aggregating and manipulating jsPsych data
+
+When accessing the data with `jsPsych.data.get()` the returned object is a special data collection object that exposes a number of methods for aggregating and manipulating the data. The full list of methods is detailed in the data API. TODO: FILL IN LINK.
+
+Here are some examples of data collection manipulation.
+
+All data generated by the single-stim plugin:
+```js
+var data = jsPsych.data.get().filter({trial_type: 'single-stim'});
+```
+
+All data generated by the categorize plugin with a correct response:
+```js
+var data = jsPsych.data.get().filter({trial_type: 'categorize', correct: true});
+```
+
+All data with a response time between 100 and 500ms:
+```js
+var data = jsPsych.data.get().filterCustom(function(x){ return x.rt >= 100 && x.rt <=500 });
+```
+
+Applying filters consecutively:
+```js
+var data = jsPsych.data.get().filter({trial_type: 'single-stim'}).filterCustom(function(x){ return x.rt > 100; });
+```
+
+Getting the data from the last n trials:
+```js
+var n = 3;
+var data = jsPsych.data.get().last(n);
+```
+
+Getting the data from the last n trials with a correct response:
+```js
+var n = 3;
+var data = jsPsych.data.get().filter({correct: true}).last(n);
+```
+
+Getting the data from the first n trials:
+```js
+var n = 3;
+var data = jsPsych.data.get().first(n);
+```
+
+Counting the number of trials in a data collection:
+```js
+var count = jsPsych.data.get().filter({correct: true}).count();
+```
+
+Selecting all of the response times from a data collection:
+```js
+var response_times = jsPsych.data.get().select('rt');
+```
+
+Calculating various descriptive statistics on the response times in a data collection:
+
+```js
+jsPsych.data.get().select('rt').mean();
+jsPsych.data.get().select('rt').sum();
+jsPsych.data.get().select('rt').min();
+jsPsych.data.get().select('rt').max();
+jsPsych.data.get().select('rt').variance();
+jsPsych.data.get().select('rt').sd();
+jsPsych.data.get().select('rt').median();
+jsPsych.data.get().select('rt').count();
+```
+
 ## Storing data permanently as a file
 
 This is one of the simplest methods for saving jsPsych data on the server that is running the experiment. It involves a short PHP script and a few lines of JavaScript code. This method will save each participant's data as a CSV file on the server. **This method will only work if you are running on a web server with PHP installed, or a local server with PHP (e.g., [XAMPP](https://www.apachefriends.org/index.html)).**
@@ -62,8 +129,8 @@ This method uses a simple PHP script to write files to the server:
 
 ```php
 <?php
-// the $_POST[] array will contain the passed in filename and data
-// the directory "data" is writable by the server (chmod 777)
+// the $_POST[] array will contain the passed in filename and filedata
+// the directory "data" must be writable by the server
 $filename = "data/".$_POST['filename'];
 $data = $_POST['filedata'];
 // write the file to disk
@@ -71,148 +138,126 @@ file_put_contents($filename, $data);
 ?>
 ```
 
-The `file_put_contents($filename, $data)` method requires permission to write new files. An easy way to solve this is to create a directory on the server that will store the data and use the chmod command to give all users write permission (chmod 777) to that directory. In the above example, I append the directory `data/` to the filename, and that directory is writable.
+The `file_put_contents($filename, $data)` method requires permission to write new files. An easy way to solve this is to create a directory on the server that will store the data and use the chmod command to give all users write permission to that directory. In the above example, I prepend the directory `data/` to the filename, and that directory is writable.
 
-To use the PHP script, the JavaScript that runs jsPsych needs to send the filename and filedata information. jQuery has an easy to use method that enables JavaScript<->PHP communication. Here's an example:
+To use the PHP script, the JavaScript that runs jsPsych needs to send the `filename` and `filedata` information. This is done through an [AJAX](http://www.w3schools.com/xml/ajax_intro.asp) call.
 
 ```javascript
-function saveData(filename, filedata){
-   $.ajax({
-      type:'post',
-      cache: false,
-      url: 'save_data.php', // this is the path to the above PHP script
-      data: {filename: filename, filedata: filedata}
-   });
+function saveData(name, data){
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file described above.
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({filename: filename, filedata: filedata}));
 }
 
 // call the saveData function after the experiment is over
 jsPsych.init({
-
    // code to define the experiment structure would go here...
-
-   on_finish: function(data){ saveData("filename.csv", jsPsych.data.getDataAsCSV()) }
+   on_finish: function(){ saveData("experiment_data.csv", jsPsych.data.get().csv()); }
 });
 ```
 
-To use this in an actual experiment, it would be important to tie the filename to some unique identifier like a subject number.
+To use this in an actual experiment, it would be important to tie the filename to some unique identifier like a subject number. Otherwise the file may be overwritten by collecting new data.
 
 ## Storing data permanently in a MySQL database
 
 The ideal solution for storing data generated by jsPsych is to write it to a database.
 
-There are dozens of database options. MySQL is one of the most popular [relational databases](http://en.wikipedia.org/wiki/Relational_database), is free to use, and relatively easy [to install](https://www.google.com/search?q=how+to+install+mysql). This page will assume that you have a MySQL database installed on your server that is hosting the jsPsych experiment, and that your server is able to execute PHP code. If you are trying to run on a local machine, you'll need to install a local server environment like [XAMPP](https://www.apachefriends.org/index.html).
+There are dozens of database options. MySQL is one of the most popular [relational databases](http://en.wikipedia.org/wiki/Relational_database), is free to use, and relatively easy [to install](https://www.google.com/search?q=how+to+install+mysql). This code will assume that you have a MySQL database installed on your server that is hosting the jsPsych experiment, and that your server is able to execute PHP code. If you are trying to run on a local machine, you'll need to install a local server environment like [XAMPP](https://www.apachefriends.org/index.html).
 
-### Step 1
+You'll need two PHP scripts. The first is a configuration file for your database. Save it as `database_config.php` on your server. Within this file are configuration options for the database. You'll need to change these according to how you have configured your MySQL installation.
 
-To communicate with a MySQL database, you will need a server-side script, such as a PHP script. The following script should work for all jsPsych data. Copy the code below into a PHP file and give it an appropriate name (e.g. savedata.php). Put the PHP file on your server in a convenient location. **This script will only work with jsPsych version 4.0 and later.**
+```php
+<?php
+  $servername = "localhost";
+  $port = 3306;
+  $username = "username";
+  $password = "password";
+  $dbname = "database";
+  $table = "tablename";
+?>
+```
+
+The second PHP file will write data to the database. This script reads the database to discover what columns are in the table, and then only allows data to be entered in that matches those columns. This is a security feature. Save this file as `write_data.php` on your server.
 
 ```php
 <?php
 
-// Submit Data to mySQL database
-// Josh de Leeuw
+// this path should point to your configuration file.
+include('database_config.php');
 
-// Edit this line to include your database connection script
-//
-//  The script you link should contain the following two lines:
-//
-//  $dbc = mysql_connect('localhost', 'username', 'password');
-//  mysql_select_db('databasename', $dbc);
-//
-include('database_connect.php');
+$data_array = json_decode(file_get_contents('php://input'), true);
 
-// You should not need to edit below this line
-
-function mysql_insert($table, $inserts) {
-    $values = array_map('mysql_real_escape_string', array_values($inserts));
-    $keys = array_keys($inserts);
-
-    return mysql_query('INSERT INTO `'.$table.'` (`'.implode('`,`', $keys).'`) VALUES (\''.implode('\',\'', $values).'\')');
+try {
+  $conn = new PDO("mysql:host=$servername;port=$port;dbname=$dbname", $username, $password);
+  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  // First stage is to get all column names from the table and store
+  // them in $col_names array.
+  $stmt = $conn->prepare("SHOW COLUMNS FROM `$table`");
+  $stmt->execute();
+  $col_names = array();
+  while($row = $stmt->fetchColumn()) {
+    $col_names[] = $row;
+  }
+  // Second stage is to create prepared SQL statement using the column
+  // names as a guide to what values might be in the JSON.
+  // If a value is missing from a particular trial, then NULL is inserted
+  $sql = "INSERT INTO $table VALUES(";
+  for($i = 0; $i < count($col_names); $i++){
+    $name = $col_names[$i];
+    $sql .= ":$name";
+    if($i != count($col_names)-1){
+      $sql .= ", ";
+    }
+  }
+  $sql .= ");";
+  $insertstmt = $conn->prepare($sql);
+  for($i=0; $i < count($data_array); $i++){
+    for($j = 0; $j < count($col_names); $j++){
+      $colname = $col_names[$j];
+      if(!isset($data_array[$i][$colname])){
+        $insertstmt->bindValue(":$colname", null, PDO::PARAM_NULL);
+      } else {
+        $insertstmt->bindValue(":$colname", $data_array[$i][$colname]);
+      }
+    }
+    $insertstmt->execute();
+  }
+  echo '{"success": true}';
+} catch(PDOException $e) {
+  echo '{"success": false, "message": ' . $e->getMessage();
 }
-
-// get the table name
-$tab = $_POST['table'];
-
-// decode the data object from json
-$trials = json_decode($_POST['json']);
-
-// get the optional data (decode as array)
-$opt_data = json_decode($_POST['opt_data'], true);
-$opt_data_names = array_keys($opt_data);
-
-var_dump($trials);
-
-// for each element in the trials array, insert the row into the mysql table
-for($i=0;$i<count($trials);$i++)
-{
-	$to_insert = (array)($trials[$i]);
-	// add any optional, static parameters that got passed in (like subject id or condition)
-	for($j=0;$j<count($opt_data_names);$j++){
-		$to_insert[$opt_data_names[$j]] = $opt_data[$opt_data_names[$j]];
-	}
-	$result = mysql_insert($tab, $to_insert);
-}
-
-// confirm the results
-if (!$result) {
-	die('Invalid query: ' . mysql_error());
-} else {
-	print "successful insert!";
-}
-
+$conn = null;
 ?>
 ```
 
-### Step 2
-
-To use the above PHP script, you'll need to provide the credentials for your MySQL database. The PHP script is expecting the credentials to be stored in a separate PHP file called 'database_connect.php', located in the same directory as the PHP script. This file should look like:
-
-```php
-<?php
-
-$dbc = mysql_connect('localhost', 'username', 'password');
-mysql_select_db('databasename', $dbc);
-
-?>
+To send the data, we use an AJAX request in JavaScript.
+```JavaScript
+function saveData() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'write_data.php'); // change 'write_data.php' to point to php script.
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    if(xhr.status == 200){
+      var response = JSON.parse(xhr.responseText);
+      console.log(response.success);
+    }
+  };
+  xhr.send(jsPsych.data.getData().json());
+}
 ```
 
-Replace the username and password strings with your database credentials, and replace the databasename string with the name of the database you are connecting to. For example, if my username is 'josh', my password is 'abc123', and the database is 'myresearch' then the file should look like:
-
-```php
-<?php
-
-$dbc = mysql_connect('localhost', 'josh', 'abc123');
-mysql_select_db('myresearch', $dbc);
-
-?>
-```
-
-### Step 3
-
-
-To use this PHP script, you need to invoke it from JavaScript code within your experiment page. Here's an example of how to do that.
+You can call the `saveData()` function using the `on_finish` handler for the experiment, or by using the `call-function` plugin.
 
 ```javascript
-// data parameter should be either the value of jsPsych.data()
-// or the parameter that is passed to the on_data_update callback function for the core library
-// jsPsych.data() contains ALL data
-// the callback function will contain only the most recently written data.
-function save_data(data){
-   var data_table = "my_experiment_table"; // change this for different experiments
-   $.ajax({
-      type:'post',
-      cache: false,
-      url: 'path/to_php/file.php', // change this to point to your php file.
-      // opt_data is to add additional values to every row, like a subject ID
-      // replace 'key' with the column name, and 'value' with the value.
-      data: {
-          table: data_table,
-          json: JSON.stringify(data),
-          opt_data: {key: value}
-      },
-      success: function(output) { console.log(output); } // write the result to javascript console
-   });
-}
-```
+// with on_finish handler
+jsPsych.init({
+  on_finish: saveData
+});
 
-Note that you'll need to change the script above to reference the table in your mysql database that will store the data, the path to the PHP file created in step 1, and change the opt_data line to include any data you want to append to the table, such as a subject ID (or remove this line entirely if you have no additional data).
+// with call-function plugin
+timeline.push({
+  type: 'call-function',
+  func: saveData
+});
+```

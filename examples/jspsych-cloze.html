@@ -1,0 +1,36 @@
+<DOCTYPE! html>
+<html>
+	<head>
+		<script src="../jspsych.js"></script>
+    	<script src="../plugins/jspsych-cloze.js"></script>
+   	 	<link rel="stylesheet" href="../css/jspsych.css"></link>
+		
+	</head>
+	
+	<body>
+		<textarea rows="" cols="" id="source"></textarea>
+		<button id="gobtn">Test</button>
+		<div id="jsPsychTarget"></div>
+		
+		<script>
+			function load(evt){
+				
+				var testTrial = {
+						type: 'cloze',
+						text: document.getElementById("source").value
+				};
+				
+				jsPsych.init({
+					display_element: "jsPsychTarget",
+					timeline: [testTrial],
+					on_finish: function(){
+						jsPsych.data.displayData();
+					}
+				})
+				
+			}
+			
+			document.getElementById("gobtn").addEventListener("click", load);
+		</script>
+	</body>
+</html>

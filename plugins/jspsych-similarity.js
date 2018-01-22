@@ -14,6 +14,7 @@ jsPsych.plugins.similarity = (function() {
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'image',function(t){ return !t.is_html || t.is_html == 'undefined'});
+  //jsPsych.pluginAPI.registerPreload('similarity', 'stimuli', 'audio');
 
   plugin.info = {
     name: 'similarity',
@@ -81,12 +82,53 @@ jsPsych.plugins.similarity = (function() {
         default: '',
         no_function: false,
         description: ''
+      },
+      button_label: {
+        type: [jsPsych.plugins.parameterType.STRING],
+        default: '',
+        no_function: false,
+        description: 'Submit Answers'
       }
     }
   }
-
+  
+  //trigger mappings
+  var cat = {
+	  'lakamite': '1',
+	  'kalamite': '2'
+  }
+  var pairtype = {
+	'same': '1',
+	'different': '2'
+  }
+  
+  
+   /**
+    * Returns a pair of numbers that are the trigger values to send. They should depend on the order, the category, and the pair-type that the image is in
+    */
+  plugin.getTriggers = function(trial){
+	  if(trial.is_practice){
+		  return;
+	  }
+	  
+	  if(!trial.data || !trial.data.firstStim || !trial.data.kind){
+		  return null;
+	  }
+	  var first = "1"+cat[trial.data.firstStim]+pairtype[trial.data.kind];
+	  var secnd = "2"+cat[trial.data.secondStim]+pairtype[trial.data.kind];
+	  return [parseInt(first), parseInt(secnd)];
+  };
+  
   plugin.trial = function(display_element, trial) {
-
+	  
+	  //we dont have time to remove dependency on jQuery here, but jsPsych now gives us a DOMElement instead of a jQuery object, quick fis
+	  //TODO: remove jQuery dependency
+	  
+	  if(display_element instanceof Element){
+		  display_element = $(display_element)
+	  }
+	  
+	  
     // default parameters
     trial.labels = (typeof trial.labels === 'undefined') ? ["Not at all similar", "Identical"] : trial.labels;
     trial.intervals = trial.intervals || 100;
@@ -97,14 +139,29 @@ jsPsych.plugins.similarity = (function() {
     trial.timing_first_stim = trial.timing_first_stim || 1000; // default 1000ms
     trial.timing_second_stim = trial.timing_second_stim || -1; // -1 = inf time; positive numbers = msec to display second image.
     trial.timing_image_gap = trial.timing_image_gap || 1000; // default 1000ms
-
+    trial.timing_fixation_cross = trial.timing_fixation_cross||1500;
+    trial.timeout = trial.timeout || 3000 //amount of time the response slider will be showing
+    trial.timeout_message = trial.timeout_message || "<p>Please respond faster</p>";
+    trial.timeout_message_timing = trial.timeout_message_timing || 1000;
+    
     trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
     trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
+    
+    trial.button_label = typeof trial.button_label === 'undefined' ? 'Submit Answers' : trial.button_label;
     
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
     trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    
+    //Adding new parameters 
+    plugin.sample_page = plugin.sample_page || true;
+    
+    //find out the right triggers to send
+    var trigs = plugin.getTriggers(trial);
+    
+    var context;
+    var source;
     
     /**
      * Let's try out my idea of normalizing trial logic as trial methods
@@ -120,61 +177,157 @@ jsPsych.plugins.similarity = (function() {
     // this array holds handlers from setTimeout calls
     // that need to be cleared if the trial ends early
     trial.setTimeoutHandlers = [];
+    
+    function showFixationCross(){
+    	display_element.empty();
+    
+    	if(display_element.css("position")==="static"){
+    		display_element.css("position", "relative");
+    	}
+	
+        var $paragraph = $('<p> + </p>');
+        
+        display_element.append($paragraph);
+        $paragraph.css({
+        	"font-size":"350%",
+        	"display": 'flex',
+        	"justify-content": "center", /* align horizontal */
+        	"align-items": "center" /* align vertical */
+    	    //"position":"absolute",
+    	    //"left": "50%"
+    	    //"top": "50%",
+    	    //"transform": "translate(-50%, -50%)"   
+        });
+        $paragraph.addClass('jspsych-genstim');
+    }
+    
+    
+	showFixationCross();
+	setTimeout(function(){
+    	display_element.empty();
+    	showFirstImage();  	
+    }, trial.timing_fixation_cross);
 
+    
+       
+    function showFirstImage(){
     // show the images
-    if (!trial.is_html) {
-      display_element.append($('<img>', {
-        "src": trial.stimuli[0],
-        "id": 'jspsych-sim-stim'
-      }));
-    } else {
-      display_element.append($('<div>', {
-        "html": trial.stimuli[0],
-        "id": 'jspsych-sim-stim'
-      }));
+	    if (!trial.is_html) {
+	      display_element.append($('<img>', {
+	        "src": trial.stimuli[0],
+	        "id": 'jspsych-sim-stim',
+	        'class': 'jspsych-genstim'
+	      }));
+	    } else {
+	      display_element.append($('<div>', {
+	        "html": trial.stimuli[0],
+	        "id": 'jspsych-sim-stim',
+	        'class': 'jspsych-genstim'
+	      }));
+	    }
+	    
+	    //first stimuli has been shown, send first trigger
+	    if(trigs && jsPsych.pluginAPI.hardwareConnected){
+	    	jsPsych.pluginAPI.hardware({
+	    		target: 'parallel',
+	    		action: 'trigger',
+	    		payload: trigs[0]
+	    	});
+	    }
+	
+	    if (trial.show_response == "FIRST_STIMULUS") {
+	      show_response_slider(display_element, trial);
+	    }
+	
+	    trial.setTimeoutHandlers.push(setTimeout(function() {
+	      showBlankScreen();
+	    }, trial.timing_first_stim));
     }
-
-    if (trial.show_response == "FIRST_STIMULUS") {
-      show_response_slider(display_element, trial);
-    }
-
-    jsPsych.pluginAPI.setTimeout(function() {
-      showBlankScreen();
-    }, trial.timing_first_stim);
-
+    
 
     function showBlankScreen() {
 
       $('#jspsych-sim-stim').css('visibility', 'hidden');
 
-      jsPsych.pluginAPI.setTimeout(function() {
+      trial.setTimeoutHandlers.push(setTimeout(function() {
         showSecondStim();
-      }, trial.timing_image_gap);
+      }, trial.timing_image_gap));
     }
 
     function showSecondStim() {
 
       if (!trial.is_html) {
-        $('#jspsych-sim-stim').attr('src', trial.stimuli[1]);
+        $('#jspsych-sim-stim')[0].src = trial.stimuli[1];
       } else {
-        $('#jspsych-sim-stim').html(trial.stimuli[1]);
+        $('#jspsych-sim-stim')[0].innerHTML = trial.stimuli[1];
       }
 
-      $('#jspsych-sim-stim').css('visibility', 'visible');
-
-      if (trial.show_response == "SECOND_STIMULUS") {
-        show_response_slider(display_element, trial);
+      $('#jspsych-sim-stim').css({
+    	"align-self":'center',  
+    	visibility:'visible'  
+      	});
+      
+      //second stimuli has been shown, send trigger
+      
+      if(trigs && jsPsych.pluginAPI.hardwareConnected){
+      	jsPsych.pluginAPI.hardware({
+      		target:'parallel',
+      		action:'trigger',
+      		payload: trigs[1]
+      	});
       }
-
+      
+      
+      if(trial.show_response == "SECOND_STIMULUS") {
+          show_response_slider(display_element, trial);
+      }
+      
       if (trial.timing_second_stim > 0) {
         jsPsych.pluginAPI.setTimeout(function() {
-          $("#jspsych-sim-stim").css('visibility', 'hidden');
+          $("#jspsych-sim-stim").css('visibility','hidden');
           if (trial.show_response == "POST_STIMULUS") {
             show_response_slider(display_element, trial);
           }
         }, trial.timing_second_stim);
       }
     }
+    
+    
+    function endTrial(data){
+        
+
+        // kill any remaining setTimeout handler
+	        for (var i = 0; i < trial.setTimeoutHandlers.length; i++) {
+	          clearTimeout(trial.setTimeoutHandlers[i]);
+	        }
+        
+	    data.timeout = false; //quick hack for something I need right now
+	    if(data.sim_score === undefined){
+	    	data.sim_score = 0;
+	    	data.timeout = true;
+	    }
+	    
+        
+        if(trial.return_stim){
+        	data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
+        }
+        // goto next trial in block
+        display_element.html('');
+        
+        if(data.rt === -1){
+        	//this was a timeout
+        	display_element.append(trial.timeout_message);
+        	trial.setTimeoutHandlers.push(setTimeout(function(){
+        		display_element.empty();
+        		jsPsych.finishTrial(data);
+        	},trial.timeout_message_timing))
+        }
+        else{
+        	jsPsych.finishTrial(data);
+        }
+        
+        
+     }
 
 
     function show_response_slider(display_element, trial) {
@@ -184,7 +337,8 @@ jsPsych.plugins.similarity = (function() {
       // create slider
       display_element.append($('<div>', {
         "id": 'slider',
-        "class": 'sim'
+        "class": 'sim',
+        "align-self":'flex-end'
       }));
 
       $("#slider").slider({
@@ -252,36 +406,31 @@ jsPsych.plugins.similarity = (function() {
       display_element.append($('<button>', {
         'id': 'next',
         'class': 'sim',
-        'html': 'Submit Answer'
+        'html': trial.button_label
       }));
-
+       
       // if prompt is set, show prompt
       if (trial.prompt !== "") {
         display_element.append(trial.prompt);
+      }  
+      
+      if(trial.timeout > 0){
+    	  trial.setTimeoutHandlers.push(setTimeout(function(){
+        	  endTrial({rt:-1});
+          }, trial.timeout));
       }
-
-      $("#next").click(function() {
-        var endTime = (new Date()).getTime();
-        var response_time = endTime - startTime;
-
-        // kill any remaining setTimeout handlers
-        jsPsych.pluginAPI.clearAllTimeouts();
-
-        var score = $("#slider").slider("value");
-        var trial_data = {
-          "sim_score": score,
-          "rt": response_time,
-          //"stimulus": JSON.stringify([trial.stimuli[0], trial.stimuli[1]])
-        };
-        trial_data.timeout = false; //quick hack for something I need right now
-        if(trial.return_stim){
-        	trial_data.stimulus = JSON.stringify([trial.stimuli[0], trial.stimuli[1]]);
-        }
-        // goto next trial in block
-        display_element.html('');
-        jsPsych.finishTrial(trial_data);
+      
+      $("#next").click(function(){
+    	  var endTime = (new Date()).getTime();
+          var response_time = endTime - startTime;
+          jsPsych.pluginAPI.clearAllTimeouts();
+          
+    	  endTrial({
+    		  rt: response_time,
+    		  sim_score: $("#slider").slider("value")
+    	  });
       });
     }
   };
   return plugin;
-})();
+  })();
