@@ -87,7 +87,7 @@ jsPsych.plugins.video = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     // display stimulus
     var video_html = '<video id="jspsych-video-player" width="'+trial.width+'" height="'+trial.height+'" '

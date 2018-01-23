@@ -27,7 +27,7 @@ jsPsych.plugins.text = (function() {
         type: [jsPsych.plugins.parameterType.KEYCODE, jsPsych.plugins.parameterType.SELECT],
         options: ['mouse'],
         array: true,
-        default: undefined,
+        default: jsPsych.ALL_KEYS,
         no_function: false,
         description: ''
       }
@@ -38,17 +38,12 @@ jsPsych.plugins.text = (function() {
 
     trial.choices = trial.choices || jsPsych.ALL_KEYS;
 
-    // if any trial variables are functions
-    // this evaluates the function and replaces
-    // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
-
     // set the HTML of the display target to replaced_text.
-    display_element.html(trial.text);
+    display_element.innerHTML = trial.text;
 
     var after_response = function(info) {
 
-      display_element.html(''); // clear the display
+      display_element.innerHTML = ''; // clear the display
 
       var trialdata = {
         "rt": info.rt,
@@ -61,9 +56,11 @@ jsPsych.plugins.text = (function() {
 
     var mouse_listener = function(e) {
 
+      j_display_element = $(display_element);
+
       var rt = (new Date()).getTime() - start_time;
 
-      display_element.unbind('click', mouse_listener);
+      j_display_element.unbind('click', mouse_listener);
 
       after_response({
         key: 'mouse',
@@ -74,7 +71,7 @@ jsPsych.plugins.text = (function() {
 
     // check if key is 'mouse'
     if (trial.choices == 'mouse') {
-      display_element.click(mouse_listener);
+      $(display_element).click(mouse_listener);
       var start_time = (new Date()).getTime();
     } else {
       jsPsych.pluginAPI.getKeyboardResponse({

@@ -42,7 +42,7 @@ jsPsych.plugins.abx = (function() {
 		trial.response_wait = (typeof trial.response_wait == "undefined") ? false : trial.response_wait;
 		trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;
 		
-		trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+		//trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 		
 
 	    var rt_start_time;

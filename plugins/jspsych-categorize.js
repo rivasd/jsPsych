@@ -147,7 +147,7 @@ jsPsych.plugins.categorize = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    //trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     //Added ability to not return stimulus, in case it is a Data URI and hence super duper long
     trial.return_stim = (typeof trial.return_stim == 'undefined') ? true : trial.return_stim;

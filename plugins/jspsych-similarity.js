@@ -146,7 +146,7 @@ jsPsych.plugins.similarity = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     //Adding new parameters 
     plugin.sample_page = plugin.sample_page || true;

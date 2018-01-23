@@ -69,6 +69,26 @@ jsPsych.plugins['survey-text'] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
+    //Compatibility fix from 5.0.3
+    if(typeof trial.questions[0] == "string"){
+      //the user is interfacing using the old syntax, create a new-style array with the given options
+
+      var new_questions = [];
+      trial.questions.forEach(function(elem, idx){
+        new_questions.push({
+          prompt: elem,
+          options: typeof trial.options == 'undefined' ? false : trial.options[idx],
+          required: typeof trial.required == 'undefined' ? false : trial.required[idx],
+          horizontal: typeof trial.horizontal =='undefined' ? false : trial.horizontal,
+          rows: typeof trial.rows =='undefined' ? 1 : trial.rows[idx],
+          columns: typeof trial.columns =='undefined' ? 40 : trial.columns[idx],
+          value: typeof trial.values =="undefined" ? [] : trial.values
+        });
+      });
+
+      trial.questions = new_questions;
+    }
+
     if (typeof trial.questions[0].rows == 'undefined') {
       trial.questions[0].rows = [];
       for (var i = 0; i < trial.questions.length; i++) {

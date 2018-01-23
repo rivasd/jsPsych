@@ -12,6 +12,13 @@ jsPsych.plugins["audio-abx"] = (function() {
 	  
 	jsPsych.pluginAPI.registerPreload('audio-abx', 'stimuli', 'audio');
 
+	plugin.info = {
+		name: 'audio-abx',
+		parameters:{
+
+		}
+	};
+
 	plugin.showFixation = function(display_element){
     	if(display_element.css("position")==="static"){
     		display_element.css("position", "relative");
@@ -47,7 +54,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 			trial.fixation = trial.fixation || 1000;
 
 
-			trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+			// trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 			
 			var context;
 		    var source;

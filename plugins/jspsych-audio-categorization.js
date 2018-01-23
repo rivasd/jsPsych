@@ -12,7 +12,12 @@ jsPsych.plugins["audio-categorization"] = (function() {
 
   jsPsych.pluginAPI.registerPreload('audio-categorization', 'stimulus', 'audio');
   
-  
+  plugin.info = {
+    name: "audio-categorization",
+    parameters:{
+
+    }
+  };
 
   plugin.trial = function(display_element, trial) {
 
@@ -38,7 +43,7 @@ jsPsych.plugins["audio-categorization"] = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
     
     var prefetched_data = {};
     var keyboardListener;

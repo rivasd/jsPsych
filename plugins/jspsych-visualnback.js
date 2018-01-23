@@ -113,7 +113,7 @@ jsPsych.plugins['visualnback'] = (function(){
   plugin.trial = function(display_element, trial){
 	  
 	  jsPsych.getDisplayElement().append(plugin.viewport);
-	  trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+	  // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 	  trial.n = trial.n || 2;
 	  trial.response_key = trial.response_key || [13];
 	  

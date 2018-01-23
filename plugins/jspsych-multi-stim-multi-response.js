@@ -86,7 +86,7 @@ jsPsych.plugins["multi-stim-multi-response"] = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
 
     // array to store if we have gotten a valid response for

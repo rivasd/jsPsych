@@ -70,7 +70,7 @@ jsPsych.plugins["single-audio"] = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // play stimulus
     var context = jsPsych.pluginAPI.audioContext();

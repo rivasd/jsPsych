@@ -82,6 +82,25 @@ jsPsych.plugins['survey-multi-choice'] = (function() {
     if(trial.preamble !== null){
       trial_form.innerHTML += '<div id="'+preamble_id_name+'" class="'+preamble_id_name+'">'+trial.preamble+'</div>';
     }
+
+    //FIX FOR COMPATIBILITY WITH 5.0.3
+    if(typeof trial.questions[0] == "string"){
+      //the user is interfacing using the old syntax, create a new-style array with the given options
+
+      var new_questions = [];
+      trial.questions.forEach(function(elem, idx){
+        new_questions.push({
+          prompt: elem,
+          options: trial.options[idx],
+          required: typeof trial.required == 'undefined' ? false : trial.required[idx],
+          horizontal: typeof trial.horizontal =='undefined' ? false : trial.horizontal
+        });
+      });
+
+      trial.questions = new_questions;
+    }
+
+
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
         // create question container

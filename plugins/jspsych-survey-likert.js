@@ -63,7 +63,26 @@ jsPsych.plugins['survey-likert'] = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    // trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+
+
+    if(typeof trial.questions[0] == "string"){
+      //the user is interfacing using the old syntax, create a new-style array with the given options
+
+      var new_questions = [];
+      trial.questions.forEach(function(elem, idx){
+        new_questions.push({
+          prompt: elem,
+          options: trial.options[idx],
+          required: typeof trial.required == 'undefined' ? false : trial.required[idx],
+          horizontal: typeof trial.horizontal =='undefined' ? false : trial.horizontal,
+          rows: typeof trial.rows =='undefined' ? false : trial.rows[idx],
+          columns: typeof trial.columns =='undefined' ? false : trial.columns[idx],
+        });
+      });
+
+      trial.questions = new_questions;
+    }
 
     var html = "";
     // inject CSS for trial
