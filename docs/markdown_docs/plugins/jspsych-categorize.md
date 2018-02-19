@@ -36,6 +36,20 @@ key_press | numeric | Indicates which key the subject pressed. The value is the 
 rt | numeric | The response time in milliseconds for the subject to make a response. The time is measured from when the stimulus first appears on the screen until the subject's response.
 correct | boolean | `true` if the subject got the correct answer, `false` otherwise.
 
+## CSS styling
+
+Element | class name | id 
+--------|------------|---
+fixation cross | jspsych-genstim | - |
+stimulus | jspsych-categorize-stimulus | jspsych-categorize-stimulus|
+
+```css
+.jspsych-categorize-stimulus{
+    width:300px;
+    height: 300px;
+}
+```
+
 ## Examples
 
 #### Categorizing HTML content
