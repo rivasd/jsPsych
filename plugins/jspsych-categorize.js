@@ -203,7 +203,7 @@ jsPsych.plugins.categorize = (function() {
       jsPsych.pluginAPI.clearAllTimeouts();
 
       // clear keyboard listener
-      jsPsych.pluginAPI.cancelAllKeyboardResponses();
+      //jsPsych.pluginAPI.cancelAllKeyboardResponses();  This was causing a weird bug with jspsych way of dealing with keyboard events
 
       var correct = false;
       if (trial.key_answer == info.key) {
