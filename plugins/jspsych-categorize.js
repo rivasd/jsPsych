@@ -24,7 +24,7 @@ jsPsych.plugins.categorize = (function() {
       },
       is_html: {
         type: [jsPsych.plugins.parameterType.BOOL],
-        default: undefined,
+        default: false,
         no_function: false,
         description: ''
       },
@@ -128,6 +128,10 @@ jsPsych.plugins.categorize = (function() {
 
   plugin.trial = function(display_element, trial) {
 
+
+    //TODO: remove jQuery dependency
+    display_element = $(display_element);
+
     // default parameters
     trial.choices = trial.choices || jsPsych.ALL_KEYS;
     trial.text_answer = (typeof trial.text_answer === 'undefined') ? "" : trial.text_answer;
@@ -191,7 +195,7 @@ jsPsych.plugins.categorize = (function() {
 
     // if prompt is set, show prompt
     if (trial.prompt !== "") {
-      display_element.innerHTML += trial.prompt;
+      display_element.get(0).innerHTML += trial.prompt;
     };
 
     var trial_data = {};
@@ -264,7 +268,7 @@ jsPsych.plugins.categorize = (function() {
     function doFeedback(correct, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
-        display_element.innerHTML += trial.timeout_message;
+        display_element.get(0).innerHTML += trial.timeout_message;
 
         //send trigger for feedback/error ERPs
         if(!trial.is_practice){
