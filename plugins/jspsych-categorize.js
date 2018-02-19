@@ -147,7 +147,7 @@ jsPsych.plugins.categorize = (function() {
     trial.timing_stim = trial.timing_stim || -1; // default is to show image until response
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
-
+    trial.timing_fixation_cross = trial.timing_fixation_cross || 1500;
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -160,45 +160,110 @@ jsPsych.plugins.categorize = (function() {
     var setTimeoutHandlers = [];
     
     var trig = plugin.getTrigger(trial);
-
-    if (!trial.is_html) {
-      // add image to display
-      display_element.append($('<img>', {
-        "src": trial.stimulus,
-        "class": 'jspsych-categorize-stimulus',
-        "id": 'jspsych-categorize-stimulus'
-      }));
-    } else {
-      display_element.append($('<div>', {
-        "id": 'jspsych-categorize-stimulus',
-        "class": 'jspsych-categorize-stimulus',
-        "html": trial.stimulus
-      }));
-    }
-    //send the correct stimulus presentation trigger
-    if(trig && jsPsych.pluginAPI.hardwareConnected){
-    	jsPsych.pluginAPI.hardware({
-    		target: 'parallel',
-    		action: 'trigger',
-    		payload: trig
-    	});
-    }
-    
-    
-
-    // hide image after time if the timing parameter is set
-    if (trial.timing_stim > 0) {
-      jsPsych.pluginAPI.setTimeout(function() {
-        $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
-      }, trial.timing_stim);
-    };
-
-    // if prompt is set, show prompt
-    if (trial.prompt !== "") {
-      display_element.get(0).innerHTML += trial.prompt;
-    };
-
     var trial_data = {};
+
+    function showFixationCross(){
+      display_element.empty();
+    
+      if(display_element.css("position")==="static"){
+        display_element.css("position", "relative");
+      }
+  
+        var $paragraph = $('<p> + </p>');
+        
+        display_element.append($paragraph);
+        $paragraph.css({
+          "font-size":"350%",
+          "display": 'flex',
+          "justify-content": "center", /* align horizontal */
+          "align-items": "center" /* align vertical */
+          //"position":"absolute",
+          //"left": "50%"
+          //"top": "50%",
+          //"transform": "translate(-50%, -50%)"   
+        });
+
+        //add trigger for fixation cross
+        if(jsPsych.pluginAPI.hardwareConnected){
+          jsPsych.pluginAPI.hardware({
+           target: 'parallel',
+           action: 'trigger',
+           payload: 10
+          });
+        }
+
+        $paragraph.addClass('jspsych-genstim');
+    }
+
+    if(trial.timing_fixation_cross || trial.timing_fixation_cross > 0){
+      showFixationCross();
+      jsPsych.pluginAPI.setTimeout(doTrial, trial.timing_fixation_cross);
+    }
+    else{
+      doTrial();
+    }
+    
+    
+
+    function doTrial(){
+      display_element.empty();
+      if (!trial.is_html) {
+        // add image to display
+        display_element.append($('<img>', {
+          "src": trial.stimulus,
+          "class": 'jspsych-categorize-stimulus',
+          "id": 'jspsych-categorize-stimulus'
+        }));
+      } else {
+        display_element.append($('<div>', {
+          "id": 'jspsych-categorize-stimulus',
+          "class": 'jspsych-categorize-stimulus',
+          "html": trial.stimulus
+        }));
+      }
+      //send the correct stimulus presentation trigger
+      if(trig && jsPsych.pluginAPI.hardwareConnected){
+        jsPsych.pluginAPI.hardware({
+          target: 'parallel',
+          action: 'trigger',
+          payload: trig
+        });
+      }
+      
+      
+  
+      // hide image after time if the timing parameter is set
+      if (trial.timing_stim > 0) {
+        jsPsych.pluginAPI.setTimeout(function() {
+          $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
+        }, trial.timing_stim);
+      };
+  
+      // if prompt is set, show prompt
+      if (trial.prompt !== "") {
+        display_element.get(0).innerHTML += trial.prompt;
+      };
+
+      jsPsych.pluginAPI.getKeyboardResponse({
+        callback_function: after_response,
+        valid_responses: trial.choices,
+        rt_method: 'date',
+        persist: false,
+        allow_held_key: false
+      });
+  
+      if (trial.timing_response > 0) {
+        jsPsych.pluginAPI.setTimeout(function() {
+          after_response({
+            key: -1,
+            rt: -1
+          });
+        }, trial.timing_response);
+      }
+    }
+    
+
+    
 
     // create response function
     var after_response = function(info) {
@@ -248,22 +313,7 @@ jsPsych.plugins.categorize = (function() {
       doFeedback(correct, timeout);
     }
     
-    jsPsych.pluginAPI.getKeyboardResponse({
-      callback_function: after_response,
-      valid_responses: trial.choices,
-      rt_method: 'date',
-      persist: false,
-      allow_held_key: false
-    });
-
-    if (trial.timing_response > 0) {
-      jsPsych.pluginAPI.setTimeout(function() {
-        after_response({
-          key: -1,
-          rt: -1
-        });
-      }, trial.timing_response);
-    }
+    
 
     function doFeedback(correct, timeout) {
 
