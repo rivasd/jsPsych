@@ -267,6 +267,8 @@ jsPsych.plugins.categorize = (function() {
 
     function doFeedback(correct, timeout) {
 
+      jsPsych.pluginAPI.cancelAllKeyboardResponses();
+
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.get(0).innerHTML += trial.timeout_message;
 
