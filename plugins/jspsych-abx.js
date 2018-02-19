@@ -12,6 +12,13 @@ jsPsych.plugins.abx = (function() {
 	var plugin = {};
 	  
 	jsPsych.pluginAPI.registerPreload('abx', 'stimuli', 'image');
+
+	plugin.info = {
+		name: 'abx',
+		parameters:{
+			
+		}
+	}
 	
 	plugin.trial = function(display_element, trial) {
 		
