@@ -187,8 +187,7 @@ jsPsych.plugins["audio-abx"] = (function() {
 				// stop the audio file if it is playing
 				source.stop();
 
-				// kill keyboard listeners
-				jsPsych.pluginAPI.cancelAllKeyboardResponses();
+				// no need to kill keyboard listeners
 
 				// gather the data to store for the trial
 				var trial_data = {
