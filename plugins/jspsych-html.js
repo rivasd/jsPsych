@@ -56,7 +56,7 @@ jsPsych.plugins.html = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial, ["check_fn"]);
+    //trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial, ["check_fn"]);
     
     
     
