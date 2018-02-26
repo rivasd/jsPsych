@@ -43,7 +43,7 @@ jsPsych.plugins['cloze'] = (function(){
 
   plugin.trial = function(display_element, trial){
 
-	trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+	//trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 	trial.button_label = trial.button_label || "Submit Answers";
 
 

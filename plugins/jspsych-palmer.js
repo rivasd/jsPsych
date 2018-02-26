@@ -84,7 +84,7 @@ jsPsych.plugins.palmer = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    //trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // variables to keep track of user interaction
     var start_circle = -1;

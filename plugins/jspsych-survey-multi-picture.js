@@ -64,7 +64,7 @@ jsPsych.plugins['survey-multi-picture'] = (function() {
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
-    trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
+    //trial = jsPsych.pluginAPI.evaluateFunctionParameters(trial);
 
     // inject CSS for trial
     var node = display_element.innerHTML += '<style id="jspsych-survey-multi-picture-css">';
