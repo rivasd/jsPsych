@@ -66,7 +66,7 @@ jsPsych.plugins.html = (function() {
       url = trial.url + "?time=" + (new Date().getTime());
     }
 
-    display_element.load(trial.url, function() {
+    $(display_element).load(trial.url, function() {
       var t0 = (new Date()).getTime();
       var finish = function() {
     	  var extraData = trial.check_fn ? trial.check_fn(display_element) : false;
