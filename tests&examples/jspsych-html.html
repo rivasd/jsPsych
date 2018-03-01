@@ -20,8 +20,11 @@
   var block_1 = {
     type: 'html',
     url: 'https://percept.uqam.ca/webexp/overlearning/request/snippet/questionnaire.html',
-    prompt: "<p class='center-content'>Press f for the first and g for the second.</p>",
-    timeout: 2000,
+    check_fn: function(){
+      console.log("submitted!");
+      return true;
+    },
+    cont_btn: "ctn-button",
     prompt_position:2,
     key_first: 'f',
     key_second: 'g',

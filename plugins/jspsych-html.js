@@ -15,31 +15,30 @@ jsPsych.plugins.html = (function() {
     description: '',
     parameters: {
       url: {
-        type: [jsPsych.plugins.parameterType.STRING],
+        type: jsPsych.plugins.parameterType.STRING,
         default: undefined,
         no_function: false,
         description: ''
       },
       cont_key: {
-        type: [jsPsych.plugins.parameterType.KEYCODE],
+        type: jsPsych.plugins.parameterType.KEYCODE,
         default: null,
         no_function: false,
         description: ''
       },
       cont_btn: {
-        type: [jsPsych.plugins.parameterType.STRING],
+        type: jsPsych.plugins.parameterType.STRING,
         default: null,
         no_function: false,
         description: ''
       },
       check_fn: {
-        type: [jsPsych.plugins.parameterType.FUNCTION],
-        default: 'function() { return true; }',
-        no_function: false,
+        type: jsPsych.plugins.parameterType.FUNCTION,
+        default: undefined,
         description: ''
       },
       force_refresh: {
-        type: [jsPsych.plugins.parameterType.BOOL],
+        type: jsPsych.plugins.parameterType.BOOL,
         default: false,
         no_function: false,
         description: ''
