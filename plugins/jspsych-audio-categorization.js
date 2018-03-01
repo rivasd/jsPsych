@@ -126,6 +126,12 @@ jsPsych.plugins["audio-categorization"] = (function() {
       if (response.key == -1) {
         response = info;
       }
+
+      if(trial.text_answer){
+        trial.incorrect_feedback = trial.incorrect_feedback.replace("%ANS%", trial.text_answer);
+        trial.correct_feedback = trial.correct_feedback.replace("%ANS%", trial.text_answer);
+      }
+
       if (info.key == trial.key_answer){
     	  var $correctFeedback = $('<p></p>', {id:'correctFeedback'});
     	  $correctFeedback.text(trial.correct_feedback);
@@ -135,10 +141,6 @@ jsPsych.plugins["audio-categorization"] = (function() {
       else {
     	  if (info.key)
     	  var $incorrectFeedback = $('<p></p>', {id:'incorrectFeedback'});
-    	  
-    	  if(trial.text_answer){
-    	      trial.incorrect_feedback = trial.incorrect_feedback.replace("%ANS%", trial.text_answer);
-    	  }
     	  $incorrectFeedback.text(trial.incorrect_feedback);
     	  display_element.append($incorrectFeedback);
     	  prefetched_data.correct = false;

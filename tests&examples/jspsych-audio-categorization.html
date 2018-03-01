@@ -15,16 +15,18 @@
   chrome --allow-file-access-from-files
   */
   
-  var stimuliList = [['sound/sound.mp3','h'],['sound/hammer.mp3', 'g']]
+  var stimuliList = [['../examples/sound/sound.mp3','h'],['../examples/sound/hammer.mp3', 'g']]
 
   var block_1 = {
-    type: 'audio-categorize',
+    type: 'audio-categorization',
     timeline: [
-      {stimulus: stimuliList[0][0], key_answer: stimuliList[0][1]},
-      {stimulus: stimuliList[1][0], key_answer: stimuliList[1][1]}
+      {stimulus: stimuliList[0][0], key_answer: stimuliList[0][1], text_answer: stimuliList[0][1]},
+      {stimulus: stimuliList[1][0], key_answer: stimuliList[1][1] , text_answer: stimuliList[1][1]}
     ],
     prompt: 'press g if the sound is made by a tool, press h for any other type of sound.',
-    choices: ['g','h']
+    choices: ['g','h'],
+    correct_feedback: "Good, you chose %ANS%",
+    incorrect_feedback: "Uh oh, should've chosen %ANS%"
   }
 
   jsPsych.init({
