@@ -85,7 +85,8 @@ var jsPsych = (function() {
       'auto_preload': true,
       'show_preload_progress_bar': true,
       'max_load_time': 60000,
-      'default_iti': 0
+      'default_iti': 0,
+      'prevent_close': true
     };
 
     // override default options if user specifies an option
@@ -146,6 +147,13 @@ var jsPsych = (function() {
     jsPsych.pluginAPI.createKeyboardEventListeners(opts.display_element);
     // create listeners for user browser interaction
     jsPsych.data.createInteractionListeners();
+
+    //event listening for browser close event to prompt an "are you sure?" alert
+    if( opts.prevent_close){
+      window.addEventListener("beforeunload", function(evt){
+        event.returnValue = "Are you sure you want to quit the experiment? Your data might not be saved!";
+      });
+    }
 
     // check exclusions before continuing
     checkExclusions(opts.exclusions,
