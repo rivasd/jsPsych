@@ -250,6 +250,7 @@ jsPsych.plugins.abx = (function() {
 				    		}
 				    		else{
 				    			jsPsych.pluginAPI.setTimeout(function(){
+									$('#jspsych-abx-stim').css('visibility', 'hidden');
 				    				acceptResponse();
 				    			}, trial.timing_stims);
 				    		}
