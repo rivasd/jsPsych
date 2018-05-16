@@ -22,6 +22,18 @@ jsPsych.plugins['wcst'] = (function(){
   
   plugin.justChanged = true;
   
+  plugin.info = {
+    name: 'wcst',
+    description: 'a plugin to make a Wisconsin Card Sorting Task',
+    parameters: {
+		streak:{
+			type: jsPsych.plugins.parameterType.INT,
+			default: 4,
+			pretty_name: "Streak",
+			description: 'The number of consecutive wins before a change of rule is triggered'
+		}
+	}
+  }
   
   
   /**
@@ -239,13 +251,13 @@ jsPsych.plugins['wcst'] = (function(){
 	  thirdrow.append(plugin.feedback);
 	  plugin.viewport.append(thirdrow);
 	  
-	  jsPsych.getDisplayElement().append(plugin.viewport);
+	  $(jsPsych.getDisplayElement()).append(plugin.viewport);
 	  
 	  plugin.generator = CardGenerator({
 		  width: 150,
 		  height: 200,
 		  backgroundColor: 'grey',
-		  target:jsPsych.getDisplayElement()
+		  target:$(jsPsych.getDisplayElement())
 	  });
 	  plugin.generator.makeDeck();
 	  
@@ -270,6 +282,9 @@ jsPsych.plugins['wcst'] = (function(){
   var rules = ['number', 'color', 'shape'];
   
   plugin.trial = function(display_element, trial){
+
+	display_element = $(display_element);
+
 	  trial.streak = trial.streak || 4;
 	  /**
 	   * Generates an abstract card where the value of all 3 dimensions are set randomly
@@ -285,7 +300,13 @@ jsPsych.plugins['wcst'] = (function(){
 					  color: chosenColor,
 					  img: plugin.generator.get(chosenNumber, chosenShape, chosenColor)		  
 		   }
-		  
+		  /**
+		   * Checks if the targetCard has exactly the same properties as at least one of the cards in board
+		   * @param {*} board 			List of cards
+		   * @param {*} targetCard 		Card to test
+		   * 
+		   * @returns {boolean}
+		   */
 		  function isSame(board, targetCard){
 			  var same = false;
 			  board.forEach(function(boardCard){
@@ -298,6 +319,7 @@ jsPsych.plugins['wcst'] = (function(){
 			  return same;
 		  }
 		  
+		  // so lazy...
 		  while(isSame(board, targetCard)){
 			  chosenShape = shapes[Math.floor(Math.random()* shapes.length)];
 			  chosenNumber = numbers[Math.floor(Math.random()* numbers.length)];
