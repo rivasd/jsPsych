@@ -21,6 +21,7 @@ jsPsych.plugins['wcst'] = (function(){
   plugin.lastRule = undefined;
   
   plugin.justChanged = true;
+  plugin.ruleCounter = 0;
   
   plugin.info = {
     name: 'wcst',
@@ -28,9 +29,15 @@ jsPsych.plugins['wcst'] = (function(){
     parameters: {
 		streak:{
 			type: jsPsych.plugins.parameterType.INT,
-			default: 4,
+			default: 10,
 			pretty_name: "Streak",
 			description: 'The number of consecutive wins before a change of rule is triggered'
+		},
+		ruleScheme:{
+			type: jsPsych.plugins.parameterType.STRING,
+			default: "standard",
+			pretty_name: "Rule Type",
+			description: "What scheme to use to change the rules after a sufficient amount of good answers are arecorded"
 		}
 	}
   }
@@ -270,8 +277,11 @@ jsPsych.plugins['wcst'] = (function(){
 	  plugin.consecutive = 0;
 	  plugin.totalErrors = 0;
 	  //TODO checking if the first rule is always color or if it is just me getting paranoid
-	  var ruleSamples = ['number','color', 'shape'];
+	  var ruleSamples = ['color','shape', 'number'];
 	  plugin.rule = ruleSamples[Math.floor(Math.random()*3)];
+
+	  plugin.ruleCounter = 0;
+
 	  //plugin.viewport.append(plugin.generator.get('2', 'cross', 'green'));
 	  initialized = true;
   }
@@ -279,13 +289,13 @@ jsPsych.plugins['wcst'] = (function(){
   var numbers=['1', '2', '3', '4'];
   var shapes=['triangle', 'square', 'circle', 'cross'];
   var colors=['red', 'yellow', 'blue', 'green'];
-  var rules = ['number', 'color', 'shape'];
+  var rules = ['color', 'shape', 'number'];
   
   plugin.trial = function(display_element, trial){
 
 	display_element = $(display_element);
 
-	  trial.streak = trial.streak || 4;
+	  trial.streak = trial.streak || 10;
 	  /**
 	   * Generates an abstract card where the value of all 3 dimensions are set randomly
 	   */
@@ -370,18 +380,26 @@ jsPsych.plugins['wcst'] = (function(){
 	  /**
 	   * Sets the relevant dimension to be different than the one currently active
 	   */
-	  function changeRule(){
-		  
+	  function changeRule(plugin){
+
+		plugin.lastRule = plugin.rule;
+		if(plugin.ruleScheme == "standard"){
+			plugin.rule = rules[plugin.ruleCounter++ % 3 ]
+		}
+		else{
 		  jsPsych.randomization.shuffle(rules);
-		  plugin.lastRule = plugin.rule;
+		  
 		  
 		  if( rules[0] !== plugin.rule){
 			  plugin.rule = rules[0];
 		  }
 		  else plugin.rule = rules[1];
-		  plugin.justChanged = true;
-		  plugin.wins++;
-		  plugin.consecutive = 0;
+		}
+		  
+		  
+		plugin.justChanged = true;
+		plugin.wins++;
+		plugin.consecutive = 0;
 	  }
 	  
 	  /**
@@ -467,13 +485,18 @@ jsPsych.plugins['wcst'] = (function(){
 				 "perseveration": checkPerseveration(card,target),
 				 "rule": plugin.rule
 			 }
+
+
+
+
+			 
 			 setTimeout(function(){
 				 plugin.target.empty();
 				 plugin.cards.empty();
 				 plugin.feedback.empty();
 				 jsPsych.finishTrial(data);
 				 if(plugin.consecutive >= trial.streak){
-				 	changeRule();
+				 	changeRule(plugin);
 				 }
 				 else{plugin.justChanged = false;}
 			 },1500); //TODO customising time in trials
