@@ -92,19 +92,19 @@ jsPsych.plugins['survey-text'] = (function() {
     if (typeof trial.questions[0].rows == 'undefined') {
       trial.questions[0].rows = [];
       for (var i = 0; i < trial.questions.length; i++) {
-        trial.questions[i].rows.push(1);
+        trial.questions[i].rows = 1;
       }
     }
     if (typeof trial.questions[0].columns == 'undefined') {
       trial.questions[0].columns = [];
       for (var i = 0; i < trial.questions.length; i++) {
-        trial.questions[i].columns.push(40);
+        trial.questions[i].columns = 40;
       }
     }
     if (typeof trial.questions[0].value == 'undefined') {
       trial.questions[0].value = [];
       for (var i = 0; i < trial.questions.length; i++) {
-        trial.questions[i].value.push("");
+        trial.questions[i].value = "";
       }
     }
 
