@@ -50,23 +50,25 @@ jsPsych.plugins.abx = (function() {
 	    var response = {
 	      rt: -1,
 	      key: -1
-	    };
-
+			};
+			
+		var fixation_cross_p_elem = undefined
+		display_element.empty();
 		/** showFixationCross()
 		 *  fucntion that makes a fixation cross appear on the screen
 		 *
 		 */
 	    function showFixationCross(){
-	    	display_element.empty();
+	    	//display_element.empty();
 
 	    	if(display_element.css("position")==="static"){
 	    		display_element.css("position", "relative");
 	    	}
 
-	        var $paragraph = $('<p> + </p>');
+	        fixation_cross_p_elem = $('<p> + </p>');
 
-	        display_element.append($paragraph);
-	        $paragraph.css({
+	        display_element.append(fixation_cross_p_elem);
+	        fixation_cross_p_elem.css({
 	        	"font-size":"350%",
 	        	"display": 'flex',
 	        	"justify-content": "center", /* align horizontal */
@@ -76,7 +78,7 @@ jsPsych.plugins.abx = (function() {
 	    	    //"top": "50%",
 	    	    //"transform": "translate(-50%, -50%)"
 	        });
-	        $paragraph.addClass('jspsych-genstim');
+	        fixation_cross_p_elem.addClass('jspsych-genstim');
 	    }
 
 			/** showImage(image_position_in_trial)
@@ -92,7 +94,7 @@ jsPsych.plugins.abx = (function() {
 					"src": trial.stimuli[0],
 					"id": 'jspsych-abx-stim',
 					'class': 'jspsych-genstim',
-					'class': 'jspsych-abx-image'+image_position_in_trial
+					'class': 'jspsych-abx-image0'
 				});
 			}
 			else {
@@ -100,21 +102,23 @@ jsPsych.plugins.abx = (function() {
 					"html": trial.stimuli[0],
 					"id": 'jspsych-abx-stim',
 					'class': 'jspsych-genstim',
-					'class': 'jspsych-abx-image'+image_position_in_trial
+					'class': 'jspsych-abx-image0'
 				});
 			}
 
 			main_stim_element.css({
 				"display": "none"
 			})
-			display_element.append(main_stim_element)
+			display_element.append(main_stim_element);
+			
 
 	    function showImage(image_position_in_trial){
 	        
 
 				main_stim_element.css({
 					"align-self":'center',
-					"display":'block'
+					"display":'block',
+					"visibility": "visible"
 				});
 	        
 
@@ -211,9 +215,10 @@ jsPsych.plugins.abx = (function() {
 
 		jsPsych.pluginAPI.setTimeout(function(){
 			//take the fixation cross of the screen
-	    	display_element.empty();
+				fixation_cross_p_elem.remove();
+				
 	    	//Show A
-			showImage(0);
+				showImage(0);
 
 
 	    	//after a customized number of time
