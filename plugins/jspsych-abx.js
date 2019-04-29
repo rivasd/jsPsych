@@ -224,15 +224,15 @@ jsPsych.plugins.abx = (function() {
 	    	//after a customized number of time
 	    	jsPsych.pluginAPI.setTimeout(function(){
 	    		//hide A
-				$('#jspsych-abx-stim').css('visibility', 'hidden');
+				main_stim_element.css('visibility', 'hidden');
 				if (!trial.is_html) {
-					$('#jspsych-abx-stim').attr({
+					main_stim_element.attr({
 						'src': trial.stimuli[1],
 						'class': 'jspsych-abx-image'+1
 					});
 				}
 				else {
-					$('#jspsych-abx-stim').html(trial.stimuli[1]);
+					main_stim_element.html(trial.stimuli[1]);
 				}
 
 	    		jsPsych.pluginAPI.setTimeout(function(){
@@ -244,16 +244,16 @@ jsPsych.plugins.abx = (function() {
 		    		jsPsych.pluginAPI.setTimeout(function(){
 						//hide B
 						if (!trial.is_html) {
-							$('#jspsych-abx-stim').attr({
+							main_stim_element.attr({
 								'src': trial.stimuli[1],
 								'class': 'jspsych-abx-image'+2
 							});
 						}
 						else {
-							$('#jspsych-abx-stim').html(trial.stimuli[2]);
+							main_stim_element.html(trial.stimuli[2]);
 						}
 
-			    		$('#jspsych-abx-stim').css('visibility', 'hidden');
+			    		main_stim_element.css('visibility', 'hidden');
 
 			    		jsPsych.pluginAPI.setTimeout(function(){
 				    		//show X
@@ -261,25 +261,15 @@ jsPsych.plugins.abx = (function() {
 
 								jsPsych.pluginAPI.setTimeout(function(){
 									//hide X
-									if (!trial.is_html) {
-										$('#jspsych-abx-stim').attr({
-											'src': trial.stimuli[2],
-											'class': 'jspsych-abx-image'+3
-										});
-									}
-									else {
-										$('#jspsych-abx-stim').html(trial.stimuli[3]);
-									}
 
-										$('#jspsych-abx-stim').css('visibility', 'hidden');
-
+									main_stim_element.remove();
 
 				    			if(!trial.response_wait){
 				    				acceptResponse();
 				    			}
 				    			else{
 				    				jsPsych.pluginAPI.setTimeout(function(){
-											$('#jspsych-abx-stim').css('visibility', 'hidden');
+											main_stim_element.remove();
 				    					acceptResponse();
 				    				}, trial.timing_stims);
 				    			}
