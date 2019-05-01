@@ -245,7 +245,7 @@ jsPsych.plugins.abx = (function() {
 						//hide B
 						if (!trial.is_html) {
 							main_stim_element.attr({
-								'src': trial.stimuli[1],
+								'src': trial.stimuli[2],
 								'class': 'jspsych-abx-image'+2
 							});
 						}
